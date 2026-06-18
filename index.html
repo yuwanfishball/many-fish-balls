@@ -286,6 +286,10 @@
   }
 
   /* ========== 公司检索：Logo 轮播 ========== */
+  .company-search-wrapper {
+    margin-bottom: 16px;
+    width: 100%;
+  }
   .carousel-container {
     display: flex; align-items: center; gap: 0;
     margin-bottom: 28px;
@@ -1934,6 +1938,15 @@
 
     <!-- ===== 子模块：公司检索 ===== -->
     <div class="sub-panel" id="sub-panel-company" style="display:none;">
+      <!-- 公司搜索栏 -->
+      <div class="search-wrapper company-search-wrapper">
+        <input type="text" class="search-input" id="company-search-input" placeholder="搜索公司或机构…" autocomplete="off">
+        <div class="search-actions">
+          <button class="search-clear" id="company-search-clear" title="清除">✕</button>
+          <span class="search-btn">🔍</span>
+        </div>
+      </div>
+
       <!-- Logo 轮播 -->
       <div class="carousel-container" id="company-carousel">
         <button class="carousel-arrow carousel-arrow-left" id="carousel-left" title="上一个">◀</button>
@@ -1944,6 +1957,9 @@
         </div>
         <button class="carousel-arrow carousel-arrow-right" id="carousel-right" title="下一个">▶</button>
       </div>
+
+      <!-- 搜索结果提示 -->
+      <div class="result-info" id="company-result-info" style="display:none;"></div>
 
       <!-- 选中公司详情 -->
       <div class="company-detail" id="company-detail">
@@ -2865,14 +2881,173 @@
     carouselReady = true;
   })();
 
-  // ---- 箭头事件 ----
-  carouselLeft.addEventListener('click', function() {
+  // ---- 公司搜索栏 ----
+  var companySearchInput = document.getElementById('company-search-input');
+  var companySearchClear = document.getElementById('company-search-clear');
+  var companyResultInfo = document.getElementById('company-result-info');
+  var allCompanies = companies.slice(); // 保留完整列表
+  var filteredCompanies = allCompanies.slice(); // 当前显示的过滤列表
+
+  function doCompanySearch(query) {
+    var q = (query || '').trim().toLowerCase();
+    if (!q) {
+      filteredCompanies = allCompanies.slice();
+      companySearchClear.classList.remove('visible');
+      companyResultInfo.style.display = 'none';
+    } else {
+      companySearchClear.classList.add('visible');
+      filteredCompanies = allCompanies.filter(function(c) {
+        return c.name.toLowerCase().indexOf(q) !== -1 ||
+               c.shortName.toLowerCase().indexOf(q) !== -1 ||
+               c.type.toLowerCase().indexOf(q) !== -1;
+      });
+      companyResultInfo.style.display = '';
+      companyResultInfo.textContent = '找到 ' + filteredCompanies.length + ' 家公司/机构';
+    }
+    // 用过滤后的列表重建轮播
+    rebuildCarousel(filteredCompanies);
+  }
+
+  function rebuildCarousel(list) {
+    carouselTrack.innerHTML = '';
+    if (list.length === 0) {
+      // 空状态
+      carouselTrack.innerHTML = '<div style="text-align:center;padding:30px 20px;color:var(--text-light);width:100%;">😕 没有匹配的公司或机构</div>';
+      companyDetailEmpty.style.display = 'none';
+      companyDetailContent.style.display = 'none';
+      carouselLeft.style.opacity = '0.3'; carouselLeft.style.pointerEvents = 'none';
+      carouselRight.style.opacity = '0.3'; carouselRight.style.pointerEvents = 'none';
+      carouselActive = false;
+      return;
+    }
+    list.forEach(function(comp, idx) {
+      var item = document.createElement('div');
+      item.className = 'carousel-logo-item';
+      item.setAttribute('data-index', idx);
+      var logoHTML = '<div class="logo-circle" style="background:' + comp.color + ';">';
+      if (comp.logo) {
+        logoHTML += '' +
+          '<span class="logo-initials">' + comp.shortName + '</span>' +
+          '<img src="' + comp.logo + '" alt="" ' +
+            'onerror="this.remove();" ' +
+            'onload="var c=this.parentElement;c.style.background=\'#fff\';var s=c.querySelector(\'.logo-initials\');if(s)s.remove();" ' +
+            'style="width:100%;height:100%;border-radius:50%;object-fit:contain;position:relative;z-index:1;" ' +
+            'loading="lazy">';
+      } else {
+        logoHTML += comp.shortName;
+      }
+      logoHTML += '</div>';
+      item.innerHTML = logoHTML + '<div class="logo-name">' + comp.name + '</div>';
+      item.addEventListener('click', function() { selectCompany(idx); });
+      carouselTrack.appendChild(item);
+    });
+    // 重置状态并选中第一个
+    currentIndex = 0;
+    carouselActive = false;
+    stopRapidScroll();
+    // 延迟确保 DOM 布局完成后再选中
+    requestAnimationFrame(function() {
+      carouselActive = true;
+      selectCompany(0);
+    });
+  }
+
+  companySearchInput.addEventListener('input', function() {
+    doCompanySearch(this.value);
+  });
+  companySearchClear.addEventListener('click', function() {
+    companySearchInput.value = '';
+    doCompanySearch('');
+    companySearchInput.focus();
+  });
+
+  // 更新 selectCompany 以使用当前显示的列表
+  var _selectCompanyOriginal = selectCompany;
+  selectCompany = function(idx) {
+    var comp = filteredCompanies[idx];
+    if (!comp) return;
+    var items = carouselTrack.querySelectorAll('.carousel-logo-item');
+
+    items.forEach(function(item, i) {
+      item.classList.remove('selected', 'dimmed', 'far-dimmed');
+      if (i === idx) {
+        item.classList.add('selected');
+      } else if (Math.abs(i - idx) === 1) {
+        item.classList.add('dimmed');
+      } else {
+        item.classList.add('far-dimmed');
+      }
+    });
+
+    currentIndex = idx;
+    updateCarouselPosition(idx);
+    updateCompanyDetail(comp);
+
+    carouselLeft.style.opacity = idx === 0 ? '0.3' : '1';
+    carouselLeft.style.pointerEvents = idx === 0 ? 'none' : '';
+    carouselRight.style.opacity = idx === filteredCompanies.length - 1 ? '0.3' : '1';
+    carouselRight.style.pointerEvents = idx === filteredCompanies.length - 1 ? 'none' : '';
+  };
+
+  // ---- 箭头事件（支持长按快速轮转） ----
+  var longPressTimer = null;
+  var rapidScrollTimer = null;
+  var LONG_PRESS_DELAY = 300;   // 长按阈值 ms
+  var RAPID_SCROLL_MS = 120;    // 快速轮转间隔 ms
+
+  function stopRapidScroll() {
+    if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+    if (rapidScrollTimer) { clearInterval(rapidScrollTimer); rapidScrollTimer = null; }
+  }
+
+  function startArrowLongPress(direction) {
+    if (!carouselActive) return;
+    stopRapidScroll();
+    longPressTimer = setTimeout(function() {
+      rapidScrollTimer = setInterval(function() {
+        if (!carouselActive) { stopRapidScroll(); return; }
+        if (direction === 'left' && currentIndex > 0) {
+          selectCompany(currentIndex - 1);
+        } else if (direction === 'right' && currentIndex < filteredCompanies.length - 1) {
+          selectCompany(currentIndex + 1);
+        } else {
+          stopRapidScroll();
+        }
+      }, RAPID_SCROLL_MS);
+    }, LONG_PRESS_DELAY);
+  }
+
+  carouselLeft.addEventListener('click', function(e) {
     if (!carouselActive) return;
     if (currentIndex > 0) selectCompany(currentIndex - 1);
   });
-  carouselRight.addEventListener('click', function() {
+  carouselLeft.addEventListener('mousedown', function(e) {
+    e.preventDefault();
+    startArrowLongPress('left');
+  });
+  carouselLeft.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    startArrowLongPress('left');
+  });
+
+  carouselRight.addEventListener('click', function(e) {
     if (!carouselActive) return;
-    if (currentIndex < companies.length - 1) selectCompany(currentIndex + 1);
+    if (currentIndex < filteredCompanies.length - 1) selectCompany(currentIndex + 1);
+  });
+  carouselRight.addEventListener('mousedown', function(e) {
+    e.preventDefault();
+    startArrowLongPress('right');
+  });
+  carouselRight.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    startArrowLongPress('right');
+  });
+
+  // 全局释放事件
+  document.addEventListener('mouseup', stopRapidScroll);
+  document.addEventListener('touchend', stopRapidScroll);
+  document.addEventListener('mouseleave', function(e) {
+    if (!e.relatedTarget || e.relatedTarget.nodeName === 'HTML') stopRapidScroll();
   });
 
   // ---- 键盘事件 ----
@@ -2880,7 +3055,7 @@
     if (!carouselActive) return;
     if (subCompanyPanel.style.display === 'none') return;
     if (e.key === 'ArrowLeft' && currentIndex > 0) selectCompany(currentIndex - 1);
-    if (e.key === 'ArrowRight' && currentIndex < companies.length - 1) selectCompany(currentIndex + 1);
+    if (e.key === 'ArrowRight' && currentIndex < filteredCompanies.length - 1) selectCompany(currentIndex + 1);
   });
 
   // ---- 监听面板可见事件 ----
