@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026智源大会 — 开幕式直播回放</title>
+<style>
+  :root {
+    --primary: #1a3a5c;
+    --accent: #2857ff;
+    --bg: #f5f6f8;
+    --card-bg: #ffffff;
+    --text: #2c3e50;
+    --text-light: #5a6d80;
+    --border: #e2e6ed;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --radius: 10px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", "AR PL UKai CN", serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding-bottom: 40px;
+  }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+
+  /* ========== Header ========== */
+  .header {
+    position: relative;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: #fff;
+    padding: 32px 0;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  .header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", serif;
+  }
+  .back-link {
+    position: absolute;
+    top: 18px;
+    left: 24px;
+    color: rgba(255,255,255,.7);
+    text-decoration: none;
+    font-size: .9rem;
+    transition: color .2s;
+    z-index: 2;
+  }
+  .back-link:hover { color: #fff; }
+
+  /* ========== Video Player ========== */
+  .video-wrapper {
+    background: #000;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .video-wrapper video {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 540px;
+  }
+
+  /* ========== Card ========== */
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 0;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 16px 20px;
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--primary);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ========== Session Table ========== */
+  .schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .schedule-table thead th {
+    text-align: left;
+    font-size: .73rem;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--text-light);
+    padding: 8px 18px;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .time-slot {
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+    min-width: 100px;
+    font-size: .82rem;
+  }
+  .speaker { font-size: .82rem; color: var(--text-light); }
+
+  /* ========== Session Rows ========== */
+  .session-row { cursor: default; }
+  .session-row td { padding: 10px 18px; }
+  .session-row.has-detail {
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .session-row.has-detail:hover { background: #f5f7fa; }
+  .session-arrow {
+    text-align: center;
+    font-size: .6rem;
+    color: var(--text-light);
+    width: 36px;
+    transition: transform .25s;
+    vertical-align: middle;
+  }
+  .session-row.has-detail.open .session-arrow { transform: rotate(90deg); }
+  .session-row.no-detail .session-arrow { color: transparent; }
+  .session-detail { display: none; }
+  .session-detail.open { display: table-row; }
+  .session-detail td {
+    padding: 0 18px 16px !important;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .session-detail-content {
+    font-size: .88rem;
+    color: var(--text);
+    padding: 8px 0 8px 6px;
+  }
+  .session-detail-content p { margin-bottom: 8px; }
+  .session-detail-content ul { padding-left: 20px; margin-bottom: 8px; }
+  .session-detail-content ul li { margin-bottom: 4px; }
+
+  /* ========== Seek Button ========== */
+  .seek-video {
+    display: inline-block;
+    padding: 4px 14px;
+    margin-bottom: 8px;
+    border: 1px solid var(--accent);
+    border-radius: 99px;
+    background: #fff;
+    color: var(--accent);
+    font-size: .78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .seek-video:hover { background: var(--accent); color: #fff; }
+
+  /* ========== Highlight Box ========== */
+  .highlight-box {
+    background: #fff8e1;
+    border-left: 4px solid #f0b400;
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+  }
+  .highlight-box h4 { color: #b8860b; margin-bottom: 4px; }
+
+  @media (max-width: 768px) {
+    .header h1 { font-size: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a class="back-link" href="index.html">← 返回</a>
+  <h1>🎬 2026智源大会 · 开幕式及全体大会</h1>
+</header>
+
+<div class="container">
+
+  <!-- 视频播放器 -->
+  <div class="video-wrapper">
+    <video id="opening-video" controls preload="metadata" crossorigin="anonymous" playsinline></video>
+  </div>
+
+  <!-- 日程详情 -->
+  <div class="card">
+    <div class="card-header">📋 议程详情（点击展开）</div>
+    <table class="schedule-table">
+      <thead><tr><th style="width:36px"></th><th>时间</th><th>环节 / 主题</th><th>嘉宾 / 讲者</th></tr></thead>
+      <tbody>
+        <tr class="session-row no-detail">
+          <td class="session-arrow"></td>
+          <td class="time-slot">08:50 – 09:00</td>
+          <td>致辞</td>
+          <td>—</td>
+        </tr>
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">09:00 – 09:05</td>
+          <td>开场介绍</td>
+          <td><span class="speaker">主持人：黄铁军 — 智源研究院理事长</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="4869">▶ 跳至视频此处</button>
+              <p><strong>黄铁军</strong>（智源研究院理事长）致开场辞，介绍本届大会主题「吾道一以贯之」——推进人类、环境和智能的可持续发展，以及大会整体框架与五大核心议题。</p>
+            </div>
+          </td>
+        </tr>
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">09:05 – 09:45</td>
+          <td>Security For AI Agents, Security Against AI Agents</td>
+          <td><span class="speaker">Whitfield Diffie — 2015年图灵奖得主，现代数字安全体系奠基人，美国国家工程院院士</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="5031">▶ 跳至视频此处</button>
+              <p><strong>Whitfield Diffie</strong>（图灵奖得主、公钥密码学之父）</p>
+              <p>围绕 AI Agent 时代的双重安全命题展开：</p>
+              <ul>
+                <li><strong>For AI Agents：</strong>如何保障 AI 智能体自身的安全运行——包括模型完整性、数据隐私、对抗攻击防御</li>
+                <li><strong>Against AI Agents：</strong>如何防御恶意 AI 智能体的攻击——自主 Agent 可能带来的新型安全威胁面</li>
+                <li>密码学在 AI 安全中的关键角色：从传统加密到同态加密、安全多方计算在 AI 场景中的应用</li>
+                <li>呼吁建立 AI Agent 安全标准与治理框架</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>AI Agent 的自主性使其既是安全工具，也是安全威胁。需要从密码学基础设施层面构建 "Agent 可信执行环境"，确保 Agent 的行为可验证、可追溯、可约束。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">09:45 – 10:20</td>
+          <td>Rediscovering Reinforcement Learning</td>
+          <td><span class="speaker">Andrew Barto — 2024年图灵奖得主，强化学习奠基人，马萨诸塞大学安姆斯特分校教授</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="7685">▶ 跳至视频此处</button>
+              <p><strong>Andrew Barto</strong>（图灵奖得主、强化学习之父）</p>
+              <p>重新审视强化学习的核心思想与当代意义：</p>
+              <ul>
+                <li><strong>RL 的哲学根基：</strong>从试错学习到目标驱动智能——RL 远不止是"奖励最大化"</li>
+                <li><strong>RL 与大模型的融合：</strong>RLHF 只是开始，RL 在推理链优化、自我改进、探索式学习中的深层价值</li>
+                <li><strong>Intrinsic Motivation（内在动机）：</strong>AI 如何在没有外部奖励时自我驱动学习——好奇心、新颖性探索、技能发现</li>
+                <li><strong>Continual RL：</strong>从静态环境到持续变化的世界——Agent 如何终身学习和适应</li>
+                <li>对当前 Scaling Law 热潮的反思：更大的模型 ≠ 更聪明的智能，RL 提供了不同的路径</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>强化学习正在经历"再发现"——从 AlphaGo 到 ChatGPT 的 RLHF，再到新一代具备自我进化能力的 Agent，RL 的核心思想（从交互中学习）是通向通用智能的必经之路。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">10:20 – 10:50</td>
+          <td>智源进展报告</td>
+          <td><span class="speaker">王仲远 — 智源研究院院长</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="10645">▶ 跳至视频此处</button>
+              <p><strong>王仲远</strong>（智源研究院院长）</p>
+              <p>年度研究进展与战略布局：</p>
+              <ul>
+                <li><strong>FlagOS：</strong>面向 AI 时代的操作系统——统一调度异构算力、管理 AI Agent 生命周期</li>
+                <li><strong>世界模型进展：</strong>ORCA 世界基座模型发布，支持物理预测、具身仿真</li>
+                <li><strong>Brainμ 脑科学平台：</strong>神经科学与 AI 融合的开放研究平台</li>
+                <li><strong>ForgeTrain：</strong>全球首个完全由 AI 编写的训练框架（清华李宇轩团队）</li>
+                <li><strong>开源生态：</strong>智源在大模型开源领域的持续投入与社区建设成果</li>
+                <li>与安贞医院战略合作：AI+医疗健康领域布局</li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">10:50 – 11:30</td>
+          <td>播客现场：总有人比时代早十年</td>
+          <td><span class="speaker">王坚 — 之江实验室主任、阿里云创始人；黄铁军 — 智源研究院理事长；卫诗婕 — 《漫谈 Light the Star》创始人</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="12133">▶ 跳至视频此处</button>
+              <p>以轻松对话形式，探讨 AI 研究者与创业者的心路历程：</p>
+              <ul>
+                <li>学术研究 vs 产业落地的张力与互补</li>
+                <li>AI 领域的长期主义：那些"过早"的研究如何最终改变了世界</li>
+                <li>中国 AI 从跟随到引领的转变</li>
+                <li>青年研究者如何在 AI 浪潮中找到自己的方向</li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">11:30 – 12:30</td>
+          <td>重构世界 —— 中国大模型巅峰对话</td>
+          <td><span class="speaker">朱军、刘知远、安波、罗福莉；主持人：王仲远</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="14568">▶ 跳至视频此处</button>
+              <p>中国大模型第一梯队企业代表圆桌讨论：</p>
+              <ul>
+                <li><strong>开源 vs 闭源：</strong>中国大模型的技术路线之争——完全开源、渐进开放还是商业闭环？</li>
+                <li><strong>Scaling Law 的尽头：</strong>数据墙、算力天花板之后，下一步技术突破点在哪？</li>
+                <li><strong>Agent 落地：</strong>从 ChatBot 到真正能执行任务的智能体——技术瓶颈与商业化路径</li>
+                <li><strong>AI 安全与治理：</strong>能力越强责任越大——中国 AI 企业的安全实践与国际协作</li>
+                <li><strong>国际化竞争：</strong>中国大模型在全球格局中的定位与差异化优势</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心看点</h4>
+                <p>圆桌汇聚了中国大模型领域最核心的力量，围绕技术路线、商业落地、生态建设展开最直接的碰撞。是中国 AI 产业方向的关键风向标。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+(function() {
+  var video = document.getElementById('opening-video');
+  var videoSrc = 'https://vod-2020.baai.ac.cn/record/06110746-29-b9922d61037bac01e736cc67cffa34a9/06110746-29-367b53f64fa7f7a28bbce536117c1b38/2026-06-12-07-49-53_2026-06-12-12-43-09.m3u8';
+  var startOffset = 74 * 60; // 跳过前 74 分钟
+
+  if (video) {
+    if (Hls.isSupported()) {
+      var hls = new Hls({ startPosition: startOffset });
+      hls.loadSource(videoSrc);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, function() {
+        video.currentTime = startOffset;
+        video.play().catch(function() {});
+      });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = videoSrc + '#t=' + startOffset;
+      video.addEventListener('loadedmetadata', function() {
+        video.play().catch(function() {});
+      });
+    }
+  }
+
+  // 议程行点击展开/收起
+  var sessionRows = document.querySelectorAll('.session-row.has-detail');
+  sessionRows.forEach(function(row) {
+    row.addEventListener('click', function() {
+      this.classList.toggle('open');
+      var next = this.nextElementSibling;
+      if (next && next.classList.contains('session-detail')) {
+        next.classList.toggle('open');
+      }
+    });
+  });
+
+  // 视频时间戳跳转
+  var seekBtns = document.querySelectorAll('.seek-video');
+  seekBtns.forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var sec = parseInt(this.getAttribute('data-seek'));
+      if (video && sec) {
+        video.currentTime = sec;
+        video.play().catch(function() {});
+        video.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026智源大会 — AI 自进化论坛 直播回放</title>
+<style>
+  :root {
+    --primary: #1a3a5c;
+    --accent: #2857ff;
+    --bg: #f5f6f8;
+    --card-bg: #ffffff;
+    --text: #2c3e50;
+    --text-light: #5a6d80;
+    --border: #e2e6ed;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --radius: 10px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", "AR PL UKai CN", serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding-bottom: 40px;
+  }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+
+  /* ========== Header ========== */
+  .header {
+    position: relative;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: #fff;
+    padding: 32px 0;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  .header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", serif;
+  }
+  .back-link {
+    position: absolute;
+    top: 18px;
+    left: 24px;
+    color: rgba(255,255,255,.7);
+    text-decoration: none;
+    font-size: .9rem;
+    transition: color .2s;
+    z-index: 2;
+  }
+  .back-link:hover { color: #fff; }
+
+  /* ========== Video Player ========== */
+  .video-wrapper {
+    background: #000;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .video-wrapper video {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 540px;
+  }
+
+  /* ========== Card ========== */
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 0;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 16px 20px;
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--primary);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ========== Session Table ========== */
+  .schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .schedule-table thead th {
+    text-align: left;
+    font-size: .73rem;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--text-light);
+    padding: 8px 18px;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .time-slot {
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+    min-width: 100px;
+    font-size: .82rem;
+  }
+  .speaker { font-size: .82rem; color: var(--text-light); }
+
+  /* ========== Session Rows ========== */
+  .session-row { cursor: default; }
+  .session-row td { padding: 10px 18px; }
+  .session-row.has-detail {
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .session-row.has-detail:hover { background: #f5f7fa; }
+  .session-arrow {
+    text-align: center;
+    font-size: .6rem;
+    color: var(--text-light);
+    width: 36px;
+    transition: transform .25s;
+    vertical-align: middle;
+  }
+  .session-row.has-detail.open .session-arrow { transform: rotate(90deg); }
+  .session-row.no-detail .session-arrow { color: transparent; }
+  .session-detail { display: none; }
+  .session-detail.open { display: table-row; }
+  .session-detail td {
+    padding: 0 18px 16px !important;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .session-detail-content {
+    font-size: .88rem;
+    color: var(--text);
+    padding: 8px 0 8px 6px;
+  }
+  .session-detail-content p { margin-bottom: 8px; }
+  .session-detail-content ul { padding-left: 20px; margin-bottom: 8px; }
+  .session-detail-content ul li { margin-bottom: 4px; }
+
+  /* ========== Seek Button ========== */
+  .seek-video {
+    display: inline-block;
+    padding: 4px 14px;
+    margin-bottom: 8px;
+    border: 1px solid var(--accent);
+    border-radius: 99px;
+    background: #fff;
+    color: var(--accent);
+    font-size: .78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .seek-video:hover { background: var(--accent); color: #fff; }
+
+  /* ========== Highlight Box ========== */
+  .highlight-box {
+    background: #fff8e1;
+    border-left: 4px solid #f0b400;
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+  }
+  .highlight-box h4 { color: #b8860b; margin-bottom: 4px; }
+
+  /* ========== Summary Box ========== */
+  .summary-box {
+    padding: 18px 20px;
+    font-size: .88rem;
+    color: var(--text-light);
+    line-height: 1.8;
+  }
+
+  @media (max-width: 768px) {
+    .header h1 { font-size: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a class="back-link" href="index.html">← 返回</a>
+  <h1>🎬 2026智源大会 · AI 自进化论坛</h1>
+</header>
+
+<div class="container">
+
+  <!-- 视频播放器 -->
+  <div class="video-wrapper" id="video-wrapper">
+    <video id="forum-video" controls preload="metadata" crossorigin="anonymous" playsinline
+           style="display:block;width:100%;height:auto;max-height:540px;"></video>
+  </div>
+
+  <!-- 论坛简介 -->
+  <div class="card">
+    <div class="card-header">📖 论坛简介</div>
+    <div class="summary-box">
+      <p>本论坛聚焦 AI 从<strong>被动训练到主动迭代</strong>的核心命题，探讨大模型如何实现自我改进、递归学习和持续进化。讲者来自 Meta、英伟达、西湖大学、NeoCognition 等机构，覆盖端侧优化、智能体经验积累、自改进幻觉、多模态统一、因果推理和抽象推理验证等前沿方向。</p>
+      <p style="margin-top:10px">大模型训练范式正从「人类监督微调」向「模型自主迭代」演进，自进化能力被视为通向更高阶智能的关键路径。论坛围绕自进化的定义、技术边界、安全机制和评估体系展开多维度研讨，为下一代 AI 的自主进化能力提供理论基础与实践方向。</p>
+      <p style="margin-top:10px;font-size:.8rem;color:#999;">🕐 2026年6月12日 13:30–17:30 · 视频时间 0:00–4:12 · 📍 海慧厅 A · 线上同步直播</p>
+    </div>
+  </div>
+
+  <!-- 议程详情 -->
+  <div class="card">
+    <div class="card-header">📋 议程详情（点击展开）</div>
+    <table class="schedule-table">
+      <thead><tr><th style="width:36px"></th><th>时间</th><th>环节 / 主题</th><th>嘉宾 / 讲者</th></tr></thead>
+      <tbody>
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">0:00 – 0:15</td>
+          <td>论坛与嘉宾介绍</td>
+          <td><span class="speaker">诸葛鸣晨</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="0">▶ 跳至视频此处</button>
+              <p><strong>诸葛鸣晨</strong> 介绍论坛设立的学术背景：大模型训练范式正从「人类监督微调」向「模型自主迭代」演进，自进化能力被视为通向更高阶智能的关键路径。</p>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">0:15 – 0:49</td>
+          <td>Scaling Down: Optimizing Foundation Models for Edge Deployment</td>
+          <td><span class="speaker">刘泽春 — Meta</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="900">▶ 跳至视频此处</button>
+              <p><strong>刘泽春（Meta）</strong> 系统阐述大模型从云端下沉到端侧的核心挑战与解决方案：</p>
+              <ul>
+                <li><strong>端侧部署三重约束：</strong>算力、内存、功耗三重约束下的模型压缩与优化策略</li>
+                <li><strong>Meta 实践经验：</strong>量化、剪枝、蒸馏等技术的组合应用，在资源受限条件下保持推理质量</li>
+                <li><strong>响应速度保障：</strong>端侧模型如何在保持推理质量的同时满足实时响应需求</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>端侧部署不是简单的模型缩小，而是在算力、内存、功耗的三角约束中找到最优平衡点。Meta 的组合式优化策略为行业提供了可复用的工程范式。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">0:49 – 1:19</td>
+          <td>基于可扩展智能体经验的递归自学习</td>
+          <td><span class="speaker">张少坤 — 英伟达</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="2940">▶ 跳至视频此处</button>
+              <p><strong>张少坤（英伟达）</strong> 深入讲解智能体如何从自身历史经验中提取可复用的知识：</p>
+              <ul>
+                <li><strong>递归能力提升：</strong>智能体从自身历史经验中提取可复用的知识，实现能力的递归式提升</li>
+                <li><strong>可扩展经验积累框架：</strong>从单一任务到多任务泛化的路径设计，使经验可在不同场景间迁移</li>
+                <li><strong>基础设施支持：</strong>英伟达在 Agent 训练基础设施上的布局与工具链支持</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>经验递归学习是智能体突破单任务局限的关键。英伟达的框架设计使 Agent 的经验积累从"一次性"走向"可继承"，为大规模 Agent 部署提供了基础能力。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:19 – 1:46</td>
+          <td>The Illusion of Self-Improving Agents</td>
+          <td><span class="speaker">谷雨 — NeoCognition</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="4740">▶ 跳至视频此处</button>
+              <p><strong>谷雨（NeoCognition）</strong> 对当前「自改进 Agent」热潮进行批判性审视：</p>
+              <ul>
+                <li><strong>自改进还是 Prompt 工程？</strong>很多声称的自改进实际上是精心设计的 Prompt 工程，并非真正的模型能力进化</li>
+                <li><strong>真正的自进化定义：</strong>需要模型在部署后持续从新数据中学习，而非仅在推理时调整策略</li>
+                <li><strong>当前技术边界：</strong>推理时自适应 vs. 真正的自进化——前者是 Prompt 层面的技巧，后者需要模型权重的持续更新和环境反馈的闭环</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>区分「推理时自适应」与「真正的自进化」至关重要。前者是 Prompt 层面的技巧，后者需要模型权重的持续更新和环境反馈的闭环。行业需警惕将工程技巧包装为能力突破。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:46 – 2:11</td>
+          <td>面向自进化统一多模态模型：少步生成与智能体式理解</td>
+          <td><span class="speaker">林涛 — 西湖大学</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="6360">▶ 跳至视频此处</button>
+              <p><strong>林涛（西湖大学）</strong> 提出将多模态理解与生成统一到单一模型中的技术路线：</p>
+              <ul>
+                <li><strong>多模态统一架构：</strong>将视觉理解与语言生成统一到单一模型中，使模型能同时处理视觉和语言任务</li>
+                <li><strong>少步生成策略：</strong>减少扩散模型的推理步数，在保持生成质量的同时大幅提升效率</li>
+                <li><strong>智能体式理解：</strong>模型主动规划感知策略，而非被动处理输入——从"被动的模式识别"走向"主动的感知决策"</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>多模态统一不是简单的模型拼接，而是在架构层面实现视觉与语言的深度融合。少步生成与智能体式理解是通往高效多模态自进化的两条关键路径。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:11 – 2:40</td>
+          <td>Empowering LLMs with More Agency: From Context Engineering to Self-Engineering Architectures</td>
+          <td><span class="speaker">王璐</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="7860">▶ 跳至视频此处</button>
+              <p><strong>王璐</strong> 系统阐述 LLM 从依赖外部 Prompt 设计走向自主架构调整的演进路径：</p>
+              <ul>
+                <li><strong>从上下文工程到自我工程：</strong>LLM 如何从依赖外部 Prompt 设计转向自主架构调整</li>
+                <li><strong>赋予模型「主动性」：</strong>自行决定何时调用工具、何时检索、何时反思——从被动执行到主动规划</li>
+                <li><strong>自我工程架构设计：</strong>在赋予模型自主权的同时，如何设定安全边界与可控机制</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>LLM 的下一步进化不是更大的参数规模，而是更强的自主性。从 Context Engineering 到 Self-Engineering 的转变，标志着 AI 从「工具」向「伙伴」的角色演进。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:40 – 3:08</td>
+          <td>开放场景下的因果世界理解：从表征学习到持续性自主优化</td>
+          <td><span class="speaker">杨梦月</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="9600">▶ 跳至视频此处</button>
+              <p><strong>杨梦月</strong> 从因果推理角度探讨 AI 自主优化的理论基础：</p>
+              <ul>
+                <li><strong>从关联到因果：</strong>模型需要理解「为什么」而非仅仅「是什么」——因果推理是实现真正泛化的基础</li>
+                <li><strong>开放场景分布偏移：</strong>训练环境与部署环境不一致时，模型如何通过因果表征持续适应</li>
+                <li><strong>因果表征学习：</strong>在自主优化中的关键作用——从观测数据中提取不变的因果结构</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>关联学习让模型「知其然」，因果推理让模型「知其所以然」。在开放场景中，因果表征是实现持续性自主优化的关键理论支撑。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:08 – 3:29</td>
+          <td>From Benchmarking to Self-Improvement: Building Verifiable Feedback Loops for Abstract Reasoning</td>
+          <td><span class="speaker">郑侠武</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="11280">▶ 跳至视频此处</button>
+              <p><strong>郑侠武</strong> 探讨抽象推理能力的评估困境与反馈驱动范式转变：</p>
+              <ul>
+                <li><strong>评估困境：</strong>现有基准测试难以衡量真正的推理进步——模型可能在刷榜而非真正提升推理能力</li>
+                <li><strong>可验证反馈回路：</strong>通过形式化验证获得可靠的改进信号，使模型能自我校准</li>
+                <li><strong>范式转变：</strong>从评测驱动（Benchmark-Driven）到反馈驱动（Feedback-Driven），让模型在可验证的环境中持续进化</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>没有可靠的反馈信号，自进化就是空中楼阁。形式化验证为抽象推理提供了客观的改进依据，是从 Benchmarking 走向真正 Self-Improvement 的关键桥梁。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:29 – 4:12</td>
+          <td><strong>圆桌讨论：觉醒与进化——AI 如何自我迭代？</strong></td>
+          <td><span class="speaker">全体讲者</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="12540">▶ 跳至视频此处</button>
+              <p>全体讲者参与，围绕以下议题展开深入讨论：</p>
+              <ul>
+                <li><strong>自进化的定义之争：</strong>什么才算真正的自我改进？推理时策略调整算不算？学术界与产业界的分歧与共识</li>
+                <li><strong>安全边界：</strong>如何确保自进化不偏离预期目标？需要什么样的约束机制和护栏设计？</li>
+                <li><strong>评估体系：</strong>如何衡量自进化的真实进展？现有基准够不够？需要建立什么样的新型评估标准？</li>
+                <li><strong>产业路径：</strong>自进化技术从实验室到产品的关键瓶颈是什么？工程化落地的时间线预期</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>圆桌共识</h4>
+                <p>自进化是 AI 从工具走向伙伴的必经之路，但当前仍处早期阶段。需要在算法创新、评估标准和安全性三个维度同步推进，任何单点突破都不足以实现真正的自我迭代。与会专家一致认为，未来 3-5 年自进化 AI 将在垂直领域率先突破，通用自进化仍需更长的技术积累。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+(function() {
+  var video = document.getElementById('forum-video');
+  var defaultM3u8 = 'https://event-cdn.baai.ac.cn/vod-71f4bf/8045d0a166b971f180d5752290ec0102/e03871a445ad4e09a7c272fbf0477eb9-592b785595d2acb30be52488424526d1-hd.m3u8';
+  var m3u8Url = null;
+
+  function initPlayer(url) {
+    m3u8Url = url;
+
+    if (Hls.isSupported()) {
+      var hls = new Hls({ startPosition: 0 });
+      hls.loadSource(url);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, function() {
+        bindSeekButtons();
+      });
+      hls.on(Hls.Events.ERROR, function(evt, data) {
+        if (data.fatal) {
+          if (data.type === Hls.ErrorTypes.NETWORK_ERROR) { hls.startLoad(); }
+          else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) { hls.recoverMediaError(); }
+        }
+      });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = url;
+      video.addEventListener('loadedmetadata', function() {
+        bindSeekButtons();
+      });
+    }
+
+    try { localStorage.setItem('forum1023_m3u8', url); } catch(e) {}
+  }
+
+  // Check URL params first
+  var m = location.search.match(/[?&]m3u8=([^&]+)/);
+  if (m) {
+    initPlayer(decodeURIComponent(m[1]));
+  } else {
+    // Try saved URL, otherwise use default
+    try {
+      var saved = localStorage.getItem('forum1023_m3u8');
+      if (saved) { initPlayer(saved); }
+      else { initPlayer(defaultM3u8); }
+    } catch(e) {
+      initPlayer(defaultM3u8);
+    }
+  }
+
+  function bindSeekButtons() {
+    document.querySelectorAll('.seek-video').forEach(function(btn) {
+      btn.onclick = function(e) {
+        e.stopPropagation();
+        var sec = parseInt(this.getAttribute('data-seek'));
+        if (video && sec >= 0) {
+          video.currentTime = sec;
+          video.play().catch(function(){});
+          video.scrollIntoView({ behavior: 'smooth' });
+        }
+      };
+    });
+  }
+
+  // Session expand/collapse
+  document.querySelectorAll('.session-row.has-detail').forEach(function(row) {
+    row.addEventListener('click', function() {
+      this.classList.toggle('open');
+      var next = this.nextElementSibling;
+      if (next && next.classList.contains('session-detail')) { next.classList.toggle('open'); }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

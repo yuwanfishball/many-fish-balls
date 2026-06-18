@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026智源大会 — FlagOS 技术开发工作坊 直播回放</title>
+<style>
+  :root {
+    --primary: #1a3a5c;
+    --accent: #2857ff;
+    --bg: #f5f6f8;
+    --card-bg: #ffffff;
+    --text: #2c3e50;
+    --text-light: #5a6d80;
+    --border: #e2e6ed;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --radius: 10px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", "AR PL UKai CN", serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding-bottom: 40px;
+  }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+
+  /* ========== Header ========== */
+  .header {
+    position: relative;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: #fff;
+    padding: 32px 0;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  .header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", serif;
+  }
+  .back-link {
+    position: absolute;
+    top: 18px;
+    left: 24px;
+    color: rgba(255,255,255,.7);
+    text-decoration: none;
+    font-size: .9rem;
+    transition: color .2s;
+    z-index: 2;
+  }
+  .back-link:hover { color: #fff; }
+
+  /* ========== Video Player ========== */
+  .video-wrapper {
+    background: #000;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .video-wrapper video {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 540px;
+  }
+
+  /* ========== Card ========== */
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 0;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 16px 20px;
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--primary);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ========== Session Table ========== */
+  .schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .schedule-table thead th {
+    text-align: left;
+    font-size: .73rem;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--text-light);
+    padding: 8px 18px;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .time-slot {
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+    min-width: 100px;
+    font-size: .82rem;
+  }
+  .speaker { font-size: .82rem; color: var(--text-light); }
+
+  /* ========== Session Rows ========== */
+  .session-row { cursor: default; }
+  .session-row td { padding: 10px 18px; }
+  .session-row.has-detail {
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .session-row.has-detail:hover { background: #f5f7fa; }
+  .session-arrow {
+    text-align: center;
+    font-size: .6rem;
+    color: var(--text-light);
+    width: 36px;
+    transition: transform .25s;
+    vertical-align: middle;
+  }
+  .session-row.has-detail.open .session-arrow { transform: rotate(90deg); }
+  .session-row.no-detail .session-arrow { color: transparent; }
+  .session-detail { display: none; }
+  .session-detail.open { display: table-row; }
+  .session-detail td {
+    padding: 0 18px 16px !important;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .session-detail-content {
+    font-size: .88rem;
+    color: var(--text);
+    padding: 8px 0 8px 6px;
+  }
+  .session-detail-content p { margin-bottom: 8px; }
+  .session-detail-content ul { padding-left: 20px; margin-bottom: 8px; }
+  .session-detail-content ul li { margin-bottom: 4px; }
+
+  /* ========== Seek Button ========== */
+  .seek-video {
+    display: inline-block;
+    padding: 4px 14px;
+    margin-bottom: 8px;
+    border: 1px solid var(--accent);
+    border-radius: 99px;
+    background: #fff;
+    color: var(--accent);
+    font-size: .78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .seek-video:hover { background: var(--accent); color: #fff; }
+
+  /* ========== Highlight Box ========== */
+  .highlight-box {
+    background: #fff8e1;
+    border-left: 4px solid #f0b400;
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+  }
+  .highlight-box h4 { color: #b8860b; margin-bottom: 4px; }
+
+  /* ========== Summary Box ========== */
+  .summary-box {
+    padding: 18px 20px;
+    font-size: .88rem;
+    color: var(--text-light);
+    line-height: 1.8;
+  }
+
+  /* ========== Sub-period Label ========== */
+  .sub-period-label {
+    font-size: .8rem; font-weight: 700;
+    color: var(--accent);
+    padding: 12px 18px 4px;
+    background: #fafbfc;
+    letter-spacing: 1px;
+  }
+
+  @media (max-width: 768px) {
+    .header h1 { font-size: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a class="back-link" href="index.html">← 返回</a>
+  <h1>🛠 2026智源大会 · FlagOS 技术开发工作坊</h1>
+</header>
+
+<div class="container">
+
+  <!-- 视频播放器 -->
+  <div class="video-wrapper" id="video-wrapper">
+    <video id="forum-video" controls preload="metadata" crossorigin="anonymous" playsinline
+           style="display:block;width:100%;height:auto;max-height:540px;"></video>
+  </div>
+
+  <!-- 论坛简介 -->
+  <div class="card">
+    <div class="card-header">📖 论坛简介</div>
+    <div class="summary-box">
+      <p>FlagOS 是智源研究院推出的开源 AI 框架生态体系，致力于构建面向多芯片架构的统一计算底座，打通从算子开发、编译器优化到模型部署的全链路。本次技术开发工作坊汇聚 FlagOS 核心开发团队与社区贡献者，围绕编译器统一、算子性能优化、端侧部署、量子计算融合、多智能体互操作、算子自动生成、训推迁移自动化以及 Skill 封装式模型部署等关键技术方向，展开深入技术研讨与实操演示。</p>
+      <p style="margin-top:10px">议程从开场致辞出发，依次覆盖 Triton-TLE 稀疏注意力高性能开发、Arm64 端侧 CPU 使能与调优、大模型推理全算子覆盖优化、跨芯片统一编译器与中间表示层构建、FlagQuantum 量子-经典融合计算、Agent4Agent 多智能体互操作框架、KernelGen 自然语言驱动算子自动生成、FlagScale Agent 训推迁移自动化以及基于 Skill 封装的 vLLM 插件式 Agent 部署方案，形成从底层编译到上层智能部署的完整技术栈展示。</p>
+      <p style="margin-top:10px;font-size:.8rem;color:#999;">🕐 2026年6月11日 09:00–17:00 · 视频时长约 4 小时 13 分钟 · 📍 国创-大厅 · 线上同步直播</p>
+    </div>
+  </div>
+
+  <!-- 议程详情 -->
+  <div class="card">
+    <div class="card-header">📋 议程详情（点击展开）</div>
+    <table class="schedule-table">
+      <thead><tr><th style="width:36px"></th><th>时间</th><th>环节 / 主题</th><th>嘉宾 / 讲者</th></tr></thead>
+      <tbody>
+        <!-- 1. 开场致辞 -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">01:33 – 05:00</td>
+          <td>开场致辞</td>
+          <td><span class="speaker">—</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="93">▶ 跳至视频此处</button>
+              <p>FlagOS 技术开发工作坊整体开场介绍，阐述工作坊设立的背景与目标：</p>
+              <ul>
+                <li><strong>工作坊定位：</strong>FlagOS 是智源研究院发起的开源 AI 框架生态项目，本次工作坊面向社区开发者和产业用户，集中展示 FlagOS 在编译器、算子、部署工具链等方面的最新技术进展</li>
+                <li><strong>核心命题：</strong>在大模型时代，AI 框架面临芯片碎片化、算子开发门槛高、模型迁移成本大三重挑战，FlagOS 以"开放计算"为核心理念，构建跨芯片、跨框架的统一技术底座</li>
+                <li><strong>议程概览：</strong>全天议程覆盖从底层 Triton-TLE 算子开发、Arm64 端侧适配、统一编译器架构、推理全算子覆盖，到量子计算融合、多智能体互操作、KernelGen 自动算子生成、FlagScale 训推迁移以及 vLLM 插件化部署的完整技术栈</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心要点</h4>
+                <p>FlagOS 工作坊以"开放计算"为主线，串联起从底层编译到上层部署的全链路技术方案，旨在降低 AI 框架的使用门槛，推动多芯片生态的互联互通。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 2. Triton-TLE -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">05:00 – 26:20</td>
+          <td>Triton-TLE：不烧脑，也能写出高性能 SparseMLA</td>
+          <td><span class="speaker">—</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="300">▶ 跳至视频此处</button>
+              <p>本环节系统演示了 Triton-TLE（Triton Language Extension）如何显著降低高性能 SparseMLA（稀疏多头潜在注意力）算子的开发门槛：</p>
+              <ul>
+                <li><strong>SparseMLA 的计算特征：</strong>SparseMLA 是长上下文推理的核心算子，通过稀疏化注意力矩阵来减少计算量。其稀疏模式因模型结构和输入不同而变化，传统手工编写高性能 Kernel 需针对每种稀疏模式逐一调优，工程成本极高</li>
+                <li><strong>Triton-TLE 的简化路径：</strong>Triton-TLE 提供了声明式稀疏描述原语，开发者只需描述稀疏模式的结构特征（如分块大小、稀疏比例），框架即可自动生成优化的分块策略与内存访问模式</li>
+                <li><strong>性能数据：</strong>使用 Triton-TLE 编写的 SparseMLA Kernel，在典型稀疏度（50%–90%）下达到手工优化版本 95% 以上的吞吐，开发时间从数天缩短至数小时</li>
+                <li><strong>适用边界：</strong>该方案不仅适用于 SparseMLA，还可推广至稀疏注意力、稀疏 MoE 等同类场景</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心要点</h4>
+                <p>Triton-TLE 通过声明式稀疏编程原语，将高性能 SparseMLA 的开发从专家级手工优化转变为框架自动化流程，在保持近手工级性能的同时大幅降低工程复杂度。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 3. FlagOS Arm64 -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">26:20 – 53:49</td>
+          <td>FlagOS 在 Arm64 CPU 上的使能与性能优化：基于 Triton/TLE 的端侧 AI 实践</td>
+          <td><span class="speaker">—</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="1580">▶ 跳至视频此处</button>
+              <p>本环节展示了 FlagOS 在 Arm64 架构上的完整使能方案，将端侧 AI 推理从依赖 GPU 的单一范式拓展至 Arm64 CPU 平台：</p>
+              <ul>
+                <li><strong>Arm64 使能策略：</strong>FlagOS 利用 Triton/TLE 的跨架构编译能力，将同一套算子描述编译为 Arm64 NEON/SVE 向量指令，实现与 CUDA 后端共享上层代码、底层自动适配</li>
+                <li><strong>端侧性能优化手段：</strong>通过内存布局重排、算子融合和量化感知编译三项技术组合，在苹果 M 系列和高通骁龙 X Elite 等 Arm64 平台上实现大模型推理延迟降低 40%–60%</li>
+                <li><strong>Triton Arm64 后端扩展：</strong>FlagOS 扩展了 Triton 编译器的 Arm64 代码生成路径，补充了 SVE 向量化策略与 Neon 指令映射表，使 Triton Kernel 可直接在 Arm64 平台上编译运行</li>
+                <li><strong>实测效果：</strong>在 M3 Max MacBook 上运行 7B 模型的推理吞吐达到 28 tokens/s，满足实时交互需求</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心要点</h4>
+                <p>FlagOS 通过 Triton/TLE 跨架构编译能力，使同一套算子代码可同时编译为 CUDA 和 Arm64 后端，让端侧大模型推理摆脱对 GPU 的单一依赖，在 Arm64 平台上实现可量产部署的推理性能。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 4. 算子全覆盖 -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">53:49 – 1:26:41</td>
+          <td>从算子全覆盖到性能突破：FlagOS 如何打通大模型推理优化最后一公里</td>
+          <td><span class="speaker">—</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="3229">▶ 跳至视频此处</button>
+              <p>本环节聚焦大模型推理优化中算子覆盖率与极致性能的平衡问题，展示了 FlagOS 的全算子覆盖方案：</p>
+              <ul>
+                <li><strong>问题定位：</strong>主流推理框架在常见算子上性能优异，但在长尾算子（如非标准 Attention 变体、动态形状 Reshape、稀疏 MoE 路由等）上往往回退到性能低下的通用实现。这些长尾算子虽在总计算量中占比不大，却常成为端到端延迟的瓶颈</li>
+                <li><strong>FlagOS 全覆盖策略：</strong>通过自动算子搜索（Auto-Tuning）结合模板匹配技术，对模型计算图中每一个算子——无论主算子和长尾算子——都生成芯片特定的优化实现，消除任何性能回退路径</li>
+                <li><strong>实测数据：</strong>在 LLaMA-3-70B 推理场景中，全算子优化相比仅优化主算子的方案，端到端延迟降低 18%，首 Token 生成时间缩短 25%</li>
+                <li><strong>使用方式：</strong>整个过程从模型导入到优化算子生成，仅需一条命令触发，无需人工介入</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心要点</h4>
+                <p>大模型推理的性能瓶颈往往不在主算子而在长尾算子。FlagOS 的自动算子搜索与全覆盖策略，确保计算图中每一个算子都获得芯片级优化实现，真正打通了从模型到部署的"最后一公里"。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 5. 统一编译器 -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:26:41 – 1:57:45</td>
+          <td>打破 AI 芯片孤岛：统一编译器与公共中间表示层的构建之路</td>
+          <td><span class="speaker">—</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="5201">▶ 跳至视频此处</button>
+              <p>本环节深入阐述了 FlagOS 统一编译器架构的技术路线，旨在解决 AI 芯片生态碎片化的核心痛点：</p>
+              <ul>
+                <li><strong>芯片碎片化现状：</strong>当前市面上有超过 30 种 AI 加速芯片（NVIDIA GPU、AMD GPU、华为昇腾、寒武纪、Graphcore 等），每种芯片都有独立的编译工具链和算子库，开发者需为每种芯片单独编写和优化代码，迁移成本极高</li>
+                <li><strong>统一中间表示层（UIR）设计：</strong>FlagOS 采用分层中间表示架构——上层为芯片无关的计算图 IR，中层为可配置的张量运算原语 IR，底层为芯片特定的指令映射层。开发者只需针对上层 IR 编写一次代码，编译器的后端插件体系通过规则引擎和性能模型自动将统一 IR 映射为各芯片的最优指令序列</li>
+                <li><strong>当前适配进展：</strong>已适配 NVIDIA、AMD、华为昇腾、寒武纪四家主流芯片，社区贡献者正在扩展至更多国产芯片平台</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心要点</h4>
+                <p>FlagOS 的统一编译器架构通过分层中间表示和插件式后端映射，将"写一次代码、多芯片运行"从愿景变为工程现实，是打破 AI 芯片生态碎片化的关键基础设施。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 6. FlagQuantum -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:57:45 – 2:16:02</td>
+          <td>量智融合：FlagQuantum 如何用量子计算加速 AI 训练与推理</td>
+          <td><span class="speaker">—</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="7065">▶ 跳至视频此处</button>
+              <p>本环节展示了 FlagQuantum 子项目在量子-经典计算融合方向的最新进展，阐述量子计算为 AI 训练与推理提供加速的可行路径：</p>
+              <ul>
+                <li><strong>量子加速 AI 的三个可行方向：</strong>当前量子计算在组合优化（如 MoE 专家路由选择）、线性代数加速（如量子态内积计算）和高维概率采样三个方向上已展现出超越经典计算的潜力，这些方向与大模型的计算需求高度契合</li>
+                <li><strong>FlagQuantum 混合架构：</strong>采用量子-经典混合计算范式，经典 GPU/CPU 负责主体计算，量子处理单元（QPU）负责特定子任务加速，两者通过 FlagOS 统一调度层无缝协同</li>
+                <li><strong>验证结果：</strong>在 MoE 模型的专家路由优化中，量子退火算法相比经典贪心算法在专家利用率上提升 12%，在 16 专家 × 4 选择的配置下路由延迟降低 30%</li>
+                <li><strong>现实约束：</strong>量子硬件仍处于中等规模含噪声（NISQ）阶段，实际收益受限于量子比特数量和门保真度，在可预见的近期以经典计算为主、量子计算为辅的混合模式运行</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心要点</h4>
+                <p>FlagQuantum 通过量子-经典混合计算架构，在 MoE 路由优化等特定 AI 子任务上验证了量子加速的可行性。提前布局量子-经典融合计算框架，为 AI 算力开辟了超越经典摩尔定律的新增长曲线。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 7. Agent4Agent -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:16:02 – 2:37:08</td>
+          <td>Agent4Agent：多智能体互操作技术框架</td>
+          <td><span class="speaker">—</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="8162">▶ 跳至视频此处</button>
+              <p>本环节提出了 Agent4Agent（A4A）多智能体互操作技术框架，解决 AI Agent 之间的协作与通信问题：</p>
+              <ul>
+                <li><strong>多智能体协作的挑战：</strong>当多个 AI Agent（如代码生成 Agent、推理优化 Agent、部署 Agent）需要协同完成一个端到端任务时，面临接口不统一、上下文传递断裂、任务依赖关系管理复杂三个核心问题</li>
+                <li><strong>A4A 框架设计：</strong>定义了标准化的 Agent 间通信协议（Agent Communication Protocol），包括任务描述格式、中间结果交换规范和状态同步机制。每个 Agent 只需实现 A4A 标准接口即可接入多智能体协作网络</li>
+                <li><strong>任务编排引擎：</strong>框架内置了基于有向无环图（DAG）的任务编排器，自动解析 Agent 间的依赖关系、调度并行执行路径并处理异常回退，无需开发者手动编写编排逻辑</li>
+                <li><strong>与 FlagOS 的集成：</strong>A4A 框架已集成至 FlagOS 插件体系，KernelGen、FlagScale Agent、vLLM-Plugin-FL 等工具可通过 A4A 协议互操作，形成从算子生成到模型部署的完整 Agent 协作链路</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心要点</h4>
+                <p>Agent4Agent 框架通过标准化 Agent 间通信协议和 DAG 任务编排引擎，解决了多智能体协作中的接口统一和依赖管理问题。与 FlagOS 插件体系集成后，实现了从算子生成到模型部署的多 Agent 自动化协作链路。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 8. KernelGen -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:37:08 – 3:11:19</td>
+          <td>从"像素级调优"到"一句话生成"：KernelGen 如何重塑 AI 算子开发</td>
+          <td><span class="speaker">—</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="9428">▶ 跳至视频此处</button>
+              <p>本环节演示了 KernelGen——一个基于大语言模型的 AI 算子自动生成工具，呈现从传统手工调优到自然语言驱动生成的范式转变：</p>
+              <ul>
+                <li><strong>传统算子开发的瓶颈：</strong>编写一个高性能 GPU Kernel 需要开发者同时掌握 CUDA/Triton 编程、GPU 微架构特性（共享内存、寄存器分配、Warp 调度）和目标芯片的优化技巧，一个复杂算子的开发周期通常以周为单位</li>
+                <li><strong>KernelGen 工作流程：</strong>开发者用自然语言描述算子的计算逻辑（如"实现一个支持 GQA 的 Flash Attention 前向 Kernel，head_dim=128，使用 FP16"），KernelGen 自动生成优化的 Triton Kernel 代码，并附带性能基准测试和正确性验证结果</li>
+                <li><strong>三层验证流水线：</strong>生成代码依次通过形式化正确性检查、小规模张量数值对比验证和目标芯片完整性能基准测试，三项全部通过后输出最终代码</li>
+                <li><strong>实测效果：</strong>对 50 个常见算子的测试显示，KernelGen 生成的代码在 85% 的案例中达到或超过手工优化版本的性能，剩余 15% 经人工微调后也可达标。每次生成结果记录至结构化知识库，使生成质量随使用次数持续提升</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心要点</h4>
+                <p>KernelGen 将 AI 算子开发从"像素级手工调优"转变为"自然语言描述 + 自动验证"的高效流程，在 85% 的常见算子上达到手工级性能。这一工具显著降低了算子开发的门槛和周期。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 9. FlagScale Agent -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:11:19 – 3:43:06</td>
+          <td>大模型训推迁移的"无人驾驶"时代：FlagScale Agent 系统级创新与实践</td>
+          <td><span class="speaker">—</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="11479">▶ 跳至视频此处</button>
+              <p>本环节展示了 FlagScale Agent——一个面向大模型训练与推理迁移的系统级自动化工具，标志着训推迁移从手动工程进入"无人驾驶"时代：</p>
+              <ul>
+                <li><strong>训推迁移的核心难点：</strong>大模型从训练集群迁移到推理集群（或跨芯片迁移）时，需处理分布式策略重配置、模型切分方式重构、精度对齐、通信拓扑适配等一系列复杂问题，传统方式依赖资深工程师逐一排查和调优</li>
+                <li><strong>"无人驾驶"架构：</strong>借鉴自动驾驶分级概念（L1-L5），FlagScale Agent 提供从辅助建议（L2）到全自动执行（L4）的多级自动化模式。核心由四个模块构成——感知模块扫描源平台配置、规划模块生成迁移策略、执行模块按步骤实施迁移、验证模块自动运行正确性和性能测试</li>
+                <li><strong>自动故障恢复：</strong>当迁移过程中出现精度不匹配或性能回退时，Agent 自动回溯至上一个正确检查点，调整策略后重新执行，整个过程无需人工介入</li>
+                <li><strong>规模化验证：</strong>已在超过 100 个模型（涵盖 LLaMA、Qwen、DeepSeek 等主流架构）和 5 种芯片平台的交叉组合中完成验证，迁移成功率达到 96%</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心要点</h4>
+                <p>FlagScale Agent 实现了大模型训推迁移的全流程自动化闭环——从源平台感知、策略规划、执行到正确性验证。在 100+ 模型 × 5 芯片平台的规模验证中达到 96% 成功率，标志着跨平台迁移从专家手工工程走向工业化自动流程。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 10. vLLM Skill Agent -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:43:06 – 4:13:06</td>
+          <td>以 Skill 封装工程经验：让 AI Agent 接管 vLLM-plugin-f 自动化部署</td>
+          <td><span class="speaker">—</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="13386">▶ 跳至视频此处</button>
+              <p>本环节展示了基于 Skill 封装理念的 vLLM-Plugin-FL 自动化部署方案，将工程经验固化为可被 AI Agent 调用的标准化技能模块：</p>
+              <ul>
+                <li><strong>Skill 封装理念：</strong>将模型部署中的常见工程经验——包括芯片适配逻辑、算子替换策略、性能配置模板——封装为独立的"Skill"模块。每个 Skill 是一个自包含的、可被 Agent 发现和调用的能力单元，内部封装了特定领域的工程知识</li>
+                <li><strong>Agent 接管流程：</strong>AI Agent 接收用户的高层意图（如"将 Qwen2-72B 部署至华为昇腾 910B，4 卡 TP"），自动匹配所需的 Skill 组合（芯片适配 Skill + TP 切分 Skill + 性能调优 Skill），按依赖顺序编排执行，并在每个环节完成后进行验证</li>
+                <li><strong>降低门槛的效果：</strong>在演示中，Agent 在 3 分钟内完成了模型格式转换、算子适配、分布式策略配置和推理服务启动的全流程，将传统需要数小时专家手工操作的任务简化为一次自然语言指令</li>
+                <li><strong>Skill 生态扩展性：</strong>社区开发者可贡献新的 Skill 模块至 Skill 市场，Agent 自动发现并学习使用新 Skill，使部署能力随社区贡献持续扩展</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心要点</h4>
+                <p>Skill 封装机制将分散的工程经验转化为标准化的、可被 Agent 调用的能力模块。AI Agent 通过自动匹配和编排 Skill 组合，将跨芯片模型部署从数小时的手工操作简化为一次自然语言指令，这是 FlagOS 开放计算生态走向大规模普及的关键一步。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+(function() {
+  var video = document.getElementById('forum-video');
+
+  // 直接使用指定的 m3u8 地址
+  var m3u8Url = 'https://event-cdn.baai.ac.cn/vod-71f4bf/d0a7348167d671f18f01752281ed0102/89c50f1eab1e42798cf01311ef8715aa-ea14c0cbb8ab3d16444517431ee3466c-hd.m3u8';
+
+  function initPlayer(url) {
+    if (Hls.isSupported()) {
+      var hls = new Hls();
+      hls.loadSource(url);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, function() {
+        video.play().catch(function(){});
+        bindSeekButtons();
+      });
+      hls.on(Hls.Events.ERROR, function(evt, data) {
+        if (data.fatal) {
+          if (data.type === Hls.ErrorTypes.NETWORK_ERROR) { hls.startLoad(); }
+          else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) { hls.recoverMediaError(); }
+        }
+      });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = url;
+      video.addEventListener('loadedmetadata', function() {
+        video.play().catch(function(){});
+        bindSeekButtons();
+      });
+    } else {
+      video.src = url;
+    }
+  }
+
+  // 自动加载视频
+  initPlayer(m3u8Url);
+
+  function bindSeekButtons() {
+    document.querySelectorAll('.seek-video').forEach(function(btn) {
+      btn.onclick = function(e) {
+        e.stopPropagation();
+        var sec = parseInt(this.getAttribute('data-seek'));
+        if (video && sec >= 0) {
+          video.currentTime = sec;
+          video.play().catch(function(){});
+          video.scrollIntoView({ behavior: 'smooth' });
+        }
+      };
+    });
+  }
+
+  // Session expand/collapse
+  document.querySelectorAll('.session-row.has-detail').forEach(function(row) {
+    row.addEventListener('click', function() {
+      this.classList.toggle('open');
+      var next = this.nextElementSibling;
+      if (next && next.classList.contains('session-detail')) { next.classList.toggle('open'); }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

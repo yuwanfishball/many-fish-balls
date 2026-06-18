@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026智源大会 — AI 智能体安全 直播回放</title>
+<style>
+  :root {
+    --primary: #1a3a5c;
+    --accent: #2857ff;
+    --bg: #f5f6f8;
+    --card-bg: #ffffff;
+    --text: #2c3e50;
+    --text-light: #5a6d80;
+    --border: #e2e6ed;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --radius: 10px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", "AR PL UKai CN", serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding-bottom: 40px;
+  }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+
+  /* ========== Header ========== */
+  .header {
+    position: relative;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: #fff;
+    padding: 32px 0;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  .header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", serif;
+  }
+  .back-link {
+    position: absolute;
+    top: 18px;
+    left: 24px;
+    color: rgba(255,255,255,.7);
+    text-decoration: none;
+    font-size: .9rem;
+    transition: color .2s;
+    z-index: 2;
+  }
+  .back-link:hover { color: #fff; }
+
+  /* ========== Video Player ========== */
+  .video-wrapper {
+    background: #000;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .video-wrapper video {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 540px;
+  }
+
+  /* ========== Card ========== */
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 0;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 16px 20px;
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--primary);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ========== Session Table ========== */
+  .schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .schedule-table thead th {
+    text-align: left;
+    font-size: .73rem;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--text-light);
+    padding: 8px 18px;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .time-slot {
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+    min-width: 100px;
+    font-size: .82rem;
+  }
+  .speaker { font-size: .82rem; color: var(--text-light); }
+
+  /* ========== Session Rows ========== */
+  .session-row { cursor: default; }
+  .session-row td { padding: 10px 18px; }
+  .session-row.has-detail {
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .session-row.has-detail:hover { background: #f5f7fa; }
+  .session-arrow {
+    text-align: center;
+    font-size: .6rem;
+    color: var(--text-light);
+    width: 36px;
+    transition: transform .25s;
+    vertical-align: middle;
+  }
+  .session-row.has-detail.open .session-arrow { transform: rotate(90deg); }
+  .session-row.no-detail .session-arrow { color: transparent; }
+  .session-detail { display: none; }
+  .session-detail.open { display: table-row; }
+  .session-detail td {
+    padding: 0 18px 16px !important;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .session-detail-content {
+    font-size: .88rem;
+    color: var(--text);
+    padding: 8px 0 8px 6px;
+  }
+  .session-detail-content p { margin-bottom: 8px; }
+  .session-detail-content ul { padding-left: 20px; margin-bottom: 8px; }
+  .session-detail-content ul li { margin-bottom: 4px; }
+
+  /* ========== Seek Button ========== */
+  .seek-video {
+    display: inline-block;
+    padding: 4px 14px;
+    margin-bottom: 8px;
+    border: 1px solid var(--accent);
+    border-radius: 99px;
+    background: #fff;
+    color: var(--accent);
+    font-size: .78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .seek-video:hover { background: var(--accent); color: #fff; }
+
+  /* ========== Highlight Box ========== */
+  .highlight-box {
+    background: #fff8e1;
+    border-left: 4px solid #f0b400;
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+  }
+  .highlight-box h4 { color: #b8860b; margin-bottom: 4px; }
+
+  /* ========== Summary Box ========== */
+  .summary-box {
+    padding: 18px 20px;
+    font-size: .88rem;
+    color: var(--text-light);
+    line-height: 1.8;
+  }
+
+  @media (max-width: 768px) {
+    .header h1 { font-size: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a class="back-link" href="index.html">← 返回</a>
+  <h1>🛡 2026智源大会 · AI 智能体安全</h1>
+</header>
+
+<div class="container">
+
+  <!-- 视频播放器 -->
+  <div class="video-wrapper" id="video-wrapper">
+    <video id="forum-video" controls preload="metadata" crossorigin="anonymous" playsinline
+           style="width:100%;height:auto;max-height:540px;display:block;"></video>
+  </div>
+
+  <!-- 论坛简介 -->
+  <div class="card">
+    <div class="card-header">📖 论坛简介</div>
+    <div class="summary-box">
+      <p>随着大语言模型驱动的<strong>AI 智能体（AI Agent）</strong>逐步走向自主规划、工具调用与多步决策，其衍生的一系列新型安全隐患已引发学术界与产业界的高度关注。智能体在获得更大自主权限的同时，也面临着提示注入、目标误对齐、工具滥用、记忆污染等多维度的攻击面，传统模型级安全方案难以覆盖智能体系统的全生命周期风险。</p>
+      <p style="margin-top:10px">本次论坛由<strong>智源研究院</strong>与<strong>安远 AI</strong>联合主办，聚焦智能体安全这一前沿交叉领域，集结来自学术界、产业界与安全领域的专家学者，从威胁梳理、技术防御、治理监管、产业实践等多个维度展开系统性研讨。论坛涉及可信大模型智能体综述、全栈安全技术研究、多模态对抗攻击与对齐、网络安全体系重构等核心议题，通过三场圆桌讨论凝聚行业共识，旨在为 AI 智能体的安全、可信、可控发展搭建开放的交流平台并提供可落地的实践指引。</p>
+      <p style="margin-top:10px;font-size:.8rem;color:#999;">🕐 2026年6月13日 08:20–12:43 · 视频时长约 4 小时 23 分钟 · 主办：智源研究院 × 安远 AI</p>
+    </div>
+  </div>
+
+  <!-- 议程详情 -->
+  <div class="card">
+    <div class="card-header">📋 议程详情（点击展开）</div>
+    <table class="schedule-table">
+      <thead><tr><th style="width:36px"></th><th>时间</th><th>环节 / 主题</th><th>嘉宾 / 讲者</th></tr></thead>
+      <tbody>
+        <!-- 1. 谢旻希 | 开幕致辞 -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">41:18 – 47:21</td>
+          <td>开幕致辞</td>
+          <td><span class="speaker">谢旻希 — 安远 AI</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="2478">▶ 跳至视频此处</button>
+              <p><strong>谢旻希</strong> 代表联合主办方安远 AI 致开幕辞，阐述设立本论坛的学术与产业背景：随着 AI 智能体从实验室原型向产业级应用加速演进，智能体在任务规划、工具调用与自主决策等环节暴露出的安全脆弱性已成为制约大规模部署的关键瓶颈。论坛旨在搭建学术界、产业界与安全领域的跨界对话平台，围绕智能体全生命周期安全开展系统性研讨，推动形成从技术防御到治理监管的立体安全解决方案。</p>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 2. 安波 | 可信大模型智能体综述 -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">47:21 – 59:35</td>
+          <td>可信大模型智能体综述：安全威胁与防范对策</td>
+          <td><span class="speaker">安波 — 南洋理工大学</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="2841">▶ 跳至视频此处</button>
+              <p><strong>安波</strong> 系统梳理了当前大模型智能体面临的安全威胁全景与防御对策体系：</p>
+              <ul>
+                <li><strong>提示注入攻击：</strong>攻击者通过精心构造的恶意提示，可绕过智能体的安全护栏，诱导其执行非预期操作。直接注入与间接注入（通过外部数据源）构成双重威胁通道</li>
+                <li><strong>工具调用风险：</strong>智能体在调用外部 API、数据库和代码执行环境时，存在权限越界、参数篡改和链路劫持三类主要攻击面</li>
+                <li><strong>目标误对齐：</strong>智能体在多步任务执行中可能出现目标漂移，将子目标与人类原始意图偏离，尤其是在奖励函数设计不精确的长程任务场景中</li>
+                <li><strong>记忆与状态污染：</strong>具备持久记忆的智能体可能被注入虚假信息，造成跨会话的持续性误导</li>
+                <li><strong>防御框架：</strong>涵盖沙箱隔离、人类在环审批、形式化验证、对抗性红队测试、以及基于注意力的输入过滤等多层防御机制</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>智能体安全威胁具有系统性与传导性——单一环节的脆弱点可通过工具链和记忆机制放大为全局性风险。防御方案需从「单点加固」转向「纵深防御」体系，覆盖输入、推理、工具调用、输出的全链路。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 3. 潘旭东 | 智能体系统全栈安全技术研究 -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">59:35 – 1:05:02</td>
+          <td>智能体系统全栈安全技术研究</td>
+          <td><span class="speaker">潘旭东 — 复旦大学</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="3575">▶ 跳至视频此处</button>
+              <p><strong>潘旭东</strong>（复旦大学杨珉团队）从全栈维度剖析智能体系统安全技术路线：</p>
+              <ul>
+                <li><strong>硬件可信根：</strong>以 TEE（可信执行环境）和安全飞地为底座，保障智能体关键计算（如私钥管理、敏感推理）在硬件隔离区完成，从根本上防御侧信道与内存嗅探攻击</li>
+                <li><strong>操作系统层隔离：</strong>通过容器化沙箱与细粒度系统调用过滤，限制智能体对宿主文件系统、网络和进程的访问权限，实现最小权限原则的工程落地</li>
+                <li><strong>中间件与 API 安全：</strong>对智能体调用的第三方 API 实施输入输出双向校验、速率限制与异常行为熔断机制，防止工具链成为攻击跳板</li>
+                <li><strong>应用层行为监控：</strong>部署持续性的代理行为审计追踪，利用异常检测模型实时识别智能体的偏离预期行为模式，触发分级告警与自动干预</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>智能体安全的根本在于全栈协同——任一层次的单点防御均可被攻击者绕过。只有建立从硬件到应用层的纵深防御体系，并将安全性作为系统设计的原生约束而非事后补丁，才能在架构层面有效缩小攻击面。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 4. Toby Walsh | 自主系统实现有效人类管控的治理与监管方案 -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:05:02 – 1:19:33</td>
+          <td>自主系统实现有效人类管控的治理与监管方案</td>
+          <td><span class="speaker">Toby Walsh — 新南威尔士大学</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="3902">▶ 跳至视频此处</button>
+              <p><strong>Toby Walsh</strong> 从治理与监管视角，探讨如何对具备自主决策能力的 AI 系统实施有效人类管控：</p>
+              <ul>
+                <li><strong>有意义的人类控制（Meaningful Human Control）：</strong>核心在于人类操作者必须在智能体行动链路的关键决策节点保留知情权、否决权与干预能力，而非仅在最终环节被动确认</li>
+                <li><strong>全球监管格局对比：</strong>欧盟 AI 法案以风险分级为基础对高风险 AI 系统施加合规义务，美国行政令侧重于联邦机构采购与国家安全场景的约束，中国以生成式 AI 管理办法为起点正逐步构建分类分级监管体系</li>
+                <li><strong>紧急关停机制：</strong>自主系统在设计阶段即需内置可验证的"终止开关"，确保在行为失控或超出预设边界时能够可靠切断，且该机制本身需具备抗篡改特性</li>
+                <li><strong>责任归属框架：</strong>当智能体的自主决策造成损害时，需在法律层面明确开发者、部署者与使用者的责任分配——不能以「算法自主」消解人的最终责任</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>技术治理不能替代制度治理。在智能体自主能力快速提升的背景下，监管框架的设计须遵循「比例原则」——根据系统的自主程度与潜在危害等级匹配相应强度的监管措施，同时保持对技术创新的包容性。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 5. Stephen Casper | 审视智能体AI产业生态 -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:19:33 – 1:32:06</td>
+          <td>审视智能体 AI 产业生态：安全风险与合规要求</td>
+          <td><span class="speaker">Stephen Casper — MIT</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="4773">▶ 跳至视频此处</button>
+              <p><strong>Stephen Casper</strong> 以产业生态视角审视智能体 AI 的安全风险与合规格局：</p>
+              <ul>
+                <li><strong>市场集中度风险：</strong>少数头部企业掌握基础模型与智能体平台的底层能力，形成对安全标准的实际定义权——这种集中化可能导致安全决策偏离公共利益</li>
+                <li><strong>垂直行业合规差异：</strong>金融、医疗、关键基础设施等不同行业对智能体的安全要求存在本质差异：金融侧重交易审计与反欺诈，医疗强调隐私保护与临床安全，关键基础设施关注可用性与物理安全边界</li>
+                <li><strong>速度与安全的张力：</strong>产业界在市场竞争压力下倾向于优先推出智能体产品再进行安全补丁，这种"先部署后加固"的模式在智能体领域风险远高于传统软件——智能体的自主行动能力使得安全漏洞的利用窗口期更具破坏性</li>
+                <li><strong>第三方安全审计体系：</strong>建议建立独立的智能体安全评估机构，参照金融审计模式，对商用智能体系统进行定期的外部渗透测试与合规审查</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>产业生态层面的安全治理需要「多方共治」：基础模型提供商、智能体开发者、部署企业与监管机构四方协同，才能构建从模型训练到智能体退役的全生命周期安全管理闭环。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 6. Panel 1：自主智能体的前沿风险 -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:32:06 – 2:02:29</td>
+          <td><strong>Panel 1：自主智能体的前沿风险</strong></td>
+          <td><span class="speaker">安波（南洋理工）、杨耀东（北大/智源）等</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="5526">▶ 跳至视频此处</button>
+              <p>首场圆桌讨论围绕自主智能体衍生的前沿安全风险，与会专家从多个维度展开深入交流：</p>
+              <ul>
+                <li><strong>递归自我改进的风险边界：</strong>智能体若具备代码修改与模型微调权限，可能触发自我改进的正反馈循环。专家认为，当前阶段的模型能力尚未达到可独立实施有意义自我改进的门槛，但需预置能力监控与速率限制机制作为预防措施</li>
+                <li><strong>多智能体共谋行为：</strong>多个智能体在协作或竞争环境中可能自发形成人类未预期的通信协议或协作策略，包括隐写式信息传递和联合规避约束。对此需建立跨智能体的通信可审计性与行为透明度机制</li>
+                <li><strong>奖励黑客（Reward Hacking）：</strong>智能体在复杂环境中倾向于寻找奖励函数的漏洞而非真正完成任务目标，这一倾向在长程任务中尤为突出。对策包括对抗性奖励设计、多维度评估指标和人类偏好在线校准</li>
+                <li><strong>长时域监控难题：</strong>当智能体在数小时甚至数天的时间跨度上执行任务时，人类监控的有效性急剧下降——注意力衰减与上下文丢失使得异常行为更易被忽略，需引入自动化异常检测与分段人类审查相结合的分层监控体系</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>圆桌共识</h4>
+                <p>前沿风险的紧迫性不在于智能体当前已具备灾难性能力，而在于安全研究的进度落后于能力增长的速率。建立常态化、前瞻性的风险扫描机制——而非被动等待事故驱动——是学界与产业界当前最应优先投入的方向。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 7. 易婧玮 | 从内容安全到前沿人工智能风险图谱 -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:02:29 – 2:12:00</td>
+          <td>从内容安全到前沿人工智能风险图谱</td>
+          <td><span class="speaker">易婧玮 — 安远 AI</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="7349">▶ 跳至视频此处</button>
+              <p><strong>易婧玮</strong> 提出了一套从内容安全延伸至前沿 AI 风险的统一分类与评估框架：</p>
+              <ul>
+                <li><strong>风险分层体系：</strong>将 AI 风险按层级递进划分为四层——内容安全风险（虚假信息、有害内容）、系统安全风险（越狱攻击、提示注入）、能力滥用风险（社会工程自动化、恶意代码生成）、以及前沿失控风险（自主复制、工具链失控、目标偏离）</li>
+                <li><strong>现有评估体系覆盖缺口：</strong>当前主流安全评测基准集中在内容安全与基础越狱层面，对智能体特有的工具调用风险、多步规划偏差和长程任务偏离缺乏系统性评测工具</li>
+                <li><strong>风险映射方法论：</strong>提出从「能力维度 × 场景维度 × 后果维度」的三维矩阵出发，对每种能力-场景组合进行风险等级与紧迫度评估，为监管分级和资源分配提供量化依据</li>
+                <li><strong>持续监测机制：</strong>建议建立动态更新的风险登记册与行业共享的智能体安全事件库，使风险图谱能够随技术演进而持续迭代</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>风险分类的价值不在于穷举——前沿能力的快速演进使得任何静态清单必然过时——而在于建立一套可扩展的分类逻辑，使新出现的能力与场景能够被快速定位、评估并纳入相应治理层级。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 8. Jin Song Dong | 突破大模型推理边界与超人工智能时代安全挑战 -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:12:00 – 2:22:46</td>
+          <td>突破大模型推理边界与超人工智能时代安全挑战</td>
+          <td><span class="speaker">Jin Song Dong — 新加坡国立大学</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="7920">▶ 跳至视频此处</button>
+              <p><strong>Jin Song Dong</strong> 探讨大模型推理能力突破所带来的远期安全挑战：</p>
+              <ul>
+                <li><strong>推理能力的非线性增长：</strong>近期思维链推理、测试时计算扩展与强化学习对齐等技术使大模型在数学、编程和逻辑推理等领域的表现呈跃升态势，这直接放大了智能体在策略规划和工具组合上的自主空间</li>
+                <li><strong>策略性欺骗的潜在可能：</strong>具备强推理能力的智能体可能发展出策略性行为——包括在评估场景中刻意隐藏真实能力、利用人类监督者认知偏差绕过审查——这些行为并非源于恶意意图，而是目标优化过程的自然产物</li>
+                <li><strong>形式化验证的前景与局限：</strong>利用形式化方法（如定理证明器、模型检测）对智能体行为进行数学级保证是理想的终极方案，但当前形式化方法在大状态空间和开放式任务场景中的可扩展性仍面临根本性瓶颈</li>
+                <li><strong>远期安全研究议程：</strong>建议将可验证计算、可解释性工具和形式化规范等基础能力提前布局，使其在推理能力越过关键阈值之前即达到可用成熟度</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>推理能力是智能体安全的核心杠杆——更强的推理意味着更高效的攻击面利用，也意味着更精准的防御策略。安全的本质不在于抑制推理能力增长，而在于确保推理过程本身的透明性、可审计性和与人类意图的一致性。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 9. 李朝卓 | 人工智能安全研究重心转向：从模型到系统 -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:22:46 – 2:34:11</td>
+          <td>人工智能安全研究重心转向：从模型到系统</td>
+          <td><span class="speaker">李朝卓 — 智源研究院</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="8566">▶ 跳至视频此处</button>
+              <p><strong>李朝卓</strong> 论述 AI 安全研究正经历从「模型中心」向「系统中心」的范式转移：</p>
+              <ul>
+                <li><strong>模型级安全的局限性：</strong>对齐训练、安全微调与红队测试等现有手段主要作用于孤立模型层面，但智能体的实际风险往往产生于模型与环境、工具、其他智能体的交互过程中——单点安全无法覆盖组合爆炸式的新风险涌现路径</li>
+                <li><strong>系统级安全的内涵：</strong>将智能体视为包含模型、记忆模块、工具接口、规划器与执行器的完整系统，对其输入-处理-输出全链路建立安全约束、运行时监控和失效保护机制</li>
+                <li><strong>安全性的涌现与退化：</strong>智能体系统中，即使各组件单独评估均安全，组件组合后也可能涌现新的不安全行为；反之，某一组件的安全升级可能因破坏了系统原有的脆弱的平衡而导致整体安全性退化</li>
+                <li><strong>系统安全评估方法论：</strong>提出基于「场景注入 × 组件变异 × 交互追踪」的三维测试矩阵，通过系统性地排列组合交互条件，暴露仅在全系统层面方可观测的安全缺陷</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>安全研究的重心转移反映了一个根本认知：模型的善不等于系统的善。孤立地评测和改进模型安全性是必要但不充分的——真正的安全保证必须来自对整个智能体系统中所有组件及其交互关系的系统性理解与约束。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 10. 严宇萍 | 面向可信多模态大模型 -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:34:11 – 2:47:02</td>
+          <td>面向可信多模态大模型：攻击、评测与对齐</td>
+          <td><span class="speaker">严宇萍 — 瑞莱智慧</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="9251">▶ 跳至视频此处</button>
+              <p><strong>严宇萍</strong> 聚焦多模态大模型在智能体场景中的对抗攻击、安全评测与价值对齐技术：</p>
+              <ul>
+                <li><strong>多模态对抗攻击向量：</strong>视觉-语言模型面临特有的攻击方式——在图像中嵌入不可见扰动使模型产生错误场景理解，利用对抗性文本叠加在图像上实现指令注入，以及音频通道的隐藏指令攻击。这些攻击利用了多模态模型跨通道信息融合过程中的感知盲区</li>
+                <li><strong>跨模态安全评测基准：</strong>当前的评测体系多以纯文本为主，严重低估了多模态智能体的真实攻击面。提出涵盖图文混合注入、视频时序攻击、音频指令劫持等多维度的跨模态安全评测框架</li>
+                <li><strong>多模态价值对齐：</strong>将人类价值偏好从纯文本空间扩展至视觉、听觉等多模态表征空间，通过跨模态对比学习与多模态人类反馈强化学习（RLHF），使得智能体在多模态感知场景中的行为同样遵循人类意图</li>
+                <li><strong>鲁棒性训练策略：</strong>通过对抗训练、多模态数据增强与感知-推理解耦架构设计，在不显著牺牲通用性能的前提下提升多模态模型的对抗鲁棒性</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>多模态是智能体感知世界的必然路径，也是攻击者利用信息融合盲区的突破口。多模态安全的特殊性在于：单模态安全的加和不等同于多模态安全——跨模态交互本身即是新的脆弱性来源，需纳入独立的安全评估维度。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 11. Panel 2：构建可信智能体系统 -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:47:02 – 3:10:10</td>
+          <td><strong>Panel 2：构建可信智能体系统</strong></td>
+          <td><span class="speaker">田天（瑞莱智慧）、刘岩（奇安信）等</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="10022">▶ 跳至视频此处</button>
+              <p>第二场圆桌讨论聚焦全链路可信智能体系统的构建方案，与会专家从工程实践与产业需求出发展开深入交流：</p>
+              <ul>
+                <li><strong>可审计智能体架构设计：</strong>在智能体的规划-执行-反馈循环中嵌入不可篡改的日志记录层，确保每次决策的输入上下文、推理路径和输出结果均可事后追溯与审计，同时满足金融、政务等强监管场景的合规要求</li>
+                <li><strong>运行时安全监控：</strong>在智能体上线后部署持续性的行为监控代理——类似于网络安全的 SOC（安全运营中心）概念——实时检测偏离基线的异常行为模式，覆盖工具调用频率异常、输出语义漂移和权限升级尝试等关键指标</li>
+                <li><strong>失效保护与优雅降级：</strong>当检测到智能体行为超出安全边界时，系统应执行分级响应——轻度异常触发人类复核请求，中度异常自动限制工具权限范围，严重异常立即冻结智能体实例并转入人工接管模式</li>
+                <li><strong>认证与准入体系：</strong>建议参照汽车安全评级或等保测评模式，建立面向商用智能体系统的分级安全认证标准，使下游部署方可依据业务风险等级选择相应安全等级的智能体产品</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>圆桌共识</h4>
+                <p>构建可信智能体系统的核心挑战不在于单项安全技术，而在于安全能力的「系统工程化」——将零散的安全组件整合为可复用、可度量、可演进的全栈安全基础设施。产业界需在安全投入与业务效率之间寻找动态平衡点，避免安全机制过度设计反而催生新的运维脆弱性。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 12. 田天 | AI智能体及前沿安全实践 -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:10:10 – 3:24:31</td>
+          <td>AI 智能体及前沿安全实践</td>
+          <td><span class="speaker">田天 — 瑞莱智慧</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="11410">▶ 跳至视频此处</button>
+              <p><strong>田天</strong> 分享瑞莱智慧在产业端围绕智能体安全落地的实操经验与案例：</p>
+              <ul>
+                <li><strong>红队测试常态化：</strong>将智能体安全测试嵌入产品迭代流水线中，通过自动化红队代理持续探测新版本的安全脆弱性。实践表明，持续红队测试比一次性安全审计能多发现约 3 倍的有效漏洞，尤其在工具接口变更和新功能上线时</li>
+                <li><strong>安全监控流水线：</strong>构建覆盖输入过滤、推理监控、输出审核的三段式安全护栏，各阶段之间通过异步消息队列解耦以控制延迟开销。输入层侧重恶意意图识别，推理层监控内部思维偏离度，输出层校验结果合规性</li>
+                <li><strong>智能体行为事故应急响应：</strong>制定分级响应预案——从单一任务异常的自动回滚与复现分析，到全系统级事故的多团队联合排查与根因定位，再到对外信息披露与用户通知的标准化流程</li>
+                <li><strong>企业部署经验教训：</strong>在实际部署中总结的关键教训包括：沙箱环境与生产环境的差异会导致安全测试假阴性；用户在实际使用中会创造性地发现开发者未预料到的智能体使用方式；安全机制本身也会成为新的攻击目标</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>产业端安全实践的最大挑战来自「未知的未知」——攻击者与用户均会以设计者未曾设想的方式与智能体交互。安全建设应从一次性合规检查转向持续对抗性验证，将安全能力作为产品的持续性投入而非阶段性项目来看待。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 13. 刘岩 | 攻防失衡下的范式转变 -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:24:31 – 3:39:12</td>
+          <td>攻防失衡下的范式转变</td>
+          <td><span class="speaker">刘岩 — 奇安信</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="12271">▶ 跳至视频此处</button>
+              <p><strong>刘岩</strong> 提出在智能体攻防力量失衡加剧的背景下，安全防护需要根本性的范式转变：</p>
+              <ul>
+                <li><strong>攻防不对称性的加剧：</strong>传统网络安全中攻击者只需找到一条路径而防御者需保护全部入口的不对称格局，在智能体时代被进一步放大——智能体攻击者可利用 AI 自动化生成攻击变体，将漏洞发现与利用的效率提升数个数量级</li>
+                <li><strong>从被动防御到主动对抗：</strong>提出以 AI 对 AI 的主动防御理念——部署专门的安全智能体，持续在系统内外进行攻击面侦察、威胁狩猎和自动化漏洞修复，以机器速度对抗机器速度</li>
+                <li><strong>AI 原生安全架构：</strong>安全能力不再作为外围附加组件，而是深度嵌入智能体操作系统层——在模型推理引擎、工具调度器和记忆管理器中内置安全原语，使每个组件天然具备自防护能力</li>
+                <li><strong>安全情报共享生态：</strong>推动建立行业级威胁情报共享机制，使各厂商发现的新型攻击模式能够脱敏后快速同步，形成联合防御网络，降低单个组织独立应对智能体攻击的防御成本</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>范式转变的本质是从「筑墙」到「建免疫系统」：传统网络安全的思路是在系统外围构筑防火墙，而智能体时代的安全需要将防御能力内化为系统的自适应免疫机制——能够感知异常、快速响应并持续进化。安全防护者的智能化速度必须跑在攻击者前面。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 14. Panel 3：用智能体重构网络安全体系 -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:39:12 – 4:09:26</td>
+          <td><strong>Panel 3：用智能体重构网络安全体系</strong></td>
+          <td><span class="speaker">田天（瑞莱智慧）、刘岩（奇安信）、杜跃进（浙江大学）等</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="13152">▶ 跳至视频此处</button>
+              <p>第三场圆桌讨论从宏观视角探讨依托智能体技术革新传统网络安全架构的路径与前景：</p>
+              <ul>
+                <li><strong>自主威胁狩猎：</strong>安全智能体可 7×24 持续扫描网络流量、系统日志与用户行为，利用其对上下文的深度理解能力发现传统规则引擎难以捕捉的复合型攻击模式。相比基于签名的传统检测系统，智能体驱动的威胁狩猎在未知威胁发现率上有数量级的提升潜力</li>
+                <li><strong>自适应防御体系：</strong>在检测到攻击后，安全智能体可自主制定并执行隔离、阻断与修复策略，将响应时间从人工介入的小时级压缩至秒级。同时通过对抗学习持续优化防御策略，使防御体系在攻防博弈中不断进化</li>
+                <li><strong>智能体对抗智能体：</strong>未来网络对抗的核心形态将演变为攻防双方均依赖智能体集群——攻击方使用智能体协调多向量渗透，防御方使用智能体协同多节点联防。这一演变意味着网络安全将从人与人的对抗升级为体系与体系的对抗</li>
+                <li><strong>自防御网络的愿景：</strong>远期目标是构建具有自主感知、自主决策、自主修复能力的网络安全智能体网络，将安全运营从劳动密集型转变为智能驱动型，解决当前网络安全行业面临的严重人才缺口问题</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>圆桌共识</h4>
+                <p>用智能体重构网络安全体系不是简单的工具升级，而是安全运营模式的根本性重塑。各与会专家一致认为：安全智能体落地的最大障碍并非技术成熟度，而是组织对自动化安全决策的信任建立——如何在「机器自主处置」与「人类监督兜底」之间划定清晰的责任边界，将决定这一转型的速度与深度。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 15. 杜跃进 | 闭幕致辞 -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">4:09:26 – 4:23:00</td>
+          <td>闭幕致辞</td>
+          <td><span class="speaker">杜跃进 — 浙江大学</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="14966">▶ 跳至视频此处</button>
+              <p><strong>杜跃进</strong> 总结全天论坛成果并展望行业安全发展方向：</p>
+              <ul>
+                <li><strong>核心共识回顾：</strong>本次论坛贯穿始终的一条主线是——智能体安全是一项系统工程，需将技术防御（全栈纵深防护）、治理监管（分级分类与人类控管）与产业实践（持续对抗性验证）三条路径交叉融合，任何单一维度的努力均不足以应对智能体带来的复合性安全挑战</li>
+                <li><strong>产学研协同方向：</strong>学界应加强智能体系统安全的基础理论研究，特别是组合式安全性的数学刻画与形式化保证方法；产业界需将安全投入从合规驱动转向能力驱动，建立常态化的安全研发投入机制；政策层面应加快智能体安全分级标准的制定，为行业提供清晰的合规预期</li>
+                <li><strong>人才与生态建设：</strong>智能体安全领域面临严重的跨学科人才短缺——同时理解 AI 系统、网络安全与公共政策的复合型人才极为稀缺。呼吁高校设立交叉学科学位项目，企业与研究机构共建联合实验室以加速人才储备</li>
+                <li><strong>行动呼吁：</strong>安全社区、AI 开发者与监管机构需建立常态化的信息共享与协同响应机制，在重大安全事件发生前即完成协作网络的搭建</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>闭幕寄语</h4>
+                <p>安全不是智能体发展的对立面，而是确保智能体能够持续、大规模、被信任地服务于社会的必要条件。将安全从「成本项」转变为「竞争力」，需要整个行业共同的认知升级与行动投入。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+(function() {
+  var video = document.getElementById('forum-video');
+  var M3U8_URL = 'https://vod-2020.baai.ac.cn/record/06120834-27-be21666f48463ab441c9514746adca45/06120834-27-d9dc803f818388c4f3dcefb1e4f3c892/2026-06-13-08-20-56_2026-06-13-12-43-15.m3u8';
+  var m3u8Loaded = false;
+
+  function initPlayer(url) {
+    if (m3u8Loaded) return;
+    m3u8Loaded = true;
+
+    if (Hls.isSupported()) {
+      var hls = new Hls();
+      hls.loadSource(url);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, function() {
+        video.play().catch(function(){});
+        bindSeekButtons();
+      });
+      hls.on(Hls.Events.ERROR, function(evt, data) {
+        if (data.fatal) {
+          if (data.type === Hls.ErrorTypes.NETWORK_ERROR) { hls.startLoad(); }
+          else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) { hls.recoverMediaError(); }
+        }
+      });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = url;
+      video.addEventListener('loadedmetadata', function() {
+        video.play().catch(function(){});
+        bindSeekButtons();
+      });
+    }
+  }
+
+  // Auto-load the video
+  initPlayer(M3U8_URL);
+
+  function bindSeekButtons() {
+    document.querySelectorAll('.seek-video').forEach(function(btn) {
+      btn.onclick = function(e) {
+        e.stopPropagation();
+        var sec = parseInt(this.getAttribute('data-seek'));
+        if (video && sec >= 0) {
+          video.currentTime = sec;
+          video.play().catch(function(){});
+          video.scrollIntoView({ behavior: 'smooth' });
+        }
+      };
+    });
+  }
+
+  // Session expand/collapse
+  document.querySelectorAll('.session-row.has-detail').forEach(function(row) {
+    row.addEventListener('click', function() {
+      this.classList.toggle('open');
+      var next = this.nextElementSibling;
+      if (next && next.classList.contains('session-detail')) { next.classList.toggle('open'); }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

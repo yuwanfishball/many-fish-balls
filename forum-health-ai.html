@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026智源大会 — AI + 健康与医疗 直播回放</title>
+<style>
+  :root {
+    --primary: #1a3a5c;
+    --accent: #2857ff;
+    --bg: #f5f6f8;
+    --card-bg: #ffffff;
+    --text: #2c3e50;
+    --text-light: #5a6d80;
+    --border: #e2e6ed;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --radius: 10px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", "AR PL UKai CN", serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding-bottom: 40px;
+  }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+
+  /* ========== Header ========== */
+  .header {
+    position: relative;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: #fff;
+    padding: 32px 0;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  .header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", serif;
+  }
+  .back-link {
+    position: absolute;
+    top: 18px;
+    left: 24px;
+    color: rgba(255,255,255,.7);
+    text-decoration: none;
+    font-size: .9rem;
+    transition: color .2s;
+    z-index: 2;
+  }
+  .back-link:hover { color: #fff; }
+
+  /* ========== Video Player ========== */
+  .video-wrapper {
+    background: #000;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .video-wrapper video {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 540px;
+  }
+
+  /* ========== Card ========== */
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 0;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 16px 20px;
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--primary);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ========== Session Table ========== */
+  .schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .schedule-table thead th {
+    text-align: left;
+    font-size: .73rem;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--text-light);
+    padding: 8px 18px;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .time-slot {
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+    min-width: 100px;
+    font-size: .82rem;
+  }
+  .speaker { font-size: .82rem; color: var(--text-light); }
+
+  /* ========== Session Rows ========== */
+  .session-row { cursor: default; }
+  .session-row td { padding: 10px 18px; }
+  .session-row.has-detail {
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .session-row.has-detail:hover { background: #f5f7fa; }
+  .session-arrow {
+    text-align: center;
+    font-size: .6rem;
+    color: var(--text-light);
+    width: 36px;
+    transition: transform .25s;
+    vertical-align: middle;
+  }
+  .session-row.has-detail.open .session-arrow { transform: rotate(90deg); }
+  .session-row.no-detail .session-arrow { color: transparent; }
+  .session-detail { display: none; }
+  .session-detail.open { display: table-row; }
+  .session-detail td {
+    padding: 0 18px 16px !important;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .session-detail-content {
+    font-size: .88rem;
+    color: var(--text);
+    padding: 8px 0 8px 6px;
+  }
+  .session-detail-content p { margin-bottom: 8px; }
+  .session-detail-content ul { padding-left: 20px; margin-bottom: 8px; }
+  .session-detail-content ul li { margin-bottom: 4px; }
+
+  /* ========== Seek Button ========== */
+  .seek-video {
+    display: inline-block;
+    padding: 4px 14px;
+    margin-bottom: 8px;
+    border: 1px solid var(--accent);
+    border-radius: 99px;
+    background: #fff;
+    color: var(--accent);
+    font-size: .78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .seek-video:hover { background: var(--accent); color: #fff; }
+
+  /* ========== Highlight Box ========== */
+  .highlight-box {
+    background: #fff8e1;
+    border-left: 4px solid #f0b400;
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+  }
+  .highlight-box h4 { color: #b8860b; margin-bottom: 4px; }
+
+  /* ========== Summary Box ========== */
+  .summary-box {
+    padding: 18px 20px;
+    font-size: .88rem;
+    color: var(--text-light);
+    line-height: 1.8;
+  }
+
+  @media (max-width: 768px) {
+    .header h1 { font-size: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a class="back-link" href="index.html">← 返回</a>
+  <h1>🏥 2026智源大会 · AI + 健康与医疗</h1>
+</header>
+
+<div class="container">
+
+  <!-- 视频播放器 -->
+  <div class="video-wrapper" id="video-wrapper">
+    <div id="video-placeholder" style="background:#1a1a2e;color:#fff;padding:40px 24px;text-align:center;border-radius:10px;">
+      <p style="font-size:1.2rem;margin-bottom:8px;">🏥 AI + 健康与医疗 · 直播回放</p>
+      <p style="font-size:.82rem;color:#aaa;margin-bottom:20px;">视频将自动加载；如无法播放，可按以下步骤获取视频地址：</p>
+
+      <div style="display:inline-block;text-align:left;background:#111;border-radius:8px;padding:16px 24px;margin-bottom:16px;">
+        <p style="margin-bottom:8px;"><strong>步骤 1：</strong>打开 <a href="https://event.baai.ac.cn/live/1024" target="_blank" style="color:#5b9eff;">BAAI 直播回放页</a></p>
+        <p style="margin-bottom:8px;"><strong>步骤 2：</strong>按 <kbd style="background:#333;padding:1px 6px;border-radius:3px;">F12</kbd> → <kbd style="background:#333;padding:1px 6px;border-radius:3px;">Console</kbd>，粘贴以下代码并回车：</p>
+        <textarea readonly onclick="this.select();document.execCommand('copy')" style="width:560px;height:36px;padding:8px;background:#0d1117;color:#58a6ff;border:1px solid #30363d;border-radius:4px;font-family:Consolas,monospace;font-size:.72rem;resize:none;cursor:pointer;display:block;margin:4px 0;">(async()=>{try{let r=await(await fetch('/api/api/playinfo?activityId=1024',{credentials:'include',headers:{accept:'application/json'}})).json();let u=r.data?.playInfo?.play_url;if(u){await navigator.clipboard.writeText(u);document.body.innerHTML='&lt;div style=text-align:center;padding:60px;font-size:1.3rem&gt;&lt;p&gt;✅ m3u8 已复制到剪贴板！&lt;/p&gt;&lt;textarea style=width:90%;height:100px;margin:12px 0;font-size:.7rem&gt;'+u+'&lt;/textarea&gt;&lt;p style=font-size:.85rem;color:#666&gt;切回本页面 → 粘贴到输入框 → 点击加载视频&lt;/p&gt;&lt;/div&gt;'}else{document.body.innerHTML='&lt;div style=text-align:center;padding:60px&gt;&lt;p&gt;❌ 获取失败，请确认已登录 BAAI&lt;/p&gt;&lt;/div&gt;'}}catch(e){document.body.innerHTML='&lt;div style=text-align:center;padding:60px&gt;&lt;p&gt;❌ 错误: '+e.message+'&lt;/p&gt;&lt;/div&gt;'}})()</textarea>
+        <p style="font-size:.7rem;color:#666;">👆 点击代码框自动复制</p>
+      </div>
+
+      <div style="border-top:1px solid #333;padding-top:16px;margin-top:4px;">
+        <p style="margin-bottom:6px;"><strong>步骤 3：</strong>回到本页，粘贴 m3u8 地址并加载：</p>
+        <input id="m3u8-input" type="text" placeholder="Ctrl+V 粘贴 .m3u8 地址..."
+               style="width:100%;max-width:500px;padding:10px;border-radius:6px;border:1px solid #555;background:#222;color:#fff;font-size:.85rem;">
+        <button onclick="loadVideo()" style="display:block;margin:10px auto 0;padding:10px 40px;background:#2857ff;color:#fff;border:none;border-radius:6px;font-size:.95rem;cursor:pointer;font-weight:700;">▶ 加载视频</button>
+      </div>
+    </div>
+    <video id="forum-video" controls preload="metadata" crossorigin="anonymous" playsinline
+           style="display:none;width:100%;height:auto;max-height:540px;"></video>
+  </div>
+
+  <!-- 论坛简介 -->
+  <div class="card">
+    <div class="card-header">📖 论坛简介</div>
+    <div class="summary-box">
+      <p>本论坛聚焦<strong>人工智能与医疗健康深度融合</strong>的前沿探索与产业实践，涵盖从基础研究到临床落地的全链条议题。来自全球顶尖医疗机构、高校及企业的专家学者围绕 AI 辅助诊断、医疗大模型、数字孪生、生物医学世界模型等方向展开深度交流。</p>
+      <p style="margin-top:10px">论坛期间举行了<strong>智源研究院与首都医科大学附属北京安贞医院战略合作签署仪式</strong>，标志着中国顶尖 AI 研究机构与顶级心血管专科医院在心血管疾病 AI 方向进入深度协同阶段，打通"数据—模型—临床"闭环，为规模化落地奠定基础。</p>
+      <p style="margin-top:10px;font-size:.8rem;color:#999;">🕐 2026年6月12日 12:50–18:33 · 视频时长约 6 小时 40 分钟 · 线上同步直播</p>
+    </div>
+  </div>
+
+  <!-- 日程详情 -->
+  <div class="card">
+    <div class="card-header">📋 议程详情（点击展开）</div>
+    <table class="schedule-table">
+      <thead><tr><th style="width:36px"></th><th>时间</th><th>环节 / 主题</th><th>嘉宾 / 讲者</th></tr></thead>
+      <tbody>
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">0:00 – 5:00</td>
+          <td>开幕致辞</td>
+          <td><span class="speaker">论坛主席</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="0">▶ 跳至视频此处</button>
+              <p>论坛主席致辞，阐述 AI + 健康与医疗论坛的宗旨：推动人工智能技术从实验室走向临床实践，构建产学研医协同创新生态，加速智慧医疗的普惠化进程。</p>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">5:00 – 30:00</td>
+          <td>全球医疗健康领域人工智能发展趋势</td>
+          <td><span class="speaker">特邀讲者</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="300">▶ 跳至视频此处</button>
+              <p>从全球视角审视 AI 在医疗健康领域的发展态势：</p>
+              <ul>
+                <li><strong>国际政策对比：</strong>美国 FDA 已批准 900+ AI/ML 医疗设备，中国 NMPA 审批加速，欧盟 AI Act 对医疗 AI 的分级监管</li>
+                <li><strong>技术热点迁移：</strong>从医学影像 AI → 多模态大模型 → Agentic AI 辅助临床决策</li>
+                <li><strong>市场规模：</strong>全球医疗 AI 市场预计 2030 年突破 2000 亿美元</li>
+                <li><strong>关键挑战：</strong>数据隐私与联邦学习、模型可解释性、临床验证周期、医保支付体系</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>趋势判断</h4>
+                <p>医疗 AI 正从"辅助工具"向"临床伙伴"演进，多模态基础模型将成为下一代智慧医疗的核心基础设施。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">30:00 – 50:00</td>
+          <td>心血管专病高质量数据集构建及人工智能模型产品研发</td>
+          <td><span class="speaker">特邀讲者</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="1800">▶ 跳至视频此处</button>
+              <p>围绕心血管专病数据体系建设与 AI 模型研发：</p>
+              <ul>
+                <li>高质量标注数据集是心血管 AI 落地的核心瓶颈——数据标准化、多中心协作、质控体系</li>
+                <li>从影像（CTA、MRI、超声）到结构化报告的端到端 AI 产品管线</li>
+                <li>覆盖冠心病、心力衰竭、心律失常等主要心血管疾病的 AI 辅助诊断模型</li>
+                <li>临床验证与 NMPA 三类证申请经验</li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">50:00 – 1:10:00</td>
+          <td>影像引导无创治疗进展</td>
+          <td><span class="speaker">特邀讲者</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="3000">▶ 跳至视频此处</button>
+              <p>影像引导下的无创/微创治疗技术前沿：</p>
+              <ul>
+                <li>AI 实时影像导航在介入手术中的应用——精准定位、智能路径规划</li>
+                <li>聚焦超声（FUS）、放射治疗中的 AI 靶区勾画</li>
+                <li>术中影像融合与增强现实（AR）引导</li>
+                <li>机器人辅助手术的智能化升级</li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:10:00 – 1:30:00</td>
+          <td>植入式左心室辅助装置引发左心血栓风险的流固耦合模拟研究</td>
+          <td><span class="speaker">特邀讲者</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="4200">▶ 跳至视频此处</button>
+              <p>计算流体力学驱动的医疗器械安全性评估：</p>
+              <ul>
+                <li>LVAD 植入后左心室流场变化的流固耦合（FSI）数值模拟</li>
+                <li>血栓形成风险的血流动力学评估指标——切应力、滞留时间、涡度</li>
+                <li>AI 加速计算流体力学仿真——从数小时到分钟级</li>
+                <li>个性化手术规划：基于患者 CT 数据构建数字孪生，预测术后并发症</li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:30:00 – 1:50:00</td>
+          <td>人工智能在冠心病领域中的应用前景与发展规划</td>
+          <td><span class="speaker">特邀讲者</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="5400">▶ 跳至视频此处</button>
+              <p>冠心病全周期管理中的 AI 应用全景：</p>
+              <ul>
+                <li><strong>早期筛查：</strong>基于 ECG、可穿戴设备数据的 AI 冠心病风险预测</li>
+                <li><strong>精准诊断：</strong>冠脉 CTA 的 AI 自动斑块分析、FFR-CT 无创功能学评估</li>
+                <li><strong>治疗决策：</strong>AI 辅助 PCI 手术规划与预后预测</li>
+                <li><strong>慢病管理：</strong>院外 AI 随访系统与个性化用药推荐</li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:50:00 – 2:10:00</td>
+          <td>可循证溯源的医疗智能体开发与应用实践</td>
+          <td><span class="speaker">特邀讲者</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="6600">▶ 跳至视频此处</button>
+              <p>循证医学理念驱动的医疗 AI 智能体设计：</p>
+              <ul>
+                <li><strong>循证溯源：</strong>每个临床建议必须链接到具体证据来源（论文、指南、病例），而非黑箱输出</li>
+                <li><strong>多 Agent 协作架构：</strong>诊断 Agent + 用药 Agent + 风险预警 Agent 的协同决策</li>
+                <li><strong>临床工作流嵌入：</strong>智能体如何无缝融入电子病历（EMR）系统和医生工作站</li>
+                <li>真实临床场景测试：准确率、召回率与医生接受度的平衡</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>关键洞察</h4>
+                <p>医疗智能体区别于通用 chatbot 的核心在于"可溯源"——没有证据支持的建议在临床上是不可接受的。这是从"AI 能回答"到"AI 能负责"的质变。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:10:00 – 2:35:00</td>
+          <td>医疗大模型技术进展及行业探索应用</td>
+          <td><span class="speaker">特邀讲者</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="7800">▶ 跳至视频此处</button>
+              <p>医疗领域大模型的最新进展与产业落地：</p>
+              <ul>
+                <li><strong>领域特化策略：</strong>通用基座 + 医疗继续预训练 + 指令微调 + RLHF 的多阶段适配</li>
+                <li><strong>多模态融合：</strong>文本（病历）+ 影像（CT/MRI）+ 信号（ECG/EEG）+ 基因组学的统一建模</li>
+                <li><strong>评测体系：</strong>超越 USMLE 刷分——建立贴近真实临床场景的中文医疗 LLM 评测基准</li>
+                <li><strong>落地场景：</strong>智能分诊、病历质控、辅助诊断、患者教育、药物研发</li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:35:00 – 2:55:00</td>
+          <td>AI 赋能高质量临床科研实践：北大医院探索之路</td>
+          <td><span class="speaker">北大医院</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="9300">▶ 跳至视频此处</button>
+              <p>北京大学第一医院在 AI 驱动临床科研中的系统实践：</p>
+              <ul>
+                <li><strong>临床数据治理：</strong>从异构 EMR 数据到研究可用数据集的全流程——脱敏、结构化、标准化</li>
+                <li><strong>AI 辅助研究设计：</strong>文献综述自动化、研究假设生成、样本量估算</li>
+                <li><strong>真实世界研究（RWS）：</strong>利用 AI 从海量临床数据中挖掘治疗模式和结局关联</li>
+                <li><strong>标杆案例：</strong>某疾病领域的 AI 驱动多中心回顾性研究——从数据到论文的全周期</li>
+                <li>临床医生 + AI 工程师协作模式的探索与经验</li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:55:00 – 3:20:00</td>
+          <td>从生理信号大模型到 AI 家庭医生</td>
+          <td><span class="speaker">特邀讲者</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="10500">▶ 跳至视频此处</button>
+              <p>以生理信号为基础的大模型如何赋能家庭健康管理：</p>
+              <ul>
+                <li><strong>生理信号大模型：</strong>在海量 ECG、PPG、EEG、呼吸等信号数据上预训练的基础模型</li>
+                <li><strong>从"疾病诊断"到"健康管理"：</strong>持续监测 → 风险预警 → 早期干预的闭环</li>
+                <li><strong>可穿戴设备融合：</strong>智能手表、心电贴、睡眠监测仪等多源信号融合</li>
+                <li><strong>AI 家庭医生愿景：</strong>7×24 小时的健康守护，降低慢病管理成本，缓解医疗资源不均</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>未来图景</h4>
+                <p>当每个人的生理信号都能被实时解读，医疗服务将从"生病后就医"转变为"持续健康管理"，AI 家庭医生将成为每个人触手可及的健康守门人。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:20:00 – 3:40:00</td>
+          <td>基于多模态、多组学数据融合的复杂疾病智能诊断与归因分析</td>
+          <td><span class="speaker">特邀讲者</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="12000">▶ 跳至视频此处</button>
+              <p>多模态 + 多组学融合驱动的精准诊断范式：</p>
+              <ul>
+                <li><strong>数据维度：</strong>影像组学 + 基因组学 + 蛋白质组学 + 代谢组学 + 电子病历文本的联合建模</li>
+                <li><strong>融合策略：</strong>早期融合、晚期融合、注意力交叉融合——不同场景的最优架构</li>
+                <li><strong>因果发现：</strong>从相关到因果——利用因果推断方法识别疾病的关键驱动因素</li>
+                <li><strong>应用案例：</strong>肿瘤分子分型、罕见病诊断、复杂慢病亚型发现</li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:40:00 – 4:00:00</td>
+          <td>面向长寿医学的可驾驭生物医学世界模型——SteeraMed 框架</td>
+          <td><span class="speaker">特邀讲者</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="13200">▶ 跳至视频此处</button>
+              <p>面向长寿医学（Longevity Medicine）的生物医学世界模型：</p>
+              <ul>
+                <li><strong>SteeraMed 框架：</strong>一个可"驾驭"的生物医学世界模型——支持可控生成和反事实推理</li>
+                <li><strong>衰老建模：</strong>在分子、细胞、组织、器官、个体多层次上模拟衰老过程</li>
+                <li><strong>干预模拟：</strong>在数字世界中测试药物、生活方式、基因编辑等干预措施对健康寿命的影响</li>
+                <li><strong>从模型到临床：</strong>个性化衰老轨迹预测与干预方案优化</li>
+                <li>闭环验证：模型预测 → 湿实验 → 模型迭代</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>愿景</h4>
+                <p>构建一个足够精确的人体数字孪生，使得大部分长寿干预策略可以先在虚拟世界中被验证，大幅缩短从基础研究到临床应用的周期。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">4:00:00 – 4:20:00</td>
+          <td>灾难性继承：从基础规模预训练数据偏差到下游性能退化</td>
+          <td><span class="speaker">特邀讲者</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="14400">▶ 跳至视频此处</button>
+              <p>医疗 AI 中的数据偏差与泛化问题深度剖析：</p>
+              <ul>
+                <li><strong>"灾难性继承"假说：</strong>基础模型预训练阶段的数据偏差会逐层传导，在下游医疗任务中被放大</li>
+                <li><strong>偏差类型：</strong>人群偏差（年龄/性别/种族）、设备偏差（不同医院影像设备差异）、标注偏差</li>
+                <li><strong>检测方法：</strong>分布偏移检测、模型行为审计、亚组性能评估</li>
+                <li><strong>缓解策略：</strong>数据平衡、分布鲁棒优化、反事实数据增强、公平性约束训练</li>
+                <li>对医疗 AI 监管的启示：需要建立模型偏差的持续监测和报告机制</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>警示</h4>
+                <p>"灾难性继承"提醒我们：医疗 AI 的安全性不仅仅是模型准确率的问题，更关乎模型在不同人群中的公平性与泛化能力。一个在总体指标上表现优秀的模型，可能对特定亚群造成系统性伤害。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">4:20:00 – 4:35:00</td>
+          <td>🏥 战略合作签署：智源研究院 × 北京安贞医院</td>
+          <td><span class="speaker">智源研究院、北京安贞医院</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="15600">▶ 跳至视频此处</button>
+              <p><strong>智源研究院与北京安贞医院战略合作签署仪式</strong></p>
+              <p>中国顶尖 AI 研究机构与顶级心血管专科医院的强强联合：</p>
+              <ul>
+                <li><strong>合作方向：</strong>心血管专病 AI 模型研发、高质量临床数据集共建、AI 辅助诊疗系统临床验证</li>
+                <li><strong>安贞医院优势：</strong>全国心血管疾病诊疗中心，年手术量全国领先，积累海量高质量临床数据</li>
+                <li><strong>智源优势：</strong>大模型技术栈、开源生态、世界模型等前沿 AI 能力</li>
+                <li><strong>目标：</strong>打造心血管 AI 领域的标杆产品和临床标准</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>战略意义</h4>
+                <p>此次合作是中国 AI+医疗领域"产研医"深度融合的标志性事件。顶级 AI 研究机构与顶级临床医院之间打通"数据—模型—临床"闭环，将为心血管疾病 AI 的规模化落地奠定基础。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">4:35:00 – 4:55:00</td>
+          <td>医疗仿真关键技术研究进展及应用</td>
+          <td><span class="speaker">特邀讲者</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="16500">▶ 跳至视频此处</button>
+              <p>医疗仿真技术的最新突破与临床转化：</p>
+              <ul>
+                <li><strong>物理仿真引擎：</strong>基于有限元/无网格法的生物力学仿真——从骨骼到软组织的精确建模</li>
+                <li><strong>AI 加速仿真：</strong>物理信息神经网络（PINN）、算子学习（Neural Operator）将计算时间从小时压缩到秒级</li>
+                <li><strong>手术仿真训练：</strong>高保真 VR/AR 手术模拟器——年轻医生技能培训的新范式</li>
+                <li><strong>个性化手术规划：</strong>基于患者影像的手术方案预演与风险评估</li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">4:55:00 – 5:15:00</td>
+          <td>面向分娩安全的母胎数字孪生技术</td>
+          <td><span class="speaker">特邀讲者</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="17700">▶ 跳至视频此处</button>
+              <p>数字孪生技术在产科安全中的创新应用：</p>
+              <ul>
+                <li><strong>母胎数字孪生：</strong>基于孕期影像和生理数据构建母体-胎儿联合计算模型</li>
+                <li><strong>产程预测：</strong>模拟分娩过程中的生物力学变化——产道、胎位、宫缩力的动态交互</li>
+                <li><strong>风险预警：</strong>提前识别难产、胎儿窘迫、产后出血等高风险场景</li>
+                <li><strong>临床决策支持：</strong>为剖宫产指征判断提供定量依据，降低不必要的手术率</li>
+                <li>从"经验医学"到"精准产科"的范式升级</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>社会价值</h4>
+                <p>母胎数字孪生直击产科安全的核心痛点——让每一次分娩都在数字世界中"预演"过，将母婴安全从被动应对变为主动规划。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">5:15:00 – 5:35:00</td>
+          <td>用自适应"词元"解读基因语言</td>
+          <td><span class="speaker">特邀讲者</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="18900">▶ 跳至视频此处</button>
+              <p>基因组学与自然语言处理的深度交叉创新：</p>
+              <ul>
+                <li><strong>"基因即语言" 范式：</strong>将 DNA/RNA 序列视为一种"自然语言"——基因大模型的 tokenization 策略</li>
+                <li><strong>自适应分词：</strong>不同于固定 k-mer，动态学习基因序列的最优"词汇"边界——外显子、调控元件、结构域</li>
+                <li><strong>跨物种泛化：</strong>在人类基因组上训练的模型能否理解其他物种的基因语言？</li>
+                <li><strong>应用场景：</strong>变异致病性预测、非编码区功能注释、合成生物学元件设计</li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">5:35:00 – 5:55:00</td>
+          <td>可解释 AI 驱动的房颤智能筛查</td>
+          <td><span class="speaker">特邀讲者</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="20100">▶ 跳至视频此处</button>
+              <p>可解释 AI 在心房颤动筛查中的突破性应用：</p>
+              <ul>
+                <li><strong>临床痛点：</strong>房颤（AF）常为阵发性，常规体检难以捕获，漏诊率高达 30%+</li>
+                <li><strong>AI 方案：</strong>基于静息 ECG 的深度学习模型——在正常窦性心律心电图中检测房颤的"隐形指纹"</li>
+                <li><strong>可解释性设计：</strong>Grad-CAM 可视化高亮对预测起关键作用的心电图波段，让医生"看见"模型的判断依据</li>
+                <li><strong>临床验证：</strong>大规模前瞻性研究结果——模型预测阳性者后续确诊房颤的风险提升 N 倍</li>
+                <li><strong>落地路径：</strong>从体检中心常规 ECG 筛查到可穿戴设备长期监测的多场景覆盖</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>突破意义</h4>
+                <p>可解释 AI 是医疗 AI 获得临床信任的关键。当模型不仅能给出预测，还能"解释"自己的判断，医生才会真正将其作为决策伙伴。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">5:55:00 – 6:15:00</td>
+          <td>从真三维可视化到智能医疗数字人</td>
+          <td><span class="speaker">特邀讲者</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="21300">▶ 跳至视频此处</button>
+              <p>医学可视化与数字人技术的融合演进：</p>
+              <ul>
+                <li><strong>真三维可视化：</strong>裸眼 3D、全息显示技术在医学影像中的应用——从二维屏幕到三维空间</li>
+                <li><strong>智能医疗数字人：</strong>高精度人体解剖模型 + AI 驱动生理仿真 + 自然语言交互</li>
+                <li><strong>应用场景：</strong>医学教育（解剖教学）、手术规划（器官级交互操作）、医患沟通（可视化病情解释）</li>
+                <li><strong>技术栈：</strong>神经辐射场（NeRF）/ 3D Gaussian Splatting 在医学影像重建中的最新进展</li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">6:15:00 – 6:40:00</td>
+          <td>闭幕致辞</td>
+          <td><span class="speaker">论坛主席</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="22500">▶ 跳至视频此处</button>
+              <p>论坛主席总结致辞：</p>
+              <ul>
+                <li>回顾论坛核心成果与亮点——战略合作签署、关键技术突破、产业落地案例</li>
+                <li>AI + 医疗健康的下一步：从单点技术突破到系统级临床解决方案</li>
+                <li>开放协作倡议：数据共享、模型开源、临床验证标准化</li>
+                <li>展望 2027：让更多 AI 医疗创新从实验室走向患者床边</li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+(function() {
+  var video = document.getElementById('forum-video');
+  var placeholder = document.getElementById('video-placeholder');
+  var input = document.getElementById('m3u8-input');
+  var m3u8Url = null;
+  var startOffset = 0;
+
+  // 默认视频地址
+  var defaultSrc = 'https://vod-2020.baai.ac.cn/record/06110746-16-769b5399016b248ae4bc65ee5cee1b57/06110746-16-4dfb0adf2662023c2e12fbf15054b8e0/2026-06-12-12-50-33_2026-06-12-18-33-23.m3u8';
+
+  function initPlayer(url) {
+    m3u8Url = url;
+    placeholder.style.display = 'none';
+    video.style.display = 'block';
+
+    if (Hls.isSupported()) {
+      var hls = new Hls({ startPosition: startOffset });
+      hls.loadSource(url);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, function() {
+        video.currentTime = startOffset;
+        video.play().catch(function(){});
+        bindSeekButtons();
+      });
+      hls.on(Hls.Events.ERROR, function(evt, data) {
+        if (data.fatal) {
+          if (data.type === Hls.ErrorTypes.NETWORK_ERROR) { hls.startLoad(); }
+          else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) { hls.recoverMediaError(); }
+        }
+      });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = url + '#t=' + startOffset;
+      video.addEventListener('loadedmetadata', function() {
+        video.play().catch(function(){});
+        bindSeekButtons();
+      });
+    }
+
+    try { localStorage.setItem('forum_health_ai_m3u8', url); } catch(e) {}
+  }
+
+  window.loadVideo = function(u) {
+    var url = u || input.value.trim();
+    if (!url) { alert('请先粘贴 m3u8 地址'); return; }
+    initPlayer(url);
+  };
+
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { loadVideo(); }
+  });
+
+  // Check URL params
+  var m = location.search.match(/[?&]m3u8=([^&]+)/);
+  if (m) { var u = decodeURIComponent(m[1]); input.value = u; initPlayer(u); }
+  else {
+    try {
+      var saved = localStorage.getItem('forum_health_ai_m3u8');
+      if (saved) { input.value = saved; initPlayer(saved); }
+      else { initPlayer(defaultSrc); }
+    } catch(e) { initPlayer(defaultSrc); }
+  }
+
+  function bindSeekButtons() {
+    document.querySelectorAll('.seek-video').forEach(function(btn) {
+      btn.onclick = function(e) {
+        e.stopPropagation();
+        var sec = parseInt(this.getAttribute('data-seek'));
+        if (video && sec >= 0) {
+          video.currentTime = sec;
+          video.play().catch(function(){});
+          video.scrollIntoView({ behavior: 'smooth' });
+        }
+      };
+    });
+  }
+
+  document.querySelectorAll('.seek-video').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      if (!m3u8Url) {
+        e.stopPropagation();
+        var sec = parseInt(this.getAttribute('data-seek'));
+        alert('请先获取视频链接！\n\n时间戳: ' + (sec ? new Date(sec*1000).toISOString().substr(11,8) : '--'));
+      }
+    });
+  });
+
+  // Session expand/collapse
+  document.querySelectorAll('.session-row.has-detail').forEach(function(row) {
+    row.addEventListener('click', function() {
+      this.classList.toggle('open');
+      var next = this.nextElementSibling;
+      if (next && next.classList.contains('session-detail')) { next.classList.toggle('open'); }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

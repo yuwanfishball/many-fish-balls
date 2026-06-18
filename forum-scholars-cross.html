@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026智源大会 — 智源学者论坛：AI 前沿交叉融合专场 直播回放</title>
+<style>
+  :root {
+    --primary: #1a3a5c;
+    --accent: #2857ff;
+    --bg: #f5f6f8;
+    --card-bg: #ffffff;
+    --text: #2c3e50;
+    --text-light: #5a6d80;
+    --border: #e2e6ed;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --radius: 10px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", "AR PL UKai CN", serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding-bottom: 40px;
+  }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+
+  /* ========== Header ========== */
+  .header {
+    position: relative;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: #fff;
+    padding: 32px 0;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  .header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", serif;
+  }
+  .back-link {
+    position: absolute;
+    top: 18px;
+    left: 24px;
+    color: rgba(255,255,255,.7);
+    text-decoration: none;
+    font-size: .9rem;
+    transition: color .2s;
+    z-index: 2;
+  }
+  .back-link:hover { color: #fff; }
+
+  /* ========== Video Player ========== */
+  .video-wrapper {
+    background: #000;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .video-wrapper video {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 540px;
+  }
+
+  /* ========== Card ========== */
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 0;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 16px 20px;
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--primary);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ========== Session Table ========== */
+  .schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .schedule-table thead th {
+    text-align: left;
+    font-size: .73rem;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--text-light);
+    padding: 8px 18px;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .time-slot {
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+    min-width: 100px;
+    font-size: .82rem;
+  }
+  .speaker { font-size: .82rem; color: var(--text-light); }
+
+  /* ========== Session Rows ========== */
+  .session-row { cursor: default; }
+  .session-row td { padding: 10px 18px; }
+  .session-row.has-detail {
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .session-row.has-detail:hover { background: #f5f7fa; }
+  .session-arrow {
+    text-align: center;
+    font-size: .6rem;
+    color: var(--text-light);
+    width: 36px;
+    transition: transform .25s;
+    vertical-align: middle;
+  }
+  .session-row.has-detail.open .session-arrow { transform: rotate(90deg); }
+  .session-row.no-detail .session-arrow { color: transparent; }
+  .session-detail { display: none; }
+  .session-detail.open { display: table-row; }
+  .session-detail td {
+    padding: 0 18px 16px !important;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .session-detail-content {
+    font-size: .88rem;
+    color: var(--text);
+    padding: 8px 0 8px 6px;
+  }
+  .session-detail-content p { margin-bottom: 8px; }
+  .session-detail-content ul { padding-left: 20px; margin-bottom: 8px; }
+  .session-detail-content ul li { margin-bottom: 4px; }
+
+  /* ========== Seek Button ========== */
+  .seek-video {
+    display: inline-block;
+    padding: 4px 14px;
+    margin-bottom: 8px;
+    border: 1px solid var(--accent);
+    border-radius: 99px;
+    background: #fff;
+    color: var(--accent);
+    font-size: .78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .seek-video:hover { background: var(--accent); color: #fff; }
+
+  /* ========== Highlight Box ========== */
+  .highlight-box {
+    background: #fff8e1;
+    border-left: 4px solid #f0b400;
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+  }
+  .highlight-box h4 { color: #b8860b; margin-bottom: 4px; }
+
+  /* ========== Summary Box ========== */
+  .summary-box {
+    padding: 18px 20px;
+    font-size: .88rem;
+    color: var(--text-light);
+    line-height: 1.8;
+  }
+
+  @media (max-width: 768px) {
+    .header h1 { font-size: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a class="back-link" href="index.html">← 返回</a>
+  <h1>🎬 2026智源大会 · 智源学者论坛 — AI 前沿交叉融合专场</h1>
+</header>
+
+<div class="container">
+
+  <!-- 视频播放器 -->
+  <div class="video-wrapper" id="video-wrapper">
+    <video id="forum-video" controls preload="metadata" crossorigin="anonymous" playsinline
+           style="display:block;width:100%;height:auto;max-height:540px;"></video>
+  </div>
+
+  <!-- 论坛简介 -->
+  <div class="card">
+    <div class="card-header">📖 论坛简介</div>
+    <div class="summary-box">
+      <p>原始创新往往诞生于学科交叉的前沿地带。本论坛由北京市人才工作局指导、世界青年科学家联合会支持，集结了具身智能、低空无人机、类脑视觉、空间智能、多智能体协同、AI安全等多元领域的智源学者与青年科学家，以<strong>交叉融合</strong>为主线，探索AI前沿突破的跨界路径。论坛设计的核心理念是将看似独立的学科方向进行系统化交叉——具身与类脑、空间智能与多智能体、人因工程与AI安全——在学科交汇处寻找新的技术生长点。</p>
+      <p style="margin-top:10px">论坛由<strong>张涛</strong>（清华大学具身智能与机器人研究院院长、自动化系主任）担任主席，讲者阵容涵盖清华大学、北京大学、河南理工大学、荷兰马斯特里赫特大学等国内外高校的顶尖学者。圆桌讨论由<strong>姬十三</strong>（果壳创始人兼CEO）主持，邀请学界与产业界嘉宾共同探讨交叉融合中的原始创新方法论。</p>
+      <p style="margin-top:10px;font-size:.8rem;color:#999;">🕐 2026年6月12日 13:30–17:30 · 视频时长约 5 小时 · 📍 G01 会议室 · 线上同步直播</p>
+    </div>
+  </div>
+
+  <!-- 议程详情 -->
+  <div class="card">
+    <div class="card-header">📋 议程详情（点击展开）</div>
+    <table class="schedule-table">
+      <thead><tr><th style="width:36px"></th><th>时间</th><th>环节 / 主题</th><th>嘉宾 / 讲者</th></tr></thead>
+      <tbody>
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">43:00 – 53:00</td>
+          <td>开场致辞</td>
+          <td><span class="speaker">张涛 — 清华大学具身智能与机器人研究院院长</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="2580">▶ 跳至视频此处</button>
+              <p><strong>张涛</strong> 致开场辞，阐述了论坛设立的学术逻辑：AI领域的重大突破往往不是单一学科纵深推进的结果，而是多学科交叉碰撞的产物。当前，具身智能需要机器人学与认知科学的融合，低空无人机需要通信、导航、遥感的多维集成，AI安全需要人因工程与系统设计的交叉——单一学科视角已难以覆盖这些复杂问题的全貌。论坛通过集结多领域的智源学者，以结构化的交叉对话机制推动学科边界的实质性突破。</p>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">53:00 – 1:23:00</td>
+          <td>关于具身智能与机器人技术发展思考</td>
+          <td><span class="speaker">张涛 — 清华大学具身智能与机器人研究院院长、自动化系主任</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="3180">▶ 跳至视频此处</button>
+              <p><strong>张涛</strong> 从机器人学科三十年的发展脉络出发，系统梳理了具身智能对传统机器人技术框架的重塑效应：</p>
+              <ul>
+                <li><strong>从预编程到自主学习：</strong>传统机器人依赖精确的动力学建模和人工编程，泛化能力受限于建模精度。具身智能通过强化学习与大模型驱动，使机器人在非结构化环境中具备了实时感知、自主决策和技能泛化的能力</li>
+                <li><strong>感知—决策—执行的一体化融合：</strong>具身智能打破了传统机器人"感知→规划→控制"的串行架构，通过端到端的神经网络将三个环节耦合为统一的优化问题，在复杂操作任务中实现了显著的性能提升</li>
+                <li><strong>数据瓶颈与突破路径：</strong>具身智能的训练数据获取成本远高于语言或视觉任务，仿真环境的逼真度决定了Sim-to-Real迁移的成功率。当前主流策略是仿真数据为主、真实数据为辅的混合训练范式</li>
+                <li><strong>清华具身智能研究院的布局：</strong>围绕操作、移动、人机协作三条技术主线，构建从基础理论到产业应用的全链条研究体系，重点攻关灵巧操作、动态导航和多机器人协同三个核心方向</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>具身智能的本质不是让机器人的关节更灵活，而是让机器人真正理解物理世界的因果规律。当机器人能够通过交互自主构建对重力、摩擦、遮挡等物理现象的隐性认知，才是具身智能从实验室走向真实场景的临界点。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:23:00 – 1:53:00</td>
+          <td>低空智能无人机：通导遥研一体化融合与应用前景</td>
+          <td><span class="speaker">金双根 — 河南理工大学副校长</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="4980">▶ 跳至视频此处</button>
+              <p><strong>金双根</strong> 从通信、导航、遥感三大技术系统的融合视角，阐述了低空智能无人机的技术架构与规模化应用前景：</p>
+              <ul>
+                <li><strong>通导遥一体化的技术内涵：</strong>通信（实时数据链路与协同控制）、导航（高精度定位与自主避障）、遥感（多模态环境感知与目标识别）三者不再是独立的功能模块，而是在统一的AI计算平台上实现数据级融合与联合优化</li>
+                <li><strong>低空经济的场景分类：</strong>将低空无人机应用划分为物流配送、农业植保、电力巡检、应急救援和城市治理五大核心场景，各场景对通信带宽、导航精度和遥感分辨率的侧重有所不同</li>
+                <li><strong>AI驱动的自主飞行决策：</strong>在密集的城市低空环境中，无人机需在毫秒级时间窗内完成多机避碰、航线重规划和异常状态应对的联合决策，传统基于规则的飞行管理系统已无法满足需求</li>
+                <li><strong>规模化部署的系统性挑战：</strong>低空空域的数字化管理、频谱资源的动态分配、以及大规模异构无人机的协同调度，需要从基础设施层进行全局设计，而非在单机层面逐个解决</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>低空智能无人机的竞争焦点正在从"单机性能"转向"系统智能"。通导遥一体化不是简单的功能叠加，而是通过AI将三个技术维度融合为统一的感知—决策—执行闭环。规模化低空经济的关键瓶颈不在飞行器本身，而在空域数字化的基础设施能力。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:53:00 – 2:23:00</td>
+          <td>小数据可信模型：堆叠集成世界模型与可信机器学习安全边界</td>
+          <td><span class="speaker">Silviu Acaru — 荷兰马斯特里赫特大学 DigiLignin 项目数据科学贡献者</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="6780">▶ 跳至视频此处</button>
+              <p><strong>Silviu Acaru</strong> 从数据效率与安全可信的双重维度，介绍了小数据场景下的可信机器学习方法：</p>
+              <ul>
+                <li><strong>小数据场景的核心矛盾：</strong>在医疗诊断、工业故障检测、稀有事件预测等数据稀缺场景中，深度学习的大数据依赖性与现实数据供给不足之间存在结构性冲突，直接套用大数据范式会导致严重的过拟合和可信度不足</li>
+                <li><strong>堆叠集成世界模型的原理：</strong>通过构建多个独立世界模型的层级化集成，在不同抽象层次上共享先验知识，使模型在小数据条件下依然能够学习到稳健的特征表征。其核心思想是将"数据稀缺"问题部分转化为"结构先验"问题</li>
+                <li><strong>可信机器学习的安全边界定义：</strong>在小数据场景中，模型的不确定性量化尤为关键。通过对预测置信度的精细校准和分布外样本的有效检测，界定模型安全运行的输入空间边界</li>
+                <li><strong>DigiLignin 项目的实践验证：</strong>在木质素分子结构预测这一典型小数据场景中，堆叠集成方法在仅有数百个训练样本的条件下，实现了与大数据方法相当甚至更优的预测精度，且不确定性估计更为可靠</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>大数据范式的成功掩盖了其在数据稀缺场景中的脆弱性。小数据可信模型的核心策略是将"从数据中学习"与"从结构先验中推理"相结合——当数据不够时，模型的归纳偏置必须承担更多的学习引导责任。这不仅是技术参数调整，更是对机器学习方法论的重新审视。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:23:00 – 2:53:00</td>
+          <td>基于类脑视觉传感器的计算摄像（类脑 + 具身）</td>
+          <td><span class="speaker">施柏鑫 — 智源学者、北京大学计算机学院长聘副教授</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="8580">▶ 跳至视频此处</button>
+              <p><strong>施柏鑫</strong> 展示了类脑视觉传感器与传统计算摄像交叉融合的前沿成果，这一方向恰好位于类脑与具身的交叉点上：</p>
+              <ul>
+                <li><strong>类脑视觉传感器的独特优势：</strong>基于事件驱动机制的视觉传感器模仿了生物视网膜的信息编码方式，仅在像素亮度变化时输出信号，天然具备高时间分辨率（微秒级）、高动态范围（>120dB）和低数据冗余三个传统相机难以同时达到的特性</li>
+                <li><strong>计算摄像的方法论演进：</strong>从"先采集后处理"向"采集即处理"的范式转变。类脑传感器的事件流可直接输入脉冲神经网络进行实时处理，省去了传统视觉流水线中的帧缓存和解码环节</li>
+                <li><strong>具身场景中的类脑视觉应用：</strong>在高速运动、极端光照和快速避障等对视觉响应延迟敏感的场景中，类脑视觉的计算摄像方案展现出传统方案难以企及的性能优势。高速运动物体的捕捉延迟从传统方案的数十毫秒压缩至微秒级</li>
+                <li><strong>算法-传感器协同设计：</strong>类脑视觉计算摄像的核心突破在于算法的设计需要与传感器的物理特性紧密耦合，单纯在算法层优化或在硬件层迭代都无法充分发挥类脑视觉的潜力</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>类脑视觉与计算摄像的交叉融合，代表了从"让机器看得更清楚"到"让机器看得更聪明"的范式升级。事件驱动的视觉感知机制在高速动态场景中的独特优势，使其成为具身智能视觉系统的关键技术路线之一。算法与传感器的协同设计是释放类脑视觉潜力的关键。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:53:00 – 3:23:00</td>
+          <td>世界记忆驱动的异构多智能体长时域协作（空间智能 + 多智能体协同）</td>
+          <td><span class="speaker">唐浩 — 智源青年学者、北京大学计算机学院助理教授</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="10380">▶ 跳至视频此处</button>
+              <p><strong>唐浩</strong> 从空间智能与多智能体协同的交叉角度，提出了以世界记忆为核心驱动力的异构多智能体长时域协作框架：</p>
+              <ul>
+                <li><strong>世界记忆的概念与构建：</strong>世界记忆是对物理空间的持久化、结构化表征，不同于单帧感知或短期上下文，它记录了场景中物体的空间属性、语义关系和动态演化历史，为多智能体提供共享的空间认知基础</li>
+                <li><strong>异构智能体协作的协同难题：</strong>不同类型的智能体（无人机、地面机器人、固定传感器等）在感知精度、运动能力和通信带宽上存在显著差异，传统联邦式协同方法难以在异构约束下实现最优协作调度</li>
+                <li><strong>长时域任务的记忆管理：</strong>在持续数小时甚至数天的协作任务中，智能体需要对不断变化的环境保持一致性认知。世界记忆通过增量更新和版本管理机制，使智能体能够在长期运行中逐步完善空间认知</li>
+                <li><strong>空间智能与多智能体的交叉创新：</strong>将3D场景理解、视觉定位和环境推理等空间智能能力注入多智能体协作框架，使协作从"基于通信协议的信息交换"升级为"基于共享世界认知的协同推理"</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>异构多智能体协作的核心瓶颈不是通信协议或任务分配算法，而是对共享物理空间的统一认知。世界记忆为多智能体提供了一个"共同知道的场景"，让协作从信息交换层上升到认知共享层。空间智能是多智能体系统从可工作走向可信任的关键跨越。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:23:00 – 3:53:00</td>
+          <td>人类认知驱动的 AI 交互安全（人因 + AI 安全）</td>
+          <td><span class="speaker">易鑫 — 智源青年学者、清华大学网络科学与网络空间研究院副教授</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="12180">▶ 跳至视频此处</button>
+              <p><strong>易鑫</strong> 从人因工程与AI安全的交叉视角，提出了以人类认知特性为核心的AI交互安全框架：</p>
+              <ul>
+                <li><strong>人因工程与AI安全的内在关联：</strong>大量AI安全事件的根本原因不在于模型能力的缺陷，而在于人类用户对AI能力的错误认知和过度信任。人类在面对AI系统时表现出的自动化偏见、确认偏误和锚定效应等认知倾向，是AI交互安全中不可回避的人因变量</li>
+                <li><strong>人类认知特性的安全影响：</strong>系统分析了人类在与AI交互中的四种典型认知偏差——过度依赖AI建议的自动化服从、忽视AI局限性的拟人化投射、将AI错误归因于自身操作偏差的内归因倾向，以及在AI出错后完全拒绝AI辅助的全盘否定效应</li>
+                <li><strong>认知驱动的安全设计原则：</strong>提出在AI系统的交互设计中嵌入认知安全机制，包括不确定性显式传达（让用户感知AI的"不确定时刻"）、决策依据可解释（展示推理路径而非仅给结论）、以及适度的认知摩擦力设计（在关键决策点引入有意的交互停顿以触发审慎思考）</li>
+                <li><strong>从模型安全到系统安全的范式扩展：</strong>AI安全不能仅关注模型本身的对齐和鲁棒性，必须将人类用户作为安全系统的一个关键组件纳入设计考量。人因驱动的安全框架将AI安全从技术问题扩展为人—AI系统协同问题</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>AI交互安全的本质不在于让模型变得更强大或更鲁棒，而在于让人与AI之间的认知界面更加透明和安全。真正有效的AI安全体系必须同时回答两个问题：模型能不能安全地完成任务，以及人能不能正确地理解和使用模型。忽视人因的AI安全方案，就像给汽车安装最好的刹车却不管驾驶员是否知道何时该踩。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:53:00 – 5:00:00</td>
+          <td><strong>圆桌论坛</strong>：在前沿交叉融合中发现原始创新的突破口</td>
+          <td><span class="speaker">姬十三（主持）、眭亚楠、王辉、王晟、程昊</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="13980">▶ 跳至视频此处</button>
+              <p>由<strong>姬十三</strong>（果壳创始人兼CEO、未来光锥前沿科技基金创始合伙人）主持，清华大学长聘副教授<strong>眭亚楠</strong>、中国科学技术大学特任教授<strong>王辉</strong>、英诺科创基金合伙人<strong>王晟</strong>、加速进化创始人兼CEO<strong>程昊</strong>共同参与。圆桌围绕在前沿交叉融合中发现原始创新突破口这一核心命题，从学术研究、产业投资和创业实践三个视角展开深度对话：</p>
+              <ul>
+                <li><strong>交叉融合的方法论：</strong>圆桌嘉宾一致认为，真正有生产力的交叉融合不是两个学科术语的简单并置，而是在一个学科中引入另一个学科的核心方法论来重构问题本身。具身与类脑的交叉之所以具有生命力，不是因为"机器人"和"神经元"的标签组合，而是因为类脑的事件驱动计算模型恰好解决了具身场景中对实时性和低功耗的根本需求</li>
+                <li><strong>原始创新的识别与筛选：</strong>从投资和产业视角，原始创新在早期往往表现为"反常性"——与主流技术路线存在根本性差异但拥有自洽的理论解释。王晟指出，最具投资价值的交叉创新通常满足三个条件：两个成熟学科的交叉点上的空白地带、已有初步的实验验证证明可行性、以及不与现有产业巨头形成正面对抗</li>
+                <li><strong>青年学者在交叉融合中的独特优势：</strong>眭亚楠和王辉分别从自身研究经历出发，指出青年学者在学科交叉领域具有天然的适应性优势——尚未被单一学科范式完全固化的思维框架、跨领域合作的低制度成本、以及对新兴工具的快速接受能力，是青年学者在交叉领域取得突破的三个有利条件</li>
+                <li><strong>从交叉到融合的"最后一公里"：</strong>程昊以加速进化的创业实践为例，阐述了学术交叉成果向产业应用转化时面临的关键挑战——交叉创新在实验室中的验证往往基于理想化假设，走向实际产品需要在工程化过程中应对交互界面的复杂性、多场景兼容性和成本约束三个现实约束。圆桌嘉宾共同认为，学术界与产业界在交叉创新链条上应建立更紧密的协同机制</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>圆桌共识</h4>
+                <p>原始创新不是"灵光一现"的随机事件，而是在学科交叉的富矿带上进行系统性探索的必然产物。最肥沃的交叉地带通常出现在两个条件交汇处：领域A的核心方法论恰好能解决领域B的长期瓶颈，且两个领域的成熟度差距不超过一个数量级。圆桌总结出培养交叉创新能力的三个关键要素：建立跨学科的"翻译能力"（能用对方领域的语言重述问题）、保持对反常现象的研究耐心（重大突破的早期信号常被主流忽视）、以及构建学术界—产业界—投资界的交叉创新转化通道。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+(function() {
+  var video = document.getElementById('forum-video');
+  var m3u8Url = 'https://vod-2020.baai.ac.cn/record/06110746-10-c79f06b2b80673105864ae6e922cb7ec/06110746-10-f49021889012c7ce05ea4ff3483a1e4f/2026-06-12-12-47-08_2026-06-12-18-02-50.m3u8';
+
+  function initPlayer(url) {
+    m3u8Url = url;
+    video.style.display = 'block';
+
+    if (Hls.isSupported()) {
+      var hls = new Hls({ startPosition: 0 });
+      hls.loadSource(url);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, function() {
+        video.play().catch(function(){});
+        bindSeekButtons();
+      });
+      hls.on(Hls.Events.ERROR, function(evt, data) {
+        if (data.fatal) {
+          if (data.type === Hls.ErrorTypes.NETWORK_ERROR) { hls.startLoad(); }
+          else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) { hls.recoverMediaError(); }
+        }
+      });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = url;
+      video.addEventListener('loadedmetadata', function() {
+        video.play().catch(function(){});
+        bindSeekButtons();
+      });
+    }
+
+    try { localStorage.setItem('forum-scholars-cross_m3u8', url); } catch(e) {}
+  }
+
+  function bindSeekButtons() {
+    document.querySelectorAll('.seek-video').forEach(function(btn) {
+      btn.onclick = function(e) {
+        e.stopPropagation();
+        var sec = parseInt(this.getAttribute('data-seek'));
+        if (video && sec >= 0) {
+          video.currentTime = sec;
+          video.play().catch(function(){});
+          video.scrollIntoView({ behavior: 'smooth' });
+        }
+      };
+    });
+  }
+
+  // Auto-init with embedded URL
+  initPlayer(m3u8Url);
+
+  // Session expand/collapse
+  document.querySelectorAll('.session-row.has-detail').forEach(function(row) {
+    row.addEventListener('click', function() {
+      this.classList.toggle('open');
+      var next = this.nextElementSibling;
+      if (next && next.classList.contains('session-detail')) { next.classList.toggle('open'); }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

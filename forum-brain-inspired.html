@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026智源大会 — 类脑智能与下一代AI路径 直播回放</title>
+<style>
+  :root {
+    --primary: #1a3a5c;
+    --accent: #2857ff;
+    --bg: #f5f6f8;
+    --card-bg: #ffffff;
+    --text: #2c3e50;
+    --text-light: #5a6d80;
+    --border: #e2e6ed;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --radius: 10px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", "AR PL UKai CN", serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding-bottom: 40px;
+  }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+
+  /* ========== Header ========== */
+  .header {
+    position: relative;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: #fff;
+    padding: 32px 0;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  .header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", serif;
+  }
+  .back-link {
+    position: absolute;
+    top: 18px;
+    left: 24px;
+    color: rgba(255,255,255,.7);
+    text-decoration: none;
+    font-size: .9rem;
+    transition: color .2s;
+    z-index: 2;
+  }
+  .back-link:hover { color: #fff; }
+
+  /* ========== Video Player ========== */
+  .video-wrapper {
+    background: #000;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .video-wrapper video {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 540px;
+  }
+
+  /* ========== Card ========== */
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 0;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 16px 20px;
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--primary);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ========== Session Table ========== */
+  .schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .schedule-table thead th {
+    text-align: left;
+    font-size: .73rem;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--text-light);
+    padding: 8px 18px;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .time-slot {
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+    min-width: 100px;
+    font-size: .82rem;
+  }
+  .speaker { font-size: .82rem; color: var(--text-light); }
+
+  /* ========== Session Rows ========== */
+  .session-row { cursor: default; }
+  .session-row td { padding: 10px 18px; }
+  .session-row.has-detail {
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .session-row.has-detail:hover { background: #f5f7fa; }
+  .session-arrow {
+    text-align: center;
+    font-size: .6rem;
+    color: var(--text-light);
+    width: 36px;
+    transition: transform .25s;
+    vertical-align: middle;
+  }
+  .session-row.has-detail.open .session-arrow { transform: rotate(90deg); }
+  .session-row.no-detail .session-arrow { color: transparent; }
+  .session-detail { display: none; }
+  .session-detail.open { display: table-row; }
+  .session-detail td {
+    padding: 0 18px 16px !important;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .session-detail-content {
+    font-size: .88rem;
+    color: var(--text);
+    padding: 8px 0 8px 6px;
+  }
+  .session-detail-content p { margin-bottom: 8px; }
+  .session-detail-content ul { padding-left: 20px; margin-bottom: 8px; }
+  .session-detail-content ul li { margin-bottom: 4px; }
+
+  /* ========== Seek Button ========== */
+  .seek-video {
+    display: inline-block;
+    padding: 4px 14px;
+    margin-bottom: 8px;
+    border: 1px solid var(--accent);
+    border-radius: 99px;
+    background: #fff;
+    color: var(--accent);
+    font-size: .78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .seek-video:hover { background: var(--accent); color: #fff; }
+
+  /* ========== Highlight Box ========== */
+  .highlight-box {
+    background: #fff8e1;
+    border-left: 4px solid #f0b400;
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+  }
+  .highlight-box h4 { color: #b8860b; margin-bottom: 4px; }
+
+  /* ========== Summary Box ========== */
+  .summary-box {
+    padding: 18px 20px;
+    font-size: .88rem;
+    color: var(--text-light);
+    line-height: 1.8;
+  }
+
+  @media (max-width: 768px) {
+    .header h1 { font-size: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a class="back-link" href="index.html">← 返回</a>
+  <h1>🎬 2026智源大会 · 类脑智能与下一代AI路径</h1>
+</header>
+
+<div class="container">
+
+  <!-- 视频播放器 -->
+  <div class="video-wrapper" id="video-wrapper">
+    <div id="video-placeholder" style="background:#1a1a2e;color:#fff;padding:40px 24px;text-align:center;border-radius:10px;">
+      <p style="font-size:1.2rem;margin-bottom:8px;">🎬 类脑智能与下一代AI路径 · 直播回放</p>
+      <p style="font-size:.82rem;color:#aaa;margin-bottom:20px;">按以下步骤获取视频地址：</p>
+
+      <div style="display:inline-block;text-align:left;background:#111;border-radius:8px;padding:16px 24px;margin-bottom:16px;">
+        <p style="margin-bottom:8px;"><strong>步骤 1：</strong>打开 <a href="https://event.baai.ac.cn/live/1024" target="_blank" style="color:#5b9eff;">BAAI 直播回放页</a></p>
+        <p style="margin-bottom:8px;"><strong>步骤 2：</strong>按 <kbd style="background:#333;padding:1px 6px;border-radius:3px;">F12</kbd> → <kbd style="background:#333;padding:1px 6px;border-radius:3px;">Console</kbd>，粘贴以下代码并回车：</p>
+        <textarea readonly onclick="this.select();document.execCommand('copy')" style="width:560px;height:36px;padding:8px;background:#0d1117;color:#58a6ff;border:1px solid #30363d;border-radius:4px;font-family:Consolas,monospace;font-size:.72rem;resize:none;cursor:pointer;display:block;margin:4px 0;">(async()=>{try{let r=await(await fetch('/api/api/playinfo?activityId=1024',{credentials:'include',headers:{accept:'application/json'}})).json();let u=r.data?.playInfo?.play_url;if(u){await navigator.clipboard.writeText(u);document.body.innerHTML='&lt;div style=text-align:center;padding:60px;font-size:1.3rem&gt;&lt;p&gt;✅ m3u8 已复制到剪贴板！&lt;/p&gt;&lt;textarea style=width:90%;height:100px;margin:12px 0;font-size:.7rem&gt;'+u+'&lt;/textarea&gt;&lt;p style=font-size:.85rem;color:#666&gt;切回 summary 页面 → 粘贴到输入框 → 点击加载视频&lt;/p&gt;&lt;/div&gt;'}else{document.body.innerHTML='&lt;div style=text-align:center;padding:60px&gt;&lt;p&gt;❌ 获取失败，请确认已登录 BAAI&lt;/p&gt;&lt;/div&gt;'}}catch(e){document.body.innerHTML='&lt;div style=text-align:center;padding:60px&gt;&lt;p&gt;❌ 错误: '+e.message+'&lt;/p&gt;&lt;/div&gt;'}})()</textarea>
+        <p style="font-size:.7rem;color:#666;">👆 点击代码框自动复制</p>
+      </div>
+
+      <div style="border-top:1px solid #333;padding-top:16px;margin-top:4px;">
+        <p style="margin-bottom:6px;"><strong>步骤 3：</strong>回到本页，粘贴 m3u8 地址并加载：</p>
+        <input id="m3u8-input" type="text" placeholder="Ctrl+V 粘贴 .m3u8 地址..."
+               style="width:100%;max-width:500px;padding:10px;border-radius:6px;border:1px solid #555;background:#222;color:#fff;font-size:.85rem;">
+        <button onclick="loadVideo()" style="display:block;margin:10px auto 0;padding:10px 40px;background:#2857ff;color:#fff;border:none;border-radius:6px;font-size:.95rem;cursor:pointer;font-weight:700;">▶ 加载视频</button>
+      </div>
+    </div>
+    <video id="forum-video" controls preload="metadata" crossorigin="anonymous" playsinline
+           style="display:none;width:100%;height:auto;max-height:540px;"></video>
+  </div>
+
+  <!-- 论坛简介 -->
+  <div class="card">
+    <div class="card-header">📖 论坛简介</div>
+    <div class="summary-box">
+      <p>当前，依托算力、参数与数据规模化扩张的大模型发展路径已步入瓶颈，行业亟待开辟下一代人工智能的多元化技术路线。<strong>类脑智能</strong>立足人脑神经元与神经环路的运行机理，构建<strong>低功耗、高鲁棒性、感知-存储-计算一体化</strong>的类脑神经网络计算架构。随着算法迭代与训练框架不断取得关键性进展，类脑智能已在各类落地场景中展现出显著的应用潜力。</p>
+      <p style="margin-top:10px">本次论坛围绕下一代人工智能多元化技术路线展开研讨，将类脑智能作为核心研讨主题，集结产学研领域专家学者，深入研讨脑科学与人工智能双向赋能、协同共进的实现路径，攻关新型基础模型与计算架构的创新研发。论坛研讨视野并不囿于类脑智能单一领域，将立足多维度、开放式视角，广泛探寻下一代 AI 基础模型的技术突破口，为搭建开放多元、高效集约的新一代人工智能发展新范式提供支撑。</p>
+      <p style="margin-top:10px;font-size:.8rem;color:#999;">🕐 2026年6月12日 13:20–17:00 · 视频时间 39:00–4:19:00 · 📍 103 会议室 · 线上同步直播</p>
+    </div>
+  </div>
+
+  <!-- 日程详情 -->
+  <div class="card">
+    <div class="card-header">📋 议程详情（点击展开）</div>
+    <table class="schedule-table">
+      <thead><tr><th style="width:36px"></th><th>时间</th><th>环节 / 主题</th><th>嘉宾 / 讲者</th></tr></thead>
+      <tbody>
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">39:00 – 41:00</td>
+          <td>开场致辞</td>
+          <td><span class="speaker">邓磊</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="2340">▶ 跳至视频此处</button>
+              <p><strong>邓磊</strong> 致开场辞，介绍论坛设立的学术背景：在 Scaling Law 遭遇瓶颈的当下，类脑智能作为突破传统冯·诺依曼架构、实现低功耗高鲁棒性计算的关键路径，正受到学术界和产业界的高度关注。论坛将围绕「Brain for AI」与「AI for Brain」双向赋能展开深入探讨。</p>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">41:00 – 1:13:00</td>
+          <td>从 DTB 到随机计算</td>
+          <td><span class="speaker">冯建峰</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="2460">▶ 跳至视频此处</button>
+              <p><strong>冯建峰</strong> 系统阐述了从确定性 DTB（Deterministic Turing-Based）计算范式向随机计算（Stochastic Computing）的演进路径：</p>
+              <ul>
+                <li><strong>DTB 的局限：</strong>传统确定性计算在能效比、容错性和生物真实性方面面临根本性瓶颈</li>
+                <li><strong>随机计算的优势：</strong>类脑神经网络的脉冲发放本质上是随机过程，利用随机性而非对抗随机性，可实现数量级的能效提升</li>
+                <li><strong>脉冲神经网络（SNN）：</strong>基于脉冲时序编码的神经网络，在事件驱动处理中展现超低功耗特性</li>
+                <li><strong>硬件实现：</strong>神经形态芯片（如 Intel Loihi、IBM TrueNorth）的最新进展与挑战</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>从确定性到随机性的范式转变，不仅是计算架构的变革，更是对"智能本质是确定性还是概率性"这一根本问题的重新审视。人脑的随机性不是缺陷，而是实现高效智能的关键。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:13:00 – 1:45:00</td>
+          <td>认知控制：从脑到 AI</td>
+          <td><span class="speaker">余山</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="4380">▶ 跳至视频此处</button>
+              <p><strong>余山</strong> 从认知神经科学角度探讨认知控制（Cognitive Control）如何启发下一代 AI 系统设计：</p>
+              <ul>
+                <li><strong>前额叶皮层与认知控制：</strong>大脑通过前额叶-基底节环路实现目标导向的行为选择、冲突监控和任务切换，其核心机制包括自上而下的信号调控和情境依赖的神经表征重组</li>
+                <li><strong>当前 AI 的认知控制缺失：</strong>大模型虽能生成流畅文本，但缺乏灵活的任务优先级管理和元认知能力</li>
+                <li><strong>类脑计算中的执行功能：</strong>在神经网络架构中嵌入类似前额叶的控制机制，可通过引入门控网络、多任务路由和基于不确定性的资源分配来实现</li>
+                <li><strong>从被动响应到主动调控：</strong>赋予 AI 系统自主设定子目标、监控进度、动态调整策略的能力</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>认知控制是人脑区别于当前 AI 的核心能力之一。将前额叶的执行功能机制引入类脑计算架构，是实现真正自主智能的关键步骤。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:45:00 – 2:20:00</td>
+          <td>人形机器人的敏捷足球技能学习</td>
+          <td><span class="speaker">赵明国 — 清华大学研究员、机器人控制实验室主任</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="6300">▶ 跳至视频此处</button>
+              <p><strong>赵明国</strong>（清华大学）以人形机器人足球为场景，展示类脑智能在具身智能中的前沿应用：</p>
+              <ul>
+                <li><strong>敏捷运动控制：</strong>人形机器人在动态环境中实现跑动、踢球、转向等复杂动作的实时控制</li>
+                <li><strong>类脑运动学习：</strong>借鉴小脑和基底神经节的计算原理，实现运动技能的快速获取与泛化</li>
+                <li><strong>感知-决策-行动闭环：</strong>从视觉感知到运动指令的全链条类脑计算实现</li>
+                <li><strong>Sim-to-Real 迁移：</strong>仿真环境中训练的类脑控制器向真实机器人无缝迁移的技术挑战</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>人形机器人是类脑智能的重要验证平台。足球场景的综合性与对抗性，为验证类脑算法在感知、决策、运动控制三个维度的整合提供了充分的评测条件。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:20:00 – 2:47:00</td>
+          <td>超越 Token 预测：迈向离散潜空间的概念级语言建模</td>
+          <td><span class="speaker">林洲汉</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="8400">▶ 跳至视频此处</button>
+              <p><strong>林洲汉</strong> 提出超越当前 Token-by-Token 自回归范式的全新语言建模方法：</p>
+              <ul>
+                <li><strong>Token 预测的局限：</strong>逐 Token 生成缺乏全局语义规划，导致长文本一致性差、推理链脆弱</li>
+                <li><strong>离散潜空间（Discrete Latent Space）：</strong>在概念层面而非 Token 层面进行语言建模，每个潜变量对应一个完整的语义概念</li>
+                <li><strong>概念级生成：</strong>先规划概念序列，再展开为具体 Token——更接近人类写作的"先构思大纲，再填充细节"</li>
+                <li><strong>类脑启发：</strong>人脑处理语言时并非逐词处理，而是在多层级抽象表征上并行运作</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>Token 预测是当前大模型的基础性局限。迈向概念级语言建模不仅是技术升级，更是让机器真正"理解"语言而非仅仅"生成"语言的关键突破。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:47:00 – 3:18:00</td>
+          <td>生物启发式人工智能的未来走向：旁观者视角</td>
+          <td><span class="speaker">Yann Sweeney</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="10020">▶ 跳至视频此处</button>
+              <p><strong>Yann Sweeney</strong> 以国际化旁观者视角，审视生物启发式 AI 的全球发展态势与未来方向：</p>
+              <ul>
+                <li><strong>全球类脑计算版图：</strong>欧美、中国、日本在神经形态计算领域的不同技术路线与战略布局</li>
+                <li><strong>从脑科学到 AI 的转化瓶颈：</strong>脑科学发现向 AI 算法创新的有效转化，面临机制理解碎片化、实验—计算语言不通、转化路径缺失三重鸿沟，需通过跨学科合作框架搭建系统性桥梁</li>
+                <li><strong>生物启发 ≠ 生物复制：</strong>借鉴脑的原理而非照搬脑的细节——工程实现中的取舍哲学</li>
+                <li><strong>跨学科协作的必要性：</strong>神经科学家、计算机科学家、硬件工程师之间存在术语体系、方法论和评价标准三方面的沟通壁垒，需通过联合培养计划、共享工具链和跨领域研讨会逐步消解</li>
+                <li><strong>未来 5-10 年的关键突破点：</strong>神经形态硬件规模化、脉冲学习算法成熟化、类脑-传统 AI 混合架构</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>生物启发式 AI 正从学术好奇心走向产业应用。关键不是制造"人造大脑"，而是从亿万年进化中提取可工程化的计算原理。这需要脑科学与 AI 领域的深度双向对话。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:18:00 – 4:19:00</td>
+          <td><strong>圆桌讨论</strong></td>
+          <td><span class="speaker">全体讲者</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="11880">▶ 跳至视频此处</button>
+              <p>全体讲者参与，围绕以下议题展开深入讨论：</p>
+              <ul>
+                <li><strong>类脑智能与深度学习的关系：</strong>两条路线并非零和博弈，而是互补融合。类脑计算在端侧低功耗场景具备独特优势，中长期类脑原理将逐步融入主流 AI 架构，催生新一代类脑-深度学习混合模型。</li>
+                <li><strong>规模化路径：</strong>类脑芯片从实验室原型走向量产，需突破三大核心瓶颈——制造工艺成熟度、软件工具链易用性、跨学科人才储备。产学研协同是破局关键。</li>
+                <li><strong>评价体系：</strong>现有 AI 基准测试主要面向传统深度学习设计，不完全适用于类脑系统。需建立涵盖能效比、鲁棒性、在线学习能力等多维度的类脑专用评测体系。</li>
+                <li><strong>突破性应用场景：</strong>类脑智能将在端侧低功耗场景率先实现商业落地，包括可穿戴设备、IoT 传感器、机器人边缘计算等领域。数据中心场景需更长周期的生态培育。</li>
+                <li><strong>AI 对脑科学的反向推动：</strong>AI 在神经数据分析与脑仿真模拟方面的进展，正加速脑科学从观测科学向计算科学转变。高精度神经元模型与大规模脑仿真使研究者能够以前所未有的效率验证脑科学假说。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>圆桌共识</h4>
+                <p>类脑智能与深度学习并非零和博弈。短期来看，类脑计算在端侧低功耗场景（可穿戴、IoT、机器人）具有独特优势；中长期来看，类脑原理将逐渐融入主流 AI 架构，催生新一代"类脑-深度学习混合模型"。关键挑战在于：硬件生态的成熟度、软件工具链的易用性、以及跨学科人才的培养。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+(function() {
+  var video = document.getElementById('forum-video');
+  var placeholder = document.getElementById('video-placeholder');
+  var input = document.getElementById('m3u8-input');
+  var m3u8Url = null;
+  var startOffset = 39 * 60; // 跳过前 39 分钟空白
+
+  function initPlayer(url) {
+    m3u8Url = url;
+    placeholder.style.display = 'none';
+    video.style.display = 'block';
+
+    if (Hls.isSupported()) {
+      var hls = new Hls({ startPosition: startOffset });
+      hls.loadSource(url);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, function() {
+        video.currentTime = startOffset;
+        video.play().catch(function(){});
+        bindSeekButtons();
+      });
+      hls.on(Hls.Events.ERROR, function(evt, data) {
+        if (data.fatal) {
+          if (data.type === Hls.ErrorTypes.NETWORK_ERROR) { hls.startLoad(); }
+          else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) { hls.recoverMediaError(); }
+        }
+      });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = url + '#t=' + startOffset;
+      video.addEventListener('loadedmetadata', function() {
+        video.play().catch(function(){});
+        bindSeekButtons();
+      });
+    }
+
+    try { localStorage.setItem('forum1024_m3u8', url); } catch(e) {}
+  }
+
+  window.loadVideo = function(u) {
+    var url = u || input.value.trim();
+    if (!url) { alert('请先粘贴 m3u8 地址'); return; }
+    initPlayer(url);
+  };
+
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { loadVideo(); }
+  });
+
+  // Check URL params
+  var m = location.search.match(/[?&]m3u8=([^&]+)/);
+  if (m) { var u = decodeURIComponent(m[1]); input.value = u; initPlayer(u); }
+  else {
+    try {
+      var saved = localStorage.getItem('forum1024_m3u8');
+      if (saved) { input.value = saved; initPlayer(saved); }
+    } catch(e) {}
+  }
+
+  function bindSeekButtons() {
+    document.querySelectorAll('.seek-video').forEach(function(btn) {
+      btn.onclick = function(e) {
+        e.stopPropagation();
+        var sec = parseInt(this.getAttribute('data-seek'));
+        if (video && sec >= 0) {
+          video.currentTime = sec;
+          video.play().catch(function(){});
+          video.scrollIntoView({ behavior: 'smooth' });
+        }
+      };
+    });
+  }
+
+  document.querySelectorAll('.seek-video').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      if (!m3u8Url) {
+        e.stopPropagation();
+        var sec = parseInt(this.getAttribute('data-seek'));
+        alert('请先获取视频链接！\n\n时间戳: ' + (sec ? new Date(sec*1000).toISOString().substr(11,8) : '--'));
+      }
+    });
+  });
+
+  // Session expand/collapse
+  document.querySelectorAll('.session-row.has-detail').forEach(function(row) {
+    row.addEventListener('click', function() {
+      this.classList.toggle('open');
+      var next = this.nextElementSibling;
+      if (next && next.classList.contains('session-detail')) { next.classList.toggle('open'); }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

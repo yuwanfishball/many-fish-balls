@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026智源大会 — 大模型产业论坛 直播回放</title>
+<style>
+  :root {
+    --primary: #1a3a5c;
+    --accent: #2857ff;
+    --bg: #f5f6f8;
+    --card-bg: #ffffff;
+    --text: #2c3e50;
+    --text-light: #5a6d80;
+    --border: #e2e6ed;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --radius: 10px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", "AR PL UKai CN", serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding-bottom: 40px;
+  }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+
+  /* ========== Header ========== */
+  .header {
+    position: relative;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: #fff;
+    padding: 32px 0;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  .header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", serif;
+  }
+  .header p {
+    margin-top: 6px;
+    font-size: .85rem;
+    opacity: .7;
+  }
+  .back-link {
+    position: absolute;
+    top: 18px;
+    left: 24px;
+    color: rgba(255,255,255,.7);
+    text-decoration: none;
+    font-size: .9rem;
+    transition: color .2s;
+    z-index: 2;
+  }
+  .back-link:hover { color: #fff; }
+
+  /* ========== Video Player ========== */
+  .video-wrapper {
+    background: #000;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .video-wrapper video {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 540px;
+  }
+
+  /* ========== Card ========== */
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 0;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 16px 20px;
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--primary);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ========== Session Table ========== */
+  .schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .schedule-table thead th {
+    text-align: left;
+    font-size: .73rem;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--text-light);
+    padding: 8px 18px;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .time-slot {
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+    min-width: 105px;
+    font-size: .82rem;
+  }
+  .speaker { font-size: .82rem; color: var(--text-light); }
+
+  /* ========== Session Rows ========== */
+  .session-row { cursor: default; }
+  .session-row td { padding: 10px 18px; }
+  .session-row.has-detail {
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .session-row.has-detail:hover { background: #f5f7fa; }
+  .session-arrow {
+    text-align: center;
+    font-size: .6rem;
+    color: var(--text-light);
+    width: 36px;
+    transition: transform .25s;
+    vertical-align: middle;
+  }
+  .session-row.has-detail.open .session-arrow { transform: rotate(90deg); }
+  .session-row.no-detail .session-arrow { color: transparent; }
+  .session-detail { display: none; }
+  .session-detail.open { display: table-row; }
+  .session-detail td {
+    padding: 0 18px 16px !important;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .session-detail-content {
+    font-size: .88rem;
+    color: var(--text);
+    padding: 8px 0 8px 6px;
+  }
+  .session-detail-content p { margin-bottom: 8px; }
+  .session-detail-content ul { padding-left: 20px; margin-bottom: 8px; }
+  .session-detail-content ul li { margin-bottom: 4px; }
+
+  /* ========== Seek Button ========== */
+  .seek-video {
+    display: inline-block;
+    padding: 4px 14px;
+    margin-bottom: 8px;
+    border: 1px solid var(--accent);
+    border-radius: 99px;
+    background: #fff;
+    color: var(--accent);
+    font-size: .78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .seek-video:hover { background: var(--accent); color: #fff; }
+
+  /* ========== Highlight Box ========== */
+  .highlight-box {
+    background: #fff8e1;
+    border-left: 4px solid #f0b400;
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+  }
+  .highlight-box h4 { color: #b8860b; margin-bottom: 4px; }
+
+  /* ========== Summary Box ========== */
+  .summary-box {
+    padding: 18px 20px;
+    font-size: .88rem;
+    color: var(--text-light);
+    line-height: 1.8;
+  }
+
+  /* ========== Note text ========== */
+  .note-text {
+    font-size: .78rem;
+    color: #999;
+    margin-top: 6px;
+  }
+
+  /* ========== Carousel ========== */
+  .carousel-section {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 10px;
+    user-select: none;
+  }
+  .carousel-viewport {
+    overflow: hidden;
+    width: 100%;
+    max-width: 680px;
+    padding: 10px 0;
+  }
+  .carousel-track {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .5s cubic-bezier(.22,.1,.18,1);
+  }
+
+  .person-card {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: all .5s cubic-bezier(.22,.1,.18,1);
+    cursor: pointer;
+  }
+  .person-card.pos-0 { order: 2; z-index: 5; margin: 0 16px; }
+  .person-card.pos-0 .person-photo { width: 130px; height: 130px; border-color: var(--accent); box-shadow: 0 4px 20px rgba(40,87,255,.20); }
+  .person-card.pos-0 .person-name { font-size: .92rem; opacity: 1; }
+  .person-card.pos-0 .person-role { font-size: .76rem; opacity: 1; }
+
+  .person-card.pos-1, .person-card.pos--1 { order: 2; z-index: 4; margin: 0 8px; }
+  .person-card.pos-1 .person-photo, .person-card.pos--1 .person-photo { width: 96px; height: 96px; border-color: #d0d8f0; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+  .person-card.pos-1 .person-name, .person-card.pos--1 .person-name { font-size: .8rem; opacity: .75; }
+  .person-card.pos-1 .person-role, .person-card.pos--1 .person-role { font-size: .68rem; opacity: .6; }
+
+  .person-card.pos-2, .person-card.pos--2 { order: 2; z-index: 3; margin: 0 4px; }
+  .person-card.pos-2 .person-photo, .person-card.pos--2 .person-photo { width: 68px; height: 68px; border-color: #e8ecf4; box-shadow: 0 1px 4px rgba(0,0,0,.03); }
+  .person-card.pos-2 .person-name, .person-card.pos--2 .person-name { font-size: .7rem; opacity: .45; }
+  .person-card.pos-2 .person-role, .person-card.pos--2 .person-role { font-size: .6rem; opacity: .3; }
+
+  .person-card.pos-3, .person-card.pos--3 { order: 2; z-index: 2; margin: 0 2px; }
+  .person-card.pos-3 .person-photo, .person-card.pos--3 .person-photo { width: 48px; height: 48px; border-color: #eff1f6; box-shadow: none; }
+  .person-card.pos-3 .person-name, .person-card.pos--3 .person-name { font-size: .62rem; opacity: .25; }
+  .person-card.pos-3 .person-role, .person-card.pos--3 .person-role { font-size: .54rem; opacity: .15; display: none; }
+
+  .person-photo {
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #e8edff;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    transition: all .5s cubic-bezier(.22,.1,.18,1);
+    background: linear-gradient(135deg, #e8edff, #d0d8f0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--accent);
+    overflow: hidden;
+  }
+  .person-photo img { width: 100%; height: 100%; object-fit: cover; }
+
+  .person-name { font-weight: 600; color: var(--primary); margin-top: 8px; white-space: nowrap; transition: all .5s; }
+  .person-role { color: var(--text-light); white-space: nowrap; transition: all .5s; }
+
+  .carousel-nav {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 68px;
+    border: none;
+    cursor: pointer;
+    background: transparent;
+    outline: none;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .15s;
+  }
+  .carousel-nav svg { opacity: .28; transition: opacity .2s; }
+  .carousel-nav:hover svg { opacity: .55; }
+  .carousel-nav:active { transform: scale(.88); }
+
+  @media (max-width: 768px) {
+    .header h1 { font-size: 1.2rem; }
+  }
+  @media (max-width: 600px) {
+    .person-card.pos-0 .person-photo { width: 100px; height: 100px; }
+    .person-card.pos-1 .person-photo, .person-card.pos--1 .person-photo { width: 70px; height: 70px; }
+    .person-card.pos-2 .person-photo, .person-card.pos--2 .person-photo { width: 48px; height: 48px; }
+    .person-card.pos-3 .person-photo, .person-card.pos--3 .person-photo { width: 32px; height: 32px; }
+    .person-card.pos-0 { margin: 0 8px; }
+    .person-card.pos-1, .person-card.pos--1 { margin: 0 4px; }
+    .carousel-nav { width: 30px; height: 48px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a class="back-link" href="index.html">← 返回</a>
+  <h1>🏭 2026智源大会 · 大模型产业论坛</h1>
+  <p>6月12日 13:00–17:00 · 北京中关村国际创新中心</p>
+</header>
+
+<div class="container">
+
+  <!-- 视频播放器 -->
+  <div class="video-wrapper" id="video-wrapper">
+    <div id="video-placeholder" style="background:#1a1a2e;color:#fff;padding:40px 24px;text-align:center;border-radius:10px;">
+      <p style="font-size:1.2rem;margin-bottom:8px;">🏭 大模型产业论坛 · 直播回放</p>
+      <p style="font-size:.82rem;color:#aaa;margin-bottom:20px;">视频将自动加载；如无法播放，可按以下步骤获取视频地址：</p>
+
+      <div style="display:inline-block;text-align:left;background:#111;border-radius:8px;padding:16px 24px;margin-bottom:16px;">
+        <p style="margin-bottom:8px;"><strong>步骤 1：</strong>打开 <a href="https://event.baai.ac.cn/live/1022" target="_blank" style="color:#5b9eff;">BAAI 直播回放页</a></p>
+        <p style="margin-bottom:8px;"><strong>步骤 2：</strong>按 <kbd style="background:#333;padding:1px 6px;border-radius:3px;">F12</kbd> → <kbd style="background:#333;padding:1px 6px;border-radius:3px;">Console</kbd>，粘贴以下代码并回车：</p>
+        <textarea readonly onclick="this.select();document.execCommand('copy')" style="width:560px;height:36px;padding:8px;background:#0d1117;color:#58a6ff;border:1px solid #30363d;border-radius:4px;font-family:Consolas,monospace;font-size:.72rem;resize:none;cursor:pointer;display:block;margin:4px 0;">(async()=>{try{let r=await(await fetch('/api/api/playinfo?activityId=1022',{credentials:'include',headers:{accept:'application/json'}})).json();let u=r.data?.playInfo?.play_url;if(u){await navigator.clipboard.writeText(u);document.body.innerHTML='&lt;div style=text-align:center;padding:60px;font-size:1.3rem&gt;&lt;p&gt;✅ m3u8 已复制到剪贴板！&lt;/p&gt;&lt;textarea style=width:90%;height:100px;margin:12px 0;font-size:.7rem&gt;'+u+'&lt;/textarea&gt;&lt;p style=font-size:.85rem;color:#666&gt;切回本页面 → 粘贴到输入框 → 点击加载视频&lt;/p&gt;&lt;/div&gt;'}else{document.body.innerHTML='&lt;div style=text-align:center;padding:60px&gt;&lt;p&gt;❌ 获取失败，请确认已登录 BAAI&lt;/p&gt;&lt;/div&gt;'}}catch(e){document.body.innerHTML='&lt;div style=text-align:center;padding:60px&gt;&lt;p&gt;❌ 错误: '+e.message+'&lt;/p&gt;&lt;/div&gt;'}})()</textarea>
+        <p style="font-size:.7rem;color:#666;">👆 点击代码框自动复制</p>
+      </div>
+
+      <div style="border-top:1px solid #333;padding-top:16px;margin-top:4px;">
+        <p style="margin-bottom:6px;"><strong>步骤 3：</strong>回到本页，粘贴 m3u8 地址并加载：</p>
+        <input id="m3u8-input" type="text" placeholder="Ctrl+V 粘贴 .m3u8 地址..."
+               style="width:100%;max-width:500px;padding:10px;border-radius:6px;border:1px solid #555;background:#222;color:#fff;font-size:.85rem;">
+        <button onclick="loadVideo()" style="display:block;margin:10px auto 0;padding:10px 40px;background:#2857ff;color:#fff;border:none;border-radius:6px;font-size:.95rem;cursor:pointer;font-weight:700;">▶ 加载视频</button>
+      </div>
+    </div>
+    <video id="forum-video" controls preload="metadata" crossorigin="anonymous" playsinline
+           style="display:none;width:100%;height:auto;max-height:540px;"></video>
+  </div>
+
+  <!-- 论坛简介 -->
+  <div class="card">
+    <div class="card-header">📖 论坛简介</div>
+    <div class="summary-box">
+      <p>本届大会的产业旗舰论坛，联合主席为<strong>王仲远</strong>（智源研究院院长）和<strong>陈家齐</strong>（港投公司CEO）。围绕大模型产业的四个核心议题展开：技术演进方向、投资价值评估、产业落地路径、全球化竞争策略。</p>
+      <p style="margin-top:10px;font-size:.8rem;color:#999;">🕐 2026年6月12日 12:59–17:01 · 视频时长约 4 小时 · 📍 北京中关村国际创新中心 · 线上同步直播</p>
+    </div>
+  </div>
+
+  <!-- 议程详情 -->
+  <div class="card">
+    <div class="card-header">📋 议程详情（点击展开）</div>
+    <table class="schedule-table">
+      <thead><tr><th style="width:36px"></th><th>时间</th><th>环节 / 主题</th><th>嘉宾 / 讲者</th></tr></thead>
+      <tbody>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">0:37 – 0:40</td>
+          <td>论坛介绍</td>
+          <td><span class="speaker">万宁</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="37">▶ 跳至视频此处</button>
+              <p>介绍论坛背景：大模型正从技术验证阶段进入商业落地阶段，产业处于关键转折点。</p>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">0:40 – 0:52</td>
+          <td>开场致辞</td>
+          <td><span class="speaker">陈家齐 — 港投公司CEO</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="40">▶ 跳至视频此处</button>
+              <p>从投资视角审视大模型产业：资本市场需要建立对 AI 长期价值的评估框架，不应照搬互联网时代的短期增长模型。香港作为科技企业出海的战略节点，在法律衔接、资本流动和国际化人才方面具备结构性优势。</p>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">0:52 – 1:49</td>
+          <td>主题演讲一：下一代 AI 能力从哪里来</td>
+          <td><span class="speaker">李大海、尤洋、李建国</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="52">▶ 跳至视频此处</button>
+              <p><strong>李大海</strong>（面壁智能CEO）— 端侧大模型部署与差异化竞争：</p>
+              <ul>
+                <li>端侧模型参数规模从 1B 增长至 4B，预计明年可达数十B级别，量化压缩技术持续提升端侧容量</li>
+                <li>大模型企业需在通用能力基础上建立差异化优势，避免同质化竞争。如 Anthropic 在通用底座上强化代码生成能力，形成独特壁垒</li>
+                <li>端侧部署本质是成本优化问题：中国消费者缺乏 AI 订阅付费习惯，端侧可承担的计算任务应优先在端侧完成，综合成本最优</li>
+              </ul>
+
+              <p style="margin-top:10px"><strong>尤洋</strong>（潞晨科技创始人 / 新加坡国立大学教授）— 大模型训练成本的系统性优化：</p>
+              <ul>
+                <li>训练成本是大模型产业化的首要瓶颈，需从芯片架构、训练框架、分布式算法三个层面协同优化，而非单点突破</li>
+                <li>AI 服务需要建立更客观的计价体系，不应简单套用消费品逻辑衡量模型营收</li>
+              </ul>
+
+              <p style="margin-top:10px"><strong>李建国</strong>（蚂蚁技术研究院深度学习实验室负责人）— 扩散语言模型：</p>
+              <ul>
+                <li>探索扩散语言模型作为自回归范式之外的 AGI 路径，有望突破当前架构在推理效率和长文本一致性方面的局限</li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:49 – 2:33</td>
+          <td><strong>圆桌一：大模型公司的长期价值在哪</strong></td>
+          <td><span class="speaker">陈维广、王仲远、王鹤、李大海</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="109">▶ 跳至视频此处</button>
+              <p><strong>主持人：</strong>陈维广（蓝驰创投）<br>
+              <strong>嘉宾：</strong>王仲远（智源）、王鹤（银河通用）、李大海（面壁智能）</p>
+
+              <p style="margin-top:10px">陈维广开场指出：头部模型评测表现趋同，开源与闭源差距持续缩小，Token 价格快速下降——在此背景下，大模型企业的长期价值和竞争壁垒究竟何在。</p>
+
+              <p style="margin-top:10px"><strong>竞争壁垒：</strong></p>
+              <ul>
+                <li>王仲远：评测榜单的参考价值有限，真正的壁垒在于进入实际场景、构建数据闭环。智能技术远未收敛，未来可能呈现多巨头格局。</li>
+                <li>王鹤：壁垒不是单一模型能力，而是完整的技术体系——从数据采集、数据治理、硬件设计、模型训练到产品交付的全链路能力。具身智能目前仍处早期阶段，全球尚无成熟产品。</li>
+                <li>李大海：大模型企业需在通用底座之上建立纵向优势。需区分技术的通用性和商业的通用性，商业化要求模型做针对性优化。</li>
+              </ul>
+
+              <p style="margin-top:10px"><strong>Scaling Law 是否失效：</strong></p>
+              <ul>
+                <li>三人一致否定 Scaling 已到尽头。预训练数据增速放缓，但后训练优化、推理增强、Agent 递归学习等新方向可延续能力提升趋势。</li>
+                <li>王鹤：以 10 亿帧仿真数据实现零样本抓取验证了 Scaling 在具身智能中的有效性，预计两年内具身智能将迎来突破性进展。</li>
+                <li>李大海：模型智能由知识密度与参数规模共同决定，量化技术使端侧模型在同等硬件条件下持续扩容。</li>
+              </ul>
+
+              <p style="margin-top:10px"><strong>AI 安全与责任：</strong></p>
+              <ul>
+                <li>王仲远：类比自动驾驶发展路径——从广泛担忧到建立完整治理体系。技术带来数倍生产力提升时，无法被阻碍。</li>
+                <li>王鹤：工业场景责任边界明确，按合同约定处理。人机交互复杂场景下的权责划分需在实践中渐进式推进。</li>
+                <li>李大海：安全规范往往来自经验教训的积累，AI 技术可加速漏洞发现和修复效率，降低试错成本。</li>
+              </ul>
+
+              <div class="highlight-box">
+                <h4>圆桌共识</h4>
+                <p>中国供应链基础、制造业体量和市场规模为具身智能和世界模型提供了差异化领先的土壤。中国拥有全球最大规模的青年 AI 人才储备，这是产业长期发展的底层优势。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:33 – 3:14</td>
+          <td>主题演讲二：AI 怎么真正进入产业</td>
+          <td><span class="speaker">特邀讲者</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="153">▶ 跳至视频此处</button>
+              <ul>
+                <li>制造业场景：质检、排产、供应链优化中 AI 的实际投入产出比正在被验证</li>
+                <li>金融业：风控建模和投研辅助是目前 AI 商业化最成熟的方向之一</li>
+                <li>产业落地的核心约束并非模型能力不足，而是推理成本过高和可靠性不达标。企业用户需要的是成本可控、输出稳定、部署简易的方案</li>
+              </ul>
+              <p class="note-text">本环节公开报道有限，待官方实录发布后补充详细内容。</p>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:14 – 3:55</td>
+          <td><strong>圆桌二：科技企业怎么出海</strong></td>
+          <td><span class="speaker">施葆莹、程振东、绪伟凡、竺添</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="194">▶ 跳至视频此处</button>
+              <p><strong>主持人：</strong>施葆莹（港投公司）<br>
+              <strong>嘉宾：</strong>程振东（戈壁创投）、绪伟凡（星睿云智）、竺添（引正基因）</p>
+              <ul>
+                <li>出海是必选项而非可选项，但不能将国内产品直接移植海外市场</li>
+                <li>三个关键前提：地缘合规体系、本地化生态网络、国际化组织能力</li>
+                <li>香港作为出海第一站的独特价值：法律体系与国际接轨、资本市场成熟、人才结构国际化</li>
+              </ul>
+              <p class="note-text">本环节公开报道有限，待官方实录发布后补充详细内容。</p>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:55 – 4:02</td>
+          <td>主持人结语</td>
+          <td><span class="speaker">主持人</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="235">▶ 跳至视频此处</button>
+              <p>总结论坛核心共识：大模型产业正从技术驱动转向价值驱动。长期竞争力取决于三个维度——持续技术创新、真实产业价值交付、全球化布局能力。</p>
+            </div>
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 关键人物 -->
+  <div class="card">
+    <div class="card-header">👤 关键人物</div>
+    <div class="carousel-section">
+      <button class="carousel-nav" id="prevBtn" aria-label="上一个">
+        <svg viewBox="0 0 30 42" width="18" height="28"><polygon points="26,3 4,21 26,39" fill="#2857ff" stroke="#2857ff" stroke-width="2" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="carousel-viewport">
+        <div class="carousel-track" id="track"></div>
+      </div>
+      <button class="carousel-nav" id="nextBtn" aria-label="下一个">
+        <svg viewBox="0 0 30 42" width="18" height="28"><polygon points="4,3 26,21 4,39" fill="#2857ff" stroke="#2857ff" stroke-width="2" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+(function() {
+  // ====== Video Player ======
+  var video = document.getElementById('forum-video');
+  var placeholder = document.getElementById('video-placeholder');
+  var input = document.getElementById('m3u8-input');
+  var m3u8Url = null;
+  var startOffset = 0;
+
+  var defaultSrc = 'https://vod-2020.baai.ac.cn/record/06110746-24-bbaf7d68cb1619ccee4e9964a7bceead/06110746-24-fd4624764b748b6d20f388161f378cb2/2026-06-12-12-59-08_2026-06-12-17-01-19.m3u8';
+
+  function initPlayer(url) {
+    m3u8Url = url;
+    placeholder.style.display = 'none';
+    video.style.display = 'block';
+
+    if (Hls.isSupported()) {
+      var hls = new Hls({ startPosition: startOffset });
+      hls.loadSource(url);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, function() {
+        video.currentTime = startOffset;
+        video.play().catch(function(){});
+        bindSeekButtons();
+      });
+      hls.on(Hls.Events.ERROR, function(evt, data) {
+        if (data.fatal) {
+          if (data.type === Hls.ErrorTypes.NETWORK_ERROR) { hls.startLoad(); }
+          else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) { hls.recoverMediaError(); }
+        }
+      });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = url + '#t=' + startOffset;
+      video.addEventListener('loadedmetadata', function() {
+        video.play().catch(function(){});
+        bindSeekButtons();
+      });
+    }
+
+    try { localStorage.setItem('forum1022_m3u8', url); } catch(e) {}
+  }
+
+  window.loadVideo = function(u) {
+    var url = u || input.value.trim();
+    if (!url) { alert('请先粘贴 m3u8 地址'); return; }
+    initPlayer(url);
+  };
+
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { loadVideo(); }
+  });
+
+  // Check URL params
+  var m = location.search.match(/[?&]m3u8=([^&]+)/);
+  if (m) { var u = decodeURIComponent(m[1]); input.value = u; initPlayer(u); }
+  else {
+    try {
+      var saved = localStorage.getItem('forum1022_m3u8');
+      if (saved) { input.value = saved; initPlayer(saved); }
+      else { initPlayer(defaultSrc); }
+    } catch(e) { initPlayer(defaultSrc); }
+  }
+
+  function bindSeekButtons() {
+    document.querySelectorAll('.seek-video').forEach(function(btn) {
+      btn.onclick = function(e) {
+        e.stopPropagation();
+        var sec = parseInt(this.getAttribute('data-seek'));
+        if (video && sec >= 0) {
+          video.currentTime = sec;
+          video.play().catch(function(){});
+          video.scrollIntoView({ behavior: 'smooth' });
+        }
+      };
+    });
+  }
+
+  document.querySelectorAll('.seek-video').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      if (!m3u8Url) {
+        e.stopPropagation();
+        var sec = parseInt(this.getAttribute('data-seek'));
+        alert('请先获取视频链接！\n\n时间戳: ' + (sec ? new Date(sec*1000).toISOString().substr(11,8) : '--'));
+      }
+    });
+  });
+
+  // Session expand/collapse
+  document.querySelectorAll('.session-row.has-detail').forEach(function(row) {
+    row.addEventListener('click', function() {
+      this.classList.toggle('open');
+      var next = this.nextElementSibling;
+      if (next && next.classList.contains('session-detail')) { next.classList.toggle('open'); }
+    });
+  });
+
+  // ====== Carousel ======
+  var people = [
+    { name: '陈家齐', role: '港投公司CEO', img: 'https://n.sinaimg.cn/finance/transform/116/w550h366/20260612/a533-ed4f39e85cc8173b3be02eca1aae57a0.jpg' },
+    { name: '王仲远', role: '智源研究院院长', img: 'portraits/王仲远.jpg' },
+    { name: '李大海', role: '面壁智能CEO', img: 'portraits/李大海.jpg' },
+    { name: '尤洋', role: '潞晨科技创始人', img: 'portraits/尤洋.jpg' },
+    { name: '李建国', role: '蚂蚁技术研究院', img: 'portraits/李建国.jpg' },
+    { name: '王鹤', role: '银河通用CTO', img: 'portraits/王鹤.jpg' },
+    { name: '陈维广', role: '蓝驰创投管理合伙人', img: 'https://pic2.pedaily.cn/22/investor100/202208/20220803102312624.png' },
+    { name: '施葆莹', role: '港投公司高级总监', img: 'portraits/施葆莹.jpg' }
+  ];
+
+  var track = document.getElementById('track');
+  var idx = 2;
+  var MAX_VISIBLE = 3;
+
+  function render() {
+    track.innerHTML = '';
+    var total = people.length;
+
+    for (var i = 0; i < total; i++) {
+      var dist = i - idx;
+      if (Math.abs(dist) > MAX_VISIBLE) continue;
+
+      var card = document.createElement('div');
+      card.className = 'person-card pos-' + dist;
+
+      var photo = document.createElement('div');
+      photo.className = 'person-photo';
+      var initChar = people[i].name.charAt(0);
+      photo.style.fontSize = (dist === 0 ? '2.6rem' : dist === 1 || dist === -1 ? '1.8rem' : '1.2rem');
+
+      if (people[i].img) {
+        var img = document.createElement('img');
+        img.src = people[i].img;
+        img.alt = people[i].name;
+        img.onerror = function(p) { return function() { p.textContent = initChar; p.style.fontSize = '2rem'; }; }(photo);
+        photo.appendChild(img);
+      } else {
+        photo.textContent = initChar;
+      }
+
+      var nameEl = document.createElement('div');
+      nameEl.className = 'person-name';
+      nameEl.textContent = people[i].name;
+
+      var roleEl = document.createElement('div');
+      roleEl.className = 'person-role';
+      roleEl.textContent = people[i].role;
+
+      card.appendChild(photo);
+      card.appendChild(nameEl);
+      card.appendChild(roleEl);
+
+      card.addEventListener('click', (function(t) {
+        return function() { idx = t; render(); };
+      })(i));
+
+      track.appendChild(card);
+    }
+  }
+
+  function goNext() { if (idx < people.length - 1) { idx++; render(); } }
+  function goPrev() { if (idx > 0) { idx--; render(); } }
+
+  document.getElementById('nextBtn').addEventListener('click', goNext);
+  document.getElementById('prevBtn').addEventListener('click', goPrev);
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight') goNext();
+    if (e.key === 'ArrowLeft') goPrev();
+  });
+
+  var touchX = 0;
+  track.addEventListener('touchstart', function(e) { touchX = e.touches[0].clientX; });
+  track.addEventListener('touchend', function(e) {
+    var dx = e.changedTouches[0].clientX - touchX;
+    if (dx < -40) goNext();
+    if (dx > 40) goPrev();
+  });
+
+  render();
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026智源大会 — AI + Neuroscience 直播回放</title>
+<style>
+  :root {
+    --primary: #1a3a5c;
+    --accent: #2857ff;
+    --bg: #f5f6f8;
+    --card-bg: #ffffff;
+    --text: #2c3e50;
+    --text-light: #5a6d80;
+    --border: #e2e6ed;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --radius: 10px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", "AR PL UKai CN", serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding-bottom: 40px;
+  }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+
+  /* ========== Header ========== */
+  .header {
+    position: relative;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: #fff;
+    padding: 32px 0;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  .header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", serif;
+  }
+  .back-link {
+    position: absolute;
+    top: 18px;
+    left: 24px;
+    color: rgba(255,255,255,.7);
+    text-decoration: none;
+    font-size: .9rem;
+    transition: color .2s;
+    z-index: 2;
+  }
+  .back-link:hover { color: #fff; }
+
+  /* ========== Video Player ========== */
+  .video-wrapper {
+    background: #000;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .video-wrapper video {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 540px;
+  }
+
+  /* ========== Card ========== */
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 0;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 16px 20px;
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--primary);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ========== Session Table ========== */
+  .schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .schedule-table thead th {
+    text-align: left;
+    font-size: .73rem;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--text-light);
+    padding: 8px 18px;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .time-slot {
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+    min-width: 100px;
+    font-size: .82rem;
+  }
+  .speaker { font-size: .82rem; color: var(--text-light); }
+
+  /* ========== Session Rows ========== */
+  .session-row { cursor: default; }
+  .session-row td { padding: 10px 18px; }
+  .session-row.has-detail {
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .session-row.has-detail:hover { background: #f5f7fa; }
+  .session-arrow {
+    text-align: center;
+    font-size: .6rem;
+    color: var(--text-light);
+    width: 36px;
+    transition: transform .25s;
+    vertical-align: middle;
+  }
+  .session-row.has-detail.open .session-arrow { transform: rotate(90deg); }
+  .session-row.no-detail .session-arrow { color: transparent; }
+  .session-detail { display: none; }
+  .session-detail.open { display: table-row; }
+  .session-detail td {
+    padding: 0 18px 16px !important;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .session-detail-content {
+    font-size: .88rem;
+    color: var(--text);
+    padding: 8px 0 8px 6px;
+  }
+  .session-detail-content p { margin-bottom: 8px; }
+  .session-detail-content ul { padding-left: 20px; margin-bottom: 8px; }
+  .session-detail-content ul li { margin-bottom: 4px; }
+
+  /* ========== Seek Button ========== */
+  .seek-video {
+    display: inline-block;
+    padding: 4px 14px;
+    margin-bottom: 8px;
+    border: 1px solid var(--accent);
+    border-radius: 99px;
+    background: #fff;
+    color: var(--accent);
+    font-size: .78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .seek-video:hover { background: var(--accent); color: #fff; }
+
+  /* ========== Highlight Box ========== */
+  .highlight-box {
+    background: #fff8e1;
+    border-left: 4px solid #f0b400;
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+  }
+  .highlight-box h4 { color: #b8860b; margin-bottom: 4px; }
+
+  /* ========== Summary Box ========== */
+  .summary-box {
+    padding: 18px 20px;
+    font-size: .88rem;
+    color: var(--text-light);
+    line-height: 1.8;
+  }
+
+  @media (max-width: 768px) {
+    .header h1 { font-size: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a class="back-link" href="index.html">← 返回</a>
+  <h1>🧠 2026智源大会 · AI + Neuroscience</h1>
+</header>
+
+<div class="container">
+
+  <!-- 视频播放器 -->
+  <div class="video-wrapper" id="video-wrapper">
+    <video id="forum-video" controls preload="metadata" crossorigin="anonymous" playsinline
+           style="display:block;width:100%;height:auto;max-height:540px;"></video>
+  </div>
+
+  <!-- 论坛简介 -->
+  <div class="card">
+    <div class="card-header">📖 论坛简介</div>
+    <div class="summary-box">
+      <p>人工智能与神经科学的交叉融合正成为突破当前AI发展瓶颈的关键路径。本论坛由中国科学院院士、清华大学生命科学学院院长<strong>时松海</strong>领衔，智源研究院研究员<strong>雷博</strong>主持，聚焦<strong>「AI for Neuroscience」</strong>与<strong>「Neuroscience for AI」</strong>两大核心方向，集结全球顶尖神经科学家与AI研究者，深入探讨脑科学与人工智能双向赋能、协同共进的实现路径。</p>
+      <p style="margin-top:10px">上午议程围绕神经科学对AI的启发展开，涵盖具身智能规划、大脑基础模型、多尺度脑图谱驱动的BrainAI构建、多尺度时空数据处理等前沿议题。下午议程聚焦脑机接口基座大模型、脑图谱启发的类脑大模型、视觉皮层信息动态路由、认知脑机接口等交叉方向。论坛设圆桌讨论环节，邀请产学研各界专家就脑科学向AI转化的关键瓶颈、跨学科协作机制与下一代智能系统架构展开深度对话。</p>
+      <p style="margin-top:10px;font-size:.8rem;color:#999;">🕐 2026年6月13日 09:00–17:15 · 📍 103 会议室 · 线上同步直播</p>
+    </div>
+  </div>
+
+  <!-- 日程详情 -->
+  <div class="card">
+    <div class="card-header">📋 议程详情（点击展开）</div>
+
+    <div class="sub-period" style="padding:10px 18px 4px;font-size:.78rem;font-weight:700;color:var(--text-light);">🌅 上午 · 09:00–12:00</div>
+    <table class="schedule-table">
+      <thead><tr><th style="width:36px"></th><th>时间</th><th>环节 / 主题</th><th>嘉宾 / 讲者</th></tr></thead>
+      <tbody>
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">0:00 – 0:20</td>
+          <td>开场介绍</td>
+          <td><span class="speaker">时松海</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="0">▶ 跳至视频此处</button>
+              <p><strong>时松海</strong>（中国科学院院士、清华大学生命科学学院院长、清华-IDG/麦戈文脑科学研究院院长）致开场辞，阐述论坛设立的学术背景与核心命题：当前人工智能发展面临算力瓶颈与泛化能力不足的双重挑战，脑科学作为人类智能的唯一已知实现载体，蕴含着破解这些难题的关键线索。论坛围绕「AI for Neuroscience」与「Neuroscience for AI」两条主线展开，前者以AI工具加速脑科学发现，后者从脑机理中提取可工程化的计算原理，双向赋能、协同推进。</p>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">0:20 – 0:50</td>
+          <td>具身智能规划思路启发</td>
+          <td><span class="speaker">Wolfgang Maass — 奥地利格拉茨科技大学教授</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="1200">▶ 跳至视频此处</button>
+              <p><strong>Wolfgang Maass</strong>（奥地利格拉茨科技大学计算机科学教授、类脑计算领域先驱）从计算神经科学视角出发，系统阐述了生物脑的规划与决策机制对具身智能系统的启发：</p>
+              <ul>
+                <li><strong>生物脑的层次化规划架构：</strong>大脑通过前额叶—海马—基底节环路实现多时间尺度的序列规划，从毫秒级的运动原语到分钟级的子目标编排，形成灵活可组合的行为层级结构</li>
+                <li><strong>脉冲神经网络中的序列学习：</strong>基于脉冲时序依赖可塑性（STDP）的局部学习规则，可在无全局监督信号的条件下自发涌现序列规划能力，为低功耗端侧具身智能提供算法基础</li>
+                <li><strong>从感知到行动的闭环规划：</strong>生物体的规划并非开环执行，而是持续融合本体感觉与环境反馈的动态修正过程，这一闭环特性是当前AI规划系统的关键缺失</li>
+                <li><strong>具身智能系统的设计启示：</strong>将类脑脉冲计算与机器人控制相结合，需要在硬件—算法—训练框架三个层面进行协同设计</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>生物脑以脉冲神经网络为载体，在极低功耗下实现高度灵活的序列规划与运动控制。将这些原理迁移至具身智能系统，需要在脉冲学习算法、神经形态硬件与机器人闭环控制三者之间建立统一的协同设计框架。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">0:50 – 1:20</td>
+          <td>大脑基础模型</td>
+          <td><span class="speaker">Andreas Tolias — 斯坦福大学教授</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="3000">▶ 跳至视频此处</button>
+              <p><strong>Andreas Tolias</strong>（斯坦福大学教授、Enigma Project联合负责人）系统阐述大脑基础模型（Brain Foundation Model）的构建理念与最新进展：</p>
+              <ul>
+                <li><strong>大脑基础模型的定义：</strong>借鉴大语言模型的预训练—微调范式，在大规模多模态神经活动数据上预训练通用神经表征模型，使其具备跨脑区、跨个体、跨物种的零样本泛化能力</li>
+                <li><strong>数据规模与多样性：</strong>整合Neuropixels高密度电生理记录、双光子钙成像、fMRI等多模态数据，覆盖视觉皮层、前额叶、海马等多个脑区，构建百亿级神经活动Token训练集</li>
+                <li><strong>模型架构选择：</strong>Transformer架构在建模长程神经依赖方面展现出优势，但脉冲式注意力机制与生物神经元动力学更为契合，当前处于两种路线的并行探索阶段</li>
+                <li><strong>从表征到功能理解：</strong>基础模型不仅是神经活动的压缩表征工具，更应成为验证脑科学假说的计算沙箱——通过在模型中执行虚拟扰动实验来预测神经环路的功能因果结构</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>大脑基础模型有望成为连接微观神经信号与宏观认知行为的计算桥梁。其关键不在于模型参数量的大小，而在于能否捕捉到跨尺度、跨模态的神经计算普适原理——即大脑的「操作系统的系统调用接口」。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:20 – 1:50</td>
+          <td>基于多尺度脑图谱与单细胞分辨率连接组构建的 BrainAI</td>
+          <td><span class="speaker">彭汉川 — 复旦大学脑智研究院创院院长</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="4800">▶ 跳至视频此处</button>
+              <p><strong>彭汉川</strong>（复旦大学脑智研究院创院院长、IEEE Fellow、AIMBE Fellow）系统阐述了基于多尺度脑图谱与单细胞分辨率连接组数据构建BrainAI的技术框架：</p>
+              <ul>
+                <li><strong>多尺度脑图谱体系：</strong>团队建立了全球首个全脑尺度单细胞精度的小鼠联接图谱与基于树突微环境的空间定位框架，实现了从纳米级突触到厘米级脑区的跨六个数量级的数据整合</li>
+                <li><strong>单细胞连接组学：</strong>通过Arbor-net（轴突分支网络）与Bouton-net（突触终扣网络）双模型架构，实现基因共表达模式与神经连接强度的跨尺度关联分析，揭示了转录组—连接组—功能表型之间的层级映射关系</li>
+                <li><strong>BrainAI技术栈：</strong>以AI驱动的神经元形态自动解析、连接模式智能识别与功能预测为核心，搭建了从原始影像数据到结构化脑连接知识图谱的全自动化处理管线</li>
+                <li><strong>NeuroXiv平台：</strong>全球最大跨物种单神经元三维形态数据库，为BrainAI模型训练提供了标准化的大规模基础数据设施</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>BrainAI的核心价值在于将脑科学从「手工描绘单张脑图」推进到「自动化生成全脑连接知识图谱」的新范式。单细胞分辨率的结构连接组是理解脑功能的物理基础，而AI是实现这一规模化解析的不可或缺的工具。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:50 – 2:20</td>
+          <td>多尺度时空数据处理的若干挑战</td>
+          <td><span class="speaker">—</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="6600">▶ 跳至视频此处</button>
+              <p>本环节系统梳理了脑科学多尺度时空数据处理面临的核心技术挑战：</p>
+              <ul>
+                <li><strong>跨尺度数据对齐难题：</strong>脑科学数据覆盖从分子（纳米级、毫秒级）到全脑行为（厘米级、天级）的十余个时空数量级，不同尺度之间的数据配准与语义映射缺乏统一的数学框架</li>
+                <li><strong>多模态融合瓶颈：</strong>电生理、光学成像、fMRI、行为视频等模态的数据分布差异极大，现有对齐方法多依赖人工标注，难以规模化</li>
+                <li><strong>时序依赖性建模：</strong>神经活动具有跨时间尺度的复杂依赖结构（从毫秒级脉冲相关到昼夜节律），现有序列模型在捕捉万倍以上时间跨度依赖方面仍显不足</li>
+                <li><strong>计算效率与存储优化：</strong>单次全脑高分辨率成像可产生TB级数据，实时处理与长期存储对计算基础设施提出了系统性挑战</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>多尺度时空数据处理的核心瓶颈不在于单一技术环节，而在于缺乏跨尺度、跨模态的统一表征框架。构建这一框架需要脑科学家、数据科学家与AI研究者的深度协作。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:20 – 2:50</td>
+          <td>Brainμ：依托世界模型构建神经科学基础模型</td>
+          <td><span class="speaker">雷博 — 智源研究院研究员</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="8400">▶ 跳至视频此处</button>
+              <p><strong>雷博</strong>（智源研究院研究员、AI+神经科学方向负责人）系统介绍了Brainμ（悟界·Brainμ）——全球首个理解与生成统一的多模态神经科学基础模型：</p>
+              <ul>
+                <li><strong>统一Token化框架：</strong>将EEG、双光子钙成像、Neuropixels电生理、fMRI、MEG等11种异构神经信号统一映射至共享Token空间，与语言、图像等自然模态对齐，打破神经科学长期存在的「数据孤岛」困境</li>
+                <li><strong>训练数据规模：</strong>覆盖人类、小鼠、猕猴三个物种的11种神经信号模态，总量超1万亿Token，为当前全球规模最大的Token化神经科学数据集</li>
+                <li><strong>零样本泛化能力：</strong>Brainμ在跨个体、跨物种、跨实验场景的零样本分析任务中展现出稳定的泛化性能，并在睡眠记忆调控机制研究中完成从假说生成到因果验证的完整科学发现闭环</li>
+                <li><strong>Science验证：</strong>2026年6月，Brainμ支撑的研究成果登上Science期刊，首次证实睡眠中的记忆重激活反向调控睡眠结构——负面记忆重激活加剧睡眠碎片化，正面记忆增强睡眠连续性，为精神疾病伴发睡眠障碍提供了全新机制视角</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>Brainμ的目标并非替代神经科学家，而是成为其研究工作的计算加速器。通过将多模态神经信号统一至共享表征空间，使研究者能够以自然语言交互方式对大规模神经数据进行探索性分析，大幅降低脑科学研究的计算门槛。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="sub-period" style="padding:10px 18px 4px;font-size:.78rem;font-weight:700;color:var(--text-light);border-top:1px solid var(--border);">🌤 下午 · 13:30–17:15</div>
+    <table class="schedule-table">
+      <thead><tr><th style="width:36px"></th><th>时间</th><th>环节 / 主题</th><th>嘉宾 / 讲者</th></tr></thead>
+      <tbody>
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">4:30 – 5:00</td>
+          <td>临界驱动型在线局部比对</td>
+          <td><span class="speaker">陈国璋 — 北京大学计算机学院研究员</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="16200">▶ 跳至视频此处</button>
+              <p><strong>陈国璋</strong>（北京大学计算机学院研究员）提出临界驱动型在线局部比对算法，将神经动力学中的临界性原理引入序列比对计算：</p>
+              <ul>
+                <li><strong>神经临界性与计算优势：</strong>生物神经网络在临界态附近运行时展现出最优的信息传输效率、动态范围与模式分离能力。研究借鉴这一原理，通过维持计算系统在「有序—混沌」相变边界附近运行，显著提升在线序列比对的灵敏度与抗噪性</li>
+                <li><strong>在线局部比对框架：</strong>摒弃传统批量比对需要完整序列先验知识的限制，实现数据流式到达即处理的在线比对能力，延迟控制在毫秒级，适配实时神经信号解码场景</li>
+                <li><strong>时空脉冲序列匹配：</strong>在脉冲神经网络输出解码中，该算法能够在保持脉冲时序精度的前提下，对噪声干扰和时序抖动实现鲁棒匹配</li>
+                <li><strong>脑机接口中的应用验证：</strong>在运动想象脑电解码任务中，临界驱动在线比对将单次试验解码延迟降低至传统方法的约三分之一，同时保持相当的分类准确率</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>神经临界性并非仅是脑科学中的一个理论概念，它可以被具体地转化为工程化的计算策略。临界驱动型在线比对展示了如何将生物神经动力学原理直接嵌入实时信号处理算法，为脑机接口的低延迟解码提供新途径。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">5:00 – 5:30</td>
+          <td>脑机接口基座大模型</td>
+          <td><span class="speaker">刘泉影 — 南方科技大学生物医学工程系长聘副教授</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="18000">▶ 跳至视频此处</button>
+              <p><strong>刘泉影</strong>（南方科技大学生物医学工程系长聘副教授、神经计算与控制实验室负责人、广东省杰青）系统阐述了脑机接口基座大模型的构建范式与前沿进展：</p>
+              <ul>
+                <li><strong>「预训练—后训练—个体适配」三阶段范式：</strong>借鉴大语言模型成功经验，将脑机接口建模从「一病一模型」的专用小模型模式升级为通用基座大模型路径。第一阶段在海量跨被试、跨任务脑信号数据上预训练通用神经表征；第二阶段通过指令微调对齐特定解码任务；第三阶段利用少量个体数据完成轻量适配</li>
+                <li><strong>OmniEEG-Bench评测体系：</strong>团队于2026年6月发布覆盖54个数据集、58个下游任务的EEG基础模型标准评测体系，涵盖信号可靠性、生物特征与疾病、意识与状态、认知与情绪、自然刺激解码、运动与交互六大任务族。当前评测揭示出现有EEG基础模型呈现「可微调能力」而非「即插即用」的阶段性特征</li>
+                <li><strong>因果连接图谱与精准溯源：</strong>构建全球首个人脑因果连接图谱（Nature Methods, 2025），提出基于个体脑几何先验的脑电源成像技术，实现高精度全脑溯源（Nature Biomedical Engineering, 2026）</li>
+                <li><strong>产业化落地：</strong>2026年2月孵化成立深圳全域智能科技有限公司，推动脑机接口基座大模型走向临床应用，已与深圳多家三甲医院合作开展癫痫病灶溯源定位与个体化AI孪生脑调控研究</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>脑机接口基座大模型的核心价值在于打破脑信号解码的「碎片化」现状——每个实验室、每种任务、每个被试独立训练模型的低效模式不可持续。通用基座大模型让脑机接口从「手工作坊」迈向「工业化生产」，但真正的即插即用仍需在预训练数据多样性、模型架构与个体适配效率三个维度取得进一步突破。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">5:30 – 6:00</td>
+          <td>脑图谱启发的类脑大模型</td>
+          <td><span class="speaker">张铁林 — 中科院脑智卓越中心 & 自动化所研究员</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="19800">▶ 跳至视频此处</button>
+              <p><strong>张铁林</strong>（中科院脑科学与智能技术卓越创新中心研究员、脑认知与类脑智能全国重点实验室PI）系统阐述了从多尺度脑图谱结构反向工程类脑脉冲神经网络大模型的完整路径：</p>
+              <ul>
+                <li><strong>脑图谱结构的三层级建模：</strong>微观层面借鉴树突非线性计算特性与突触可塑性规则，介观层面复现皮层柱与脑区间的层流连接模式，宏观层面嵌入全脑213个脑区间的有向连接骨架——三层级结构约束共同定义了类脑大模型的初始架构</li>
+                <li><strong>脉冲神经网络大模型的规模化挑战：</strong>团队作为主要贡献者完成了包含7100万神经元、213脑区的全脑SNN计算仿真。从万级到千万级神经元的规模化过程中，脉冲信息流的路由效率与训练稳定性构成核心瓶颈</li>
+                <li><strong>时序脉冲学习算法创新：</strong>提出基于多巴胺奖赏传播的SNN学习算法与神经调制驱动的类脑连续学习方法（NACA），在前向传播中嵌入局部突触可塑性信号，在后向传播中以全局调制信号校准学习方向，有效缓解了脉冲网络中的灾难性遗忘问题</li>
+                <li><strong>类脑大模型的应用验证：</strong>在时序信号处理（天气预报、语音流）、端侧低功耗推理、类脑具身机器人控制等任务中验证了脑图谱约束的SNN架构在能效比与小样本泛化方面的独特优势</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>脑图谱不仅是理解脑功能的科学工具，更是设计下一代类脑AI架构的工程蓝图。将脑的结构连接骨架嵌入脉冲神经网络架构设计，有望在保持生物合理性的同时实现高效计算——这条路线的关键在于找到结构约束与学习自由度之间的最优平衡点。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">6:00 – 6:30</td>
+          <td>视觉皮层中的信息动态路由</td>
+          <td><span class="speaker">贾晓轩 — 清华大学生命学院副教授</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="21600">▶ 跳至视频此处</button>
+              <p><strong>贾晓轩</strong>（清华大学生命学院副教授、清华-IDG/麦戈文脑科学研究院研究员）基于大规模电生理记录与计算建模，深入解析了视觉皮层信息动态路由的神经机制及其对AI系统的启示：</p>
+              <ul>
+                <li><strong>视觉信息层级处理的动态性：</strong>传统前馈卷积模型将视觉处理描述为V1→V2→V4→IT的固定层级级联。实验证据表明，视觉信息流并非静态度量——刺激复杂度、行为任务需求与注意力状态均会动态调节皮层区域间的有效连接强度与信息流向，包括自上而下的预测信号与自下而上的预测误差信号的实时博弈</li>
+                <li><strong>稀疏编码与选择性路由：</strong>视觉皮层中仅约10%—20%的神经元在任意给定时刻处于活跃状态，信息并非在全连接网络中均匀扩散，而是沿稀疏激活的特定神经群体选择性传输，形成任务依赖的动态路由路径</li>
+                <li><strong>预测编码框架：</strong>视觉皮层的信息处理可以统一描述为层级预测编码过程——高层区域生成对低层活动的预测，仅预测误差沿层级上传递，这与Transformer中的残差连接在功能上有结构上的类比</li>
+                <li><strong>对动态神经网络架构的启示：</strong>基于视觉皮层动态路由原理，可设计输入依赖的稀疏激活前向传播路径，在保持模型容量的同时将推理计算量降低至稠密网络的几分之一</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>视觉皮层并非静态的特征提取管道，而是一个根据任务上下文动态重配置的信息路由网络。将这一动态路由原理引入AI模型设计，有望在计算效率与任务适应性之间取得更优平衡——这是当前静态计算图架构难以实现的能力。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">6:30 – 7:00</td>
+          <td>人类认知脑机接口的探索和尝试</td>
+          <td><span class="speaker">柳昀哲 — 北京师范大学教授、北京脑科学与类脑研究所研究员</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="23400">▶ 跳至视频此处</button>
+              <p><strong>柳昀哲</strong>（北京师范大学心理学部认知神经科学与学习国家重点实验室教授、北京脑科学与类脑研究所研究员）系统阐述认知脑机接口从「状态识别」到「内容理解」的演进路径与最新突破：</p>
+              <ul>
+                <li><strong>认知脑机接口的定义升级：</strong>传统脑机接口聚焦运动意图解码或简单的状态分类。认知脑机接口的目标是从神经信号中解码语义内容、记忆表征与思维过程，实现人脑与外部系统在语义层面的信息交换</li>
+                <li><strong>Sleep Interpreter（SI）睡眠解码框架：</strong>团队于2026年4月在Neuron发表睡眠记忆解码框架，利用神经对比学习从135名被试约1000小时睡眠脑电中解码语义内容。该模型在NREM睡眠期实现15分类22.82%的解码准确率（随机水平6.67%），并支持跨被试零样本解码</li>
+                <li><strong>神经对比学习的核心创新：</strong>将不同睡眠阶段、不同被试的脑电信号投射至共享语义嵌入空间，使语义相近的神经活动模式在嵌入空间中彼此靠近。该方法的优势在于不依赖显式的语义标注，可从未标记的睡眠数据中自动涌现出结构化语义表征</li>
+                <li><strong>实时闭环系统：</strong>搭建了可实时运行的睡眠分期（与专家标注90.38%一致率）与阶段特异性语义解码系统，为面向睡眠障碍、记忆巩固障碍患者的闭环干预提供了技术雏形</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>认知脑机接口正经历从「识别脑状态」到「理解脑内容」的范式转变。神经对比学习为这一转变提供了关键方法论——它使模型能够从未标注的大规模神经数据中自发发现语义结构，是实现可规模化认知解码的重要技术路径。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">7:00 – 8:00</td>
+          <td><strong>圆桌讨论</strong></td>
+          <td><span class="speaker">全体讲者及特邀嘉宾</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="25200">▶ 跳至视频此处</button>
+              <p>全体讲者与特邀圆桌嘉宾参与，围绕以下议题展开深入讨论。特邀嘉宾：<strong>阿迪斯</strong>（浙江强脑科技有限公司CTO）、<strong>陈峰</strong>（清华大学自动化系长聘教授）、<strong>戴小川</strong>（清华大学生物医学工程学院副教授）、<strong>李远宁</strong>（上海科技大学生物医学工程学院研究员）、<strong>唐毅</strong>（首都医科大学宣武医院常务副院长）。</p>
+              <ul>
+                <li><strong>脑科学向AI转化的关键瓶颈与破解路径：</strong>当前脑科学发现向AI算法的有效转化面临三重鸿沟——机制理解碎片化（已知脑区功能与完整环路计算逻辑之间的知识空白）、实验语言与计算语言不通（神经科学家以脉冲频率、场电位为术语体系，AI研究者以梯度、损失函数为工作语言）、工程化路径缺失（从生物学原理到可部署算法缺少系统性的转化方法论）。破解路径在于建立跨学科的「原理—算法—系统」三级转化框架，并在关键节点设置联合验证标准。</li>
+                <li><strong>跨学科协作的机制建设：</strong>与会专家一致认为，脑科学与AI的协作不应停留在互相借鉴灵感的浅层阶段。需要建立联合培养计划（神经科学+机器学习双导师制）、共享实验—计算工具链（统一数据格式与基准测试）与定期跨领域研讨会三重机制，逐步消解两个领域间在术语、方法论和评价标准上的系统性壁垒。</li>
+                <li><strong>脑机接口的临床转化路径：</strong>从实验室原型到临床可部署系统，脑机接口需跨越信号稳定性（长期植入电极的生物相容性与信号衰减）、实时性（闭环场景要求毫秒级解码延迟）、个性化（跨个体的神经表征差异需要高效适配方案）与伦理合规（认知隐私与神经数据安全）四道门槛。宣武医院唐毅教授从临床需求端指出，脑机接口在意识障碍评估、癫痫预警和脑卒中后功能重建三个领域具有最为紧迫的临床价值。</li>
+                <li><strong>类脑计算芯片的产业化前景：</strong>强脑科技阿迪斯从产业视角分析了非侵入式与侵入式脑机接口的技术路线选择——非侵入式在消费级市场具有规模化优势，但其信号分辨率存在物理天花板；侵入式在临床级应用中精度优势明显，但面临手术风险与长期维护成本的双重挑战。两条路线短期内将并行发展，中长期可能在微创方案上实现交汇。</li>
+                <li><strong>下一代智能系统的架构展望：</strong>与会专家认为，未来的通用智能系统不大可能是单一技术路线的产物。类脑脉冲计算、深度神经网络与符号推理三种范式将在不同时空尺度上融合——类脑计算负责低功耗实时感知与运动控制，深度学习承担高维模式识别与生成，符号系统提供逻辑推理与可解释性保障。实现这一融合需要在统一的计算理论框架下重新定义各模块间的接口与通信协议。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>圆桌共识</h4>
+                <p>AI与神经科学的交叉研究正处于从「相互借鉴灵感」向「系统性双向赋能」过渡的关键阶段。实现这一转型需要三个层面的行动：在科学层面，建立跨物种、跨模态的开放数据标准与基准测试体系；在工程层面，构建从脑科学原理到可部署算法的系统化转化方法论；在人才层面，通过联合培养与交叉项目机制培育兼具神经科学素养与AI工程能力的新一代研究者。脑机接口与类脑计算将在未来五至十年内从实验室原型走向临床与产业落地，但这一进程的速度取决于上述瓶颈的突破节奏。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">8:00 – 8:15</td>
+          <td>🏁 大会闭幕</td>
+          <td><span class="speaker">黄铁军 — 智源研究院理事长</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="28800">▶ 跳至视频此处</button>
+              <p><strong>黄铁军</strong>（智源研究院理事长）致闭幕辞，总结论坛核心成果与智源研究院在AI+神经科学交叉方向的战略布局：</p>
+              <ul>
+                <li><strong>论坛成果总结：</strong>本次论坛涵盖从微观突触到宏观脑网络、从基础脑机接口到类脑大模型的全链条研究，充分展示了AI与神经科学交叉领域的活跃态势。Brainμ等标志性成果登上Science表明，中国在这一交叉领域已进入国际前沿梯队</li>
+                <li><strong>智源战略布局：</strong>智源研究院将持续加大对AI+神经科学方向的支持力度，推动Brainμ模型向「神经科学世界模型」演进，同时加强类脑芯片、脑机接口算法等方向的产学研协同</li>
+                <li><strong>开放科学倡议：</strong>脑科学数据的开放共享是加速交叉研究的基石。智源将联合学术界伙伴推动建立中国脑科学大数据共享平台，以标准化数据格式和开放API降低跨学科研究的准入门槛</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>2026年将是AI+神经科学交叉研究从学术探索走向实质性突破的元年。智源将持续扮演连接脑科学与人工智能两个领域的枢纽角色，推动开放科学基础设施与跨学科人才培养两大战略支柱的建设。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+(function() {
+  var video = document.getElementById('forum-video');
+  var m3u8Url = 'https://event-cdn.baai.ac.cn/vod-71f4bf/a0296d8b67d871f1b6ae1776b3cf0102/c4c2b6ff4d064620b350854f154f5eed-ef4286ab5da0694627224b8bf817c8c4-hd.m3u8';
+  var hlsInstance = null;
+
+  function initPlayer(url) {
+    if (Hls.isSupported()) {
+      if (hlsInstance) { hlsInstance.destroy(); }
+      hlsInstance = new Hls();
+      hlsInstance.loadSource(url);
+      hlsInstance.attachMedia(video);
+      hlsInstance.on(Hls.Events.MANIFEST_PARSED, function() {
+        video.play().catch(function(){});
+      });
+      hlsInstance.on(Hls.Events.ERROR, function(evt, data) {
+        if (data.fatal) {
+          if (data.type === Hls.ErrorTypes.NETWORK_ERROR) { hlsInstance.startLoad(); }
+          else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) { hlsInstance.recoverMediaError(); }
+        }
+      });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = url;
+      video.addEventListener('loadedmetadata', function() {
+        video.play().catch(function(){});
+      });
+    }
+  }
+
+  // Auto-load the video
+  initPlayer(m3u8Url);
+
+  // Bind seek buttons
+  function bindSeekButtons() {
+    document.querySelectorAll('.seek-video').forEach(function(btn) {
+      btn.onclick = function(e) {
+        e.stopPropagation();
+        var sec = parseInt(this.getAttribute('data-seek'));
+        if (video && sec >= 0) {
+          video.currentTime = sec;
+          video.play().catch(function(){});
+          video.scrollIntoView({ behavior: 'smooth' });
+        }
+      };
+    });
+  }
+
+  // Initial bind + rebind after HLS manifest parsed
+  bindSeekButtons();
+  if (Hls.isSupported()) {
+    var checkInterval = setInterval(function() {
+      if (video.readyState >= 2) {
+        bindSeekButtons();
+        clearInterval(checkInterval);
+      }
+    }, 1000);
+  }
+
+  // Session expand/collapse
+  document.querySelectorAll('.session-row.has-detail').forEach(function(row) {
+    row.addEventListener('click', function() {
+      this.classList.toggle('open');
+      var next = this.nextElementSibling;
+      if (next && next.classList.contains('session-detail')) { next.classList.toggle('open'); }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

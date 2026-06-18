@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026智源大会 — 终端智能体与OpenClaw 直播回放</title>
+<style>
+  :root {
+    --primary: #1a3a5c;
+    --accent: #2857ff;
+    --bg: #f5f6f8;
+    --card-bg: #ffffff;
+    --text: #2c3e50;
+    --text-light: #5a6d80;
+    --border: #e2e6ed;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --radius: 10px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", "AR PL UKai CN", serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding-bottom: 40px;
+  }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+
+  /* ========== Header ========== */
+  .header {
+    position: relative;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: #fff;
+    padding: 32px 0;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  .header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", serif;
+  }
+  .back-link {
+    position: absolute;
+    top: 18px;
+    left: 24px;
+    color: rgba(255,255,255,.7);
+    text-decoration: none;
+    font-size: .9rem;
+    transition: color .2s;
+    z-index: 2;
+  }
+  .back-link:hover { color: #fff; }
+
+  /* ========== Video Player ========== */
+  .video-wrapper {
+    background: #000;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .video-wrapper video {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 540px;
+  }
+
+  /* ========== Card ========== */
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 0;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 16px 20px;
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--primary);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ========== Session Table ========== */
+  .schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .schedule-table thead th {
+    text-align: left;
+    font-size: .73rem;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--text-light);
+    padding: 8px 18px;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .time-slot {
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+    min-width: 100px;
+    font-size: .82rem;
+  }
+  .speaker { font-size: .82rem; color: var(--text-light); }
+
+  /* ========== Session Rows ========== */
+  .session-row { cursor: default; }
+  .session-row td { padding: 10px 18px; }
+  .session-row.has-detail {
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .session-row.has-detail:hover { background: #f5f7fa; }
+  .session-arrow {
+    text-align: center;
+    font-size: .6rem;
+    color: var(--text-light);
+    width: 36px;
+    transition: transform .25s;
+    vertical-align: middle;
+  }
+  .session-row.has-detail.open .session-arrow { transform: rotate(90deg); }
+  .session-row.no-detail .session-arrow { color: transparent; }
+  .session-detail { display: none; }
+  .session-detail.open { display: table-row; }
+  .session-detail td {
+    padding: 0 18px 16px !important;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .session-detail-content {
+    font-size: .88rem;
+    color: var(--text);
+    padding: 8px 0 8px 6px;
+  }
+  .session-detail-content p { margin-bottom: 8px; }
+  .session-detail-content ul { padding-left: 20px; margin-bottom: 8px; }
+  .session-detail-content ul li { margin-bottom: 4px; }
+
+  /* ========== Seek Button ========== */
+  .seek-video {
+    display: inline-block;
+    padding: 4px 14px;
+    margin-bottom: 8px;
+    border: 1px solid var(--accent);
+    border-radius: 99px;
+    background: #fff;
+    color: var(--accent);
+    font-size: .78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .seek-video:hover { background: var(--accent); color: #fff; }
+
+  /* ========== Highlight Box ========== */
+  .highlight-box {
+    background: #fff8e1;
+    border-left: 4px solid #f0b400;
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+  }
+  .highlight-box h4 { color: #b8860b; margin-bottom: 4px; }
+
+  /* ========== Summary Box ========== */
+  .summary-box {
+    padding: 18px 20px;
+    font-size: .88rem;
+    color: var(--text-light);
+    line-height: 1.8;
+  }
+
+  @media (max-width: 768px) {
+    .header h1 { font-size: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a class="back-link" href="index.html">← 返回</a>
+  <h1>🤖 2026智源大会 · 终端智能体与OpenClaw</h1>
+</header>
+
+<div class="container">
+
+  <!-- 视频播放器 -->
+  <div class="video-wrapper" id="video-wrapper">
+    <video id="forum-video" controls preload="metadata" crossorigin="anonymous" playsinline
+           style="display:block;width:100%;height:auto;max-height:540px;"></video>
+  </div>
+
+  <!-- 论坛简介 -->
+  <div class="card">
+    <div class="card-header">📖 论坛简介</div>
+    <div class="summary-box">
+      <p>本论坛围绕 <strong>「大模型智能体如何获得真实执行能力」</strong> 展开，核心关键词是 <strong>Harness（连接/驾驭）体系</strong>——通过 Harness 框架将模型、工具、环境、记忆、符号结构、安全沙箱、端云系统有机整合，使 Agent 从单纯的"会聊天的语言模型"进化为能在终端设备和组织场景中持续完成任务的执行系统。</p>
+      <p style="margin-top:10px">刘知远教授指出：<strong>OpenClaw 的历史意义不在于它是否长存，而在于它标志着大模型智能体从云端聊天进入真实工作场域</strong>——正如浏览器没有发明互联网，却定义了普通人进入互联网的方式。论坛集结产学研领域专家学者，从系统架构、移动端集成、神经符号融合、环境构建、产品落地等多维度展开深入研讨。</p>
+      <p style="margin-top:10px;font-size:.8rem;color:#999;">🕐 2026年6月12日 13:00–17:00 · 视频时间 5:35–4:05:35 · 📍 海慧厅 B · 线上同步直播</p>
+    </div>
+  </div>
+
+  <!-- 议程详情 -->
+  <div class="card">
+    <div class="card-header">📋 议程详情（点击展开）</div>
+    <table class="schedule-table">
+      <thead><tr><th style="width:36px"></th><th>时间</th><th>环节 / 主题</th><th>嘉宾 / 讲者</th></tr></thead>
+      <tbody>
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">5:35 – 40:35</td>
+          <td>开场致辞 & 主题报告：从 OpenClaw 看智能体技术发展趋势</td>
+          <td><span class="speaker">刘知远 — 清华大学计算机系教授，面壁智能创始人</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="335">▶ 跳至视频此处</button>
+              <p><strong>刘知远</strong>（清华大学计算机系长聘教授、面壁智能创始人、论坛主席）致开场辞并做主题报告：</p>
+              <ul>
+                <li>OpenClaw 标志着大模型智能体从「云端聊天助手」进入真实工作场域</li>
+                <li>核心命题：<strong>谁能定义 Agent 时代的「操作层」？</strong></li>
+                <li>Agent 正从「工具使用者」走向「环境参与者」，从「任务执行器」走向「持续学习体」</li>
+                <li>端侧智能的三大命题：端侧模型最重要的使命？落地形态？谁能留在牌桌上？</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>OpenClaw 被比作「Agent 时代的浏览器」——并未发明底层技术，但第一次把分散能力组织成可被大众感知的形态。正如浏览器定义了普通人进入互联网的方式，OpenClaw 正在定义 Agent 进入工作场景的方式。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">40:35 – 1:05:35</td>
+          <td>从 OpenClaw 看智能体技术发展趋势</td>
+          <td><span class="speaker">林衍凯 — 中国人民大学高瓴人工智能学院准聘副教授</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="2435">▶ 跳至视频此处</button>
+              <p><strong>林衍凯</strong>（中国人民大学高瓴人工智能学院准聘副教授）系统分析 OpenClaw 背后的技术架构与趋势：</p>
+              <ul>
+                <li>OpenClaw 的本质是<strong>系统集成</strong>——把模型、Skill、记忆、接口和用户入口组织到一起</li>
+                <li>智能体技术栈的分层：模型层 → 能力层 → 交互层 → 应用层</li>
+                <li>当前瓶颈不在模型能力，而在<strong>系统架构的整合效率</strong></li>
+                <li>未来趋势：从单 Agent 到多 Agent 协作，从固定流程到自适应编排</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>Agent 框架的竞争本质是「系统集成效率」的竞争——谁能用更少的工程成本，把更强的模型能力转化为更可靠的任务执行，谁就掌握了 Agent 时代的入口。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:05:35 – 1:30:35</td>
+          <td>Organization Model：让组织变得可生成</td>
+          <td><span class="speaker">钱忱 — 上海交通大学人工智能学院副教授</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="3935">▶ 跳至视频此处</button>
+              <p><strong>钱忱</strong>（上海交通大学人工智能学院副教授）提出「可生成组织」概念：</p>
+              <ul>
+                <li>提出「<strong>可生成组织</strong>」（Generative Organization）概念——多个 Agent 如何自动生成组织结构</li>
+                <li>核心机制：角色分配、任务分解、协作流程的自动化生成</li>
+                <li>扩展到教育场景：TeachMaster 教学智能体、Agentic University 智能大学构想</li>
+                <li>组织模型的三个层次：个体 Agent → 团队协作 → 组织级智能</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>当 Agent 不仅能执行单个任务，还能自动组建「虚拟团队」完成复杂项目时，教育、科研、企业管理的组织形态将被根本性重塑。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:30:35 – 1:55:35</td>
+          <td>Mobile Agent Harness（移动智能体集成框架）</td>
+          <td><span class="speaker">李元春 — 清华大学智能产业研究院助理教授</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="5435">▶ 跳至视频此处</button>
+              <p><strong>李元春</strong>（清华大学智能产业研究院助理教授）提出核心框架 <strong>Agent = Model + Harness</strong>：</p>
+              <ul>
+                <li>端侧 Agent 的四大基础设施：
+                  <ul>
+                    <li><strong>APP 知识库</strong>——让 Agent 理解每个应用的能力边界</li>
+                    <li><strong>自动探索机制</strong>——Agent 自主发现和适配新环境</li>
+                    <li><strong>状态转换图</strong>——对复杂任务流程的结构化建模</li>
+                    <li><strong>合成环境</strong>——弥补真实环境数据的不足</li>
+                  </ul>
+                </li>
+                <li>移动端 Agent 的独特挑战：屏幕理解、触控操作、跨应用协同</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>没有好的 Harness 体系，再强的模型也无法在终端设备上可靠执行任务。Harness 是连接模型能力与真实世界的「最后一公里」。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:55:35 – 2:20:35</td>
+          <td>Neuro-Symbolic Agent（神经符号智能体）</td>
+          <td><span class="speaker">郭兰哲 — 南京大学智能科学与技术学院准聘助理教授</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="6935">▶ 跳至视频此处</button>
+              <p><strong>郭兰哲</strong>（南京大学智能科学与技术学院准聘助理教授）从神经符号角度重新审视 Agent 架构：</p>
+              <ul>
+                <li>Agent 需要的五种关键能力：
+                  <ul>
+                    <li><strong>状态判断</strong>——准确感知当前执行进度</li>
+                    <li><strong>变量绑定</strong>——将抽象指令映射到具体操作</li>
+                    <li><strong>控制流</strong>——条件分支、循环、异常处理</li>
+                    <li><strong>失败修复</strong>——出错后自主诊断和恢复</li>
+                    <li><strong>可执行图结构</strong>——将经验压缩为可操作、可泛化的符号结构</li>
+                  </ul>
+                </li>
+                <li>从反应式决策到<strong>可验证决策</strong>：神经网络的灵活性 + 符号系统的可靠性</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>纯神经网络的黑盒决策在关键任务中不可靠。神经符号方法将 Agent 的「直觉」与「逻辑」结合，是实现可信自主智能体的关键路径。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:20:35 – 2:40:35</td>
+          <td>Environment is the Missing "Data" for Agents</td>
+          <td><span class="speaker">范文栋 — CAMEL 技术负责人</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="8435">▶ 跳至视频此处</button>
+              <p><strong>范文栋</strong>（CAMEL 技术负责人）提出核心论点：环境是 Agent 缺失的关键「数据」：</p>
+              <ul>
+                <li>没有可规模化、可验证的环境，Agent 无法形成真正的长程能力</li>
+                <li>CAMEL 在环境构建方面的实践：
+                  <ul>
+                    <li>合成任务环境——大规模生成训练场景</li>
+                    <li>对抗性环境——测试 Agent 的鲁棒性边界</li>
+                    <li>多 Agent 社会环境——模拟真实协作与竞争</li>
+                  </ul>
+                </li>
+                <li>环境即数据：环境的质量决定了 Agent 能力的上限</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>我们花了太多精力优化模型，却忽略了 Agent 赖以成长的「土壤」——环境。没有丰富、可扩展的环境基础设施，Agent 的进化将撞上数据天花板。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:40:35 – 3:00:35</td>
+          <td>AI 原生战略下的 Agent 产品思考与实践</td>
+          <td><span class="speaker">段亦涛 — 网易有道首席科学家</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="9635">▶ 跳至视频此处</button>
+              <p><strong>段亦涛</strong>（网易有道首席科学家）分享教育场景下 Agent 产品的落地经验：</p>
+              <ul>
+                <li>核心原则：<strong>围绕业务目标优化，而非论文 Benchmark</strong></li>
+                <li>教育 Agent 的独特需求：
+                  <ul>
+                    <li>可解释性——学生和家长需要理解 AI 的决策</li>
+                    <li>个性化——适应不同学习风格和进度</li>
+                    <li>安全性——教育场景对内容安全要求极高</li>
+                  </ul>
+                </li>
+                <li>AI 原生战略：不是给旧产品加 AI 功能，而是从 AI 能力出发重新设计产品</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>「先找到用户愿意付费的真实需求，再用 Agent 能力去满足它」——产业落地的关键是业务价值驱动，而非技术炫技。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:00:35 – 3:20:35</td>
+          <td>从"能聊"到"能力"：让智能体拥有超级执行力</td>
+          <td><span class="speaker">李景秋 — 百度搭子 DuMate 产品总架构师</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="10835">▶ 跳至视频此处</button>
+              <p><strong>李景秋</strong>（百度搭子 DuMate 产品总架构师）阐述从「能聊」到「能力」的关键跃迁：</p>
+              <ul>
+                <li>超级执行力的三大支柱：
+                  <ul>
+                    <li><strong>意图理解</strong>——从模糊需求到精确任务描述</li>
+                    <li><strong>工具编排</strong>——自动选择和组合合适的工具链</li>
+                    <li><strong>执行闭环</strong>——任务 → 反馈 → 调整 → 完成</li>
+                  </ul>
+                </li>
+                <li>百度 DuMate 的实践：如何让 Agent 真正「干活」而不是「聊天」</li>
+                <li>端侧 Agent 的产品化挑战：延迟、功耗、隐私</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>用户不会为「会聊天的 AI」付费，但会为「能帮我把事办成的 AI」付费。执行力是 Agent 产品从玩具走向工具的必经之路。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:20:35 – 3:40:35</td>
+          <td>Work Buddy 思考与实践</td>
+          <td><span class="speaker">汪晟杰 — 腾讯云资深产品专家</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="12035">▶ 跳至视频此处</button>
+              <p><strong>汪晟杰</strong>（腾讯云资深产品专家、Work Buddy 产品负责人、本场主持人）提出 AgentOS 概念：</p>
+              <ul>
+                <li><strong>AgentOS</strong> 概念——面向 Agent 的新型操作系统范式</li>
+                <li>Work Buddy 的核心架构：
+                  <ul>
+                    <li><strong>端云协同</strong>——端侧低延迟 + 云端强算力</li>
+                    <li><strong>安全沙箱</strong>——Agent 执行环境隔离，防止越权操作</li>
+                    <li><strong>审计追踪</strong>——每一步操作可记录、可回溯</li>
+                    <li><strong>记忆分层</strong>——短期工作记忆 + 长期知识积累</li>
+                    <li><strong>多设备调度</strong>——跨手机、PC、平板的统一 Agent 体验</li>
+                  </ul>
+                </li>
+                <li>腾讯在办公场景下的 Agent 落地实践</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>Agent 的操作系统不是 Windows/macOS 的简单延伸——它需要重新定义进程（Agent 生命周期）、文件系统（记忆管理）、权限模型（能力边界）和安全模型（行为审计）。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:40:35 – 3:50:35</td>
+          <td>🔥「智源-面壁联合加速器」发布仪式</td>
+          <td><span class="speaker">王仲远（智源研究院院长）+ 刘知远（面壁智能创始人）</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="13235">▶ 跳至视频此处</button>
+              <p><strong>王仲远</strong>（智源研究院院长）× <strong>刘知远</strong>（面壁智能创始人）联合发布「智源-面壁联合加速器」：</p>
+              <ul>
+                <li>为 Agent 方向的初创团队提供算力、数据和工程基础设施支持</li>
+                <li>推动 OpenClaw 生态的开发者社区建设</li>
+                <li>加速从学术研究到产业落地的转化周期</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>智源与面壁的合作标志着中国 AI 领域「研究机构 + 创业公司」协同模式的深化——用开源生态降低 Agent 开发门槛，用加速器机制培育创新力量。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row no-detail">
+          <td class="session-arrow"></td>
+          <td class="time-slot">3:50:35 – 4:05:35</td>
+          <td>项目汇报 & 闭幕</td>
+          <td><span class="speaker">—</span></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+(function() {
+  var video = document.getElementById('forum-video');
+  var videoSrc = 'https://vod-2020.baai.ac.cn/record/06110746-18-907afa61ec6e5822613a8e44a3756fb1/06110746-18-2d9f161b1c038a6ad5b3167ae2f84eb4/2026-06-12-12-54-25_2026-06-12-17-06-00.m3u8';
+  var m3u8Url = null;
+
+  function initPlayer(url) {
+    m3u8Url = url;
+
+    if (Hls.isSupported()) {
+      var hls = new Hls({ startPosition: 0 });
+      hls.loadSource(url);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, function() {
+        bindSeekButtons();
+      });
+      hls.on(Hls.Events.ERROR, function(evt, data) {
+        if (data.fatal) {
+          if (data.type === Hls.ErrorTypes.NETWORK_ERROR) { hls.startLoad(); }
+          else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) { hls.recoverMediaError(); }
+        }
+      });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = url;
+      video.addEventListener('loadedmetadata', function() {
+        bindSeekButtons();
+      });
+    }
+
+    try { localStorage.setItem('forum_openclaw_m3u8', url); } catch(e) {}
+  }
+
+  // Check URL params first
+  var m = location.search.match(/[?&]m3u8=([^&]+)/);
+  if (m) {
+    initPlayer(decodeURIComponent(m[1]));
+  } else {
+    // Try saved URL, otherwise use default
+    try {
+      var saved = localStorage.getItem('forum_openclaw_m3u8');
+      if (saved) { initPlayer(saved); }
+      else { initPlayer(videoSrc); }
+    } catch(e) {
+      initPlayer(videoSrc);
+    }
+  }
+
+  function bindSeekButtons() {
+    document.querySelectorAll('.seek-video').forEach(function(btn) {
+      btn.onclick = function(e) {
+        e.stopPropagation();
+        var sec = parseInt(this.getAttribute('data-seek'));
+        if (video && sec >= 0) {
+          video.currentTime = sec;
+          video.play().catch(function(){});
+          video.scrollIntoView({ behavior: 'smooth' });
+        }
+      };
+    });
+  }
+
+  // Session expand/collapse
+  document.querySelectorAll('.session-row.has-detail').forEach(function(row) {
+    row.addEventListener('click', function() {
+      this.classList.toggle('open');
+      var next = this.nextElementSibling;
+      if (next && next.classList.contains('session-detail')) { next.classList.toggle('open'); }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

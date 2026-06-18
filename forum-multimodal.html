@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026智源大会 — 多模态生成与视频世界模型 直播回放</title>
+<style>
+  :root {
+    --primary: #1a3a5c;
+    --accent: #2857ff;
+    --bg: #f5f6f8;
+    --card-bg: #ffffff;
+    --text: #2c3e50;
+    --text-light: #5a6d80;
+    --border: #e2e6ed;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --radius: 10px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", "AR PL UKai CN", serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding-bottom: 40px;
+  }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+
+  /* ========== Header ========== */
+  .header {
+    position: relative;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: #fff;
+    padding: 32px 0;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  .header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", serif;
+  }
+  .back-link {
+    position: absolute;
+    top: 18px;
+    left: 24px;
+    color: rgba(255,255,255,.7);
+    text-decoration: none;
+    font-size: .9rem;
+    transition: color .2s;
+    z-index: 2;
+  }
+  .back-link:hover { color: #fff; }
+
+  /* ========== Video Player ========== */
+  .video-wrapper {
+    background: #000;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .video-wrapper video {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 540px;
+  }
+
+  /* ========== Card ========== */
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 0;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 16px 20px;
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--primary);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ========== Session Table ========== */
+  .schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .schedule-table thead th {
+    text-align: left;
+    font-size: .73rem;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--text-light);
+    padding: 8px 18px;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .time-slot {
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+    min-width: 100px;
+    font-size: .82rem;
+  }
+  .speaker { font-size: .82rem; color: var(--text-light); }
+
+  /* ========== Session Rows ========== */
+  .session-row { cursor: default; }
+  .session-row td { padding: 10px 18px; }
+  .session-row.has-detail {
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .session-row.has-detail:hover { background: #f5f7fa; }
+  .session-arrow {
+    text-align: center;
+    font-size: .6rem;
+    color: var(--text-light);
+    width: 36px;
+    transition: transform .25s;
+    vertical-align: middle;
+  }
+  .session-row.has-detail.open .session-arrow { transform: rotate(90deg); }
+  .session-row.no-detail .session-arrow { color: transparent; }
+  .session-detail { display: none; }
+  .session-detail.open { display: table-row; }
+  .session-detail td {
+    padding: 0 18px 16px !important;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .session-detail-content {
+    font-size: .88rem;
+    color: var(--text);
+    padding: 8px 0 8px 6px;
+  }
+  .session-detail-content p { margin-bottom: 8px; }
+  .session-detail-content ul { padding-left: 20px; margin-bottom: 8px; }
+  .session-detail-content ul li { margin-bottom: 4px; }
+
+  /* ========== Seek Button ========== */
+  .seek-video {
+    display: inline-block;
+    padding: 4px 14px;
+    margin-bottom: 8px;
+    border: 1px solid var(--accent);
+    border-radius: 99px;
+    background: #fff;
+    color: var(--accent);
+    font-size: .78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .seek-video:hover { background: var(--accent); color: #fff; }
+
+  /* ========== Highlight Box ========== */
+  .highlight-box {
+    background: #fff8e1;
+    border-left: 4px solid #f0b400;
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+  }
+  .highlight-box h4 { color: #b8860b; margin-bottom: 4px; }
+
+  /* ========== Summary Box ========== */
+  .summary-box {
+    padding: 18px 20px;
+    font-size: .88rem;
+    color: var(--text-light);
+    line-height: 1.8;
+  }
+
+  @media (max-width: 768px) {
+    .header h1 { font-size: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a class="back-link" href="index.html">← 返回</a>
+  <h1>🎬 2026智源大会 · 多模态生成与视频世界模型</h1>
+</header>
+
+<div class="container">
+
+  <!-- 视频播放器 -->
+  <div class="video-wrapper" id="video-wrapper">
+    <div id="video-placeholder" style="background:#1a1a2e;color:#fff;padding:40px 24px;text-align:center;border-radius:10px;">
+      <p style="font-size:1.2rem;margin-bottom:8px;">🎬 多模态生成与视频世界模型 · 直播回放</p>
+      <p style="font-size:.82rem;color:#aaa;margin-bottom:20px;">按以下步骤获取视频地址：</p>
+
+      <div style="display:inline-block;text-align:left;background:#111;border-radius:8px;padding:16px 24px;margin-bottom:16px;">
+        <p style="margin-bottom:8px;"><strong>步骤 1：</strong>打开 <a href="https://event.baai.ac.cn/live/1024" target="_blank" style="color:#5b9eff;">BAAI 直播回放页</a></p>
+        <p style="margin-bottom:8px;"><strong>步骤 2：</strong>按 <kbd style="background:#333;padding:1px 6px;border-radius:3px;">F12</kbd> → <kbd style="background:#333;padding:1px 6px;border-radius:3px;">Console</kbd>，粘贴以下代码并回车：</p>
+        <textarea readonly onclick="this.select();document.execCommand('copy')" style="width:560px;height:36px;padding:8px;background:#0d1117;color:#58a6ff;border:1px solid #30363d;border-radius:4px;font-family:Consolas,monospace;font-size:.72rem;resize:none;cursor:pointer;display:block;margin:4px 0;">(async()=>{try{let r=await(await fetch('/api/api/playinfo?activityId=1024',{credentials:'include',headers:{accept:'application/json'}})).json();let u=r.data?.playInfo?.play_url;if(u){await navigator.clipboard.writeText(u);document.body.innerHTML='&lt;div style=text-align:center;padding:60px;font-size:1.3rem&gt;&lt;p&gt;✅ m3u8 已复制到剪贴板！&lt;/p&gt;&lt;textarea style=width:90%;height:100px;margin:12px 0;font-size:.7rem&gt;'+u+'&lt;/textarea&gt;&lt;p style=font-size:.85rem;color:#666&gt;切回 summary 页面 → 粘贴到输入框 → 点击加载视频&lt;/p&gt;&lt;/div&gt;'}else{document.body.innerHTML='&lt;div style=text-align:center;padding:60px&gt;&lt;p&gt;❌ 获取失败，请确认已登录 BAAI&lt;/p&gt;&lt;/div&gt;'}}catch(e){document.body.innerHTML='&lt;div style=text-align:center;padding:60px&gt;&lt;p&gt;❌ 错误: '+e.message+'&lt;/p&gt;&lt;/div&gt;'}})()</textarea>
+        <p style="font-size:.7rem;color:#666;">👆 点击代码框自动复制</p>
+      </div>
+
+      <div style="border-top:1px solid #333;padding-top:16px;margin-top:4px;">
+        <p style="margin-bottom:6px;"><strong>步骤 3：</strong>回到本页，粘贴 m3u8 地址并加载：</p>
+        <input id="m3u8-input" type="text" placeholder="Ctrl+V 粘贴 .m3u8 地址..."
+               style="width:100%;max-width:500px;padding:10px;border-radius:6px;border:1px solid #555;background:#222;color:#fff;font-size:.85rem;">
+        <button onclick="loadVideo()" style="display:block;margin:10px auto 0;padding:10px 40px;background:#2857ff;color:#fff;border:none;border-radius:6px;font-size:.95rem;cursor:pointer;font-weight:700;">▶ 加载视频</button>
+      </div>
+    </div>
+    <video id="forum-video" controls preload="metadata" crossorigin="anonymous" playsinline
+           style="display:none;width:100%;height:auto;max-height:540px;"></video>
+  </div>
+
+  <!-- 论坛简介 -->
+  <div class="card">
+    <div class="card-header">📖 论坛简介</div>
+    <div class="summary-box">
+      <p>多模态感知与生成技术正加速推动人工智能从单一模态理解向跨模态协同演进。<strong>多模态世界模型</strong>旨在建立统一的多模态表示框架，整合文本、图像、视频与三维空间信息，实现从感知到生成、从理解到交互的完整闭环。在视频生成领域，扩散模型、自回归模型与新兴生成范式持续迭代，推动内容生成质量不断提升；在空间感知领域，三维基础模型正逐步打通从二维视觉输入到三维场景理解的技术路径。</p>
+      <p style="margin-top:10px">本次论坛围绕多模态生成与视频世界模型的前沿进展展开研讨，集结学术界与产业界的一线研究者，深入探讨生成式建模新范式、视频世界模型从离线生成到实时交互的演进、三维空间感知基础模型、统一多模态世界模型架构，以及多模态技术在视频生成、交互表演等场景中的产品化落地实践。论坛以圆桌讨论收束，从"看懂"与"交互"两个维度，探讨多模态技术如何重构世界模型的能力边界。</p>
+      <p style="margin-top:10px;font-size:.8rem;color:#999;">🕐 2026年6月13日 08:20–12:34 · 视频时间 43:01–3:51:43 · 📍 G09 会议室 · 线上同步直播</p>
+    </div>
+  </div>
+
+  <!-- 议程详情 -->
+  <div class="card">
+    <div class="card-header">📋 议程详情（点击展开）</div>
+    <table class="schedule-table">
+      <thead><tr><th style="width:36px"></th><th>时间</th><th>环节 / 主题</th><th>嘉宾 / 讲者</th></tr></thead>
+      <tbody>
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">43:01 – 46:36</td>
+          <td>论坛介绍及主持</td>
+          <td><span class="speaker">赵敏</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="2581">▶ 跳至视频此处</button>
+              <p><strong>赵敏</strong> 主持论坛开场，对多模态生成与视频世界模型论坛的研讨背景与议程框架进行导览，梳理各议题之间的逻辑关联：</p>
+              <ul>
+                <li><strong>论坛定位：</strong>聚焦多模态生成技术与视频世界模型的前沿交叉地带，覆盖生成式建模新范式、视频世界模型的能力演进、三维空间感知与统一多模态架构四个核心方向</li>
+                <li><strong>议程脉络：</strong>从底层生成范式出发，逐层推进至视频世界模型的交互能力、三维空间的理解模型，再到工业界的产品化实践，最终通过圆桌讨论汇聚各方视角</li>
+                <li><strong>核心议题：</strong>多模态感知如何赋能世界模型、视频生成技术如何从离线走向实时、三维空间感知如何弥合二维与三维之间的语义鸿沟</li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">46:36 – 1:10:30</td>
+          <td>Generative Modeling via Drifting</td>
+          <td><span class="speaker">邓明扬</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="2796">▶ 跳至视频此处</button>
+              <p><strong>邓明扬</strong> 提出基于 Drifting 范式的生成式建模方法，为图像与视频生成提供新的理论框架：</p>
+              <ul>
+                <li><strong>Drifting 范式核心思想：</strong>通过概率分布在数据空间中的渐进漂移实现从噪声到目标分布的转换，每一漂移步长与方向由当前分布状态与目标数据分布共同决定</li>
+                <li><strong>与扩散模型的区别：</strong>扩散模型依赖固定的前向加噪与逆向去噪过程，而 Drifting 采用更灵活的概率流路径设计，在保持生成质量的同时减少采样步数</li>
+                <li><strong>生成质量表现：</strong>在图像生成基准测试中，Drifting 模型在 FID 与 IS 指标上达到与主流扩散模型相当的水平，同时推理速度提升约 30%–50%</li>
+                <li><strong>视频生成拓展：</strong>Drifting 范式在视频生成任务中展现出良好的时间一致性，通过引入时序漂移约束有效缓解帧间闪烁问题</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>Drifting 范式为生成式建模提供了扩散模型之外的新选择。其灵活的概率流设计在生成效率与质量之间取得了更优的平衡，尤其在高维视频生成场景中展现出独特优势。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:10:30 – 1:43:21</td>
+          <td>视频世界模型：从离线内容生成到实时交互</td>
+          <td><span class="speaker">赵敏</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="4230">▶ 跳至视频此处</button>
+              <p><strong>赵敏</strong> 系统阐述视频世界模型从离线高质量生成向实时交互演进的技术路径与核心挑战：</p>
+              <ul>
+                <li><strong>离线生成阶段的技术基础：</strong>基于扩散模型与自回归模型的视频生成方法已实现分钟级高清视频的稳定产出，核心突破在于时空注意力机制与级联式超分辨率策略</li>
+                <li><strong>实时交互的核心瓶颈：</strong>从离线到实时的跃迁面临三重约束——单帧生成延迟需压缩至毫秒级、多帧一致性需在因果约束下维持、交互输入的即时反馈需与生成管线深度耦合</li>
+                <li><strong>模型轻量化策略：</strong>通过模型蒸馏、量化压缩与稀疏注意力机制，在保持生成质量的前提下将推理延迟降低至实时交互可接受的范围</li>
+                <li><strong>交互一致性优化：</strong>引入交互条件编码与闭环反馈机制，确保用户输入的操控信号在生成的视频帧中得到准确、即时的视觉响应</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>视频世界模型从离线生成到实时交互的跃迁，本质是在生成质量、响应延迟与交互一致性三者之间寻求最优平衡。这一跃迁是视频类世界模型走向实际应用的关键步骤。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:43:21 – 2:11:40</td>
+          <td>面向三维世界模型的空间感知基础模型研究</td>
+          <td><span class="speaker">彭思达</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="6201">▶ 跳至视频此处</button>
+              <p><strong>彭思达</strong> 介绍面向三维场景的空间感知基础模型研发进展，构建从二维视觉到三维理解的统一表示框架：</p>
+              <ul>
+                <li><strong>三维空间感知的核心任务：</strong>涵盖深度估计、三维重建、语义分割与空间推理四大任务，各任务在传统方案中相互独立，缺乏统一的表示基础</li>
+                <li><strong>统一表示框架设计：</strong>以体素-神经场混合表示为骨干，在有尺度的三维空间中对几何结构与语义信息进行联合编码，实现多任务共享同一空间表征</li>
+                <li><strong>多视图几何约束：</strong>通过多视图一致性损失与跨视角特征对齐，确保模型在单目、双目与多目输入条件下均能输出几何一致的三维空间理解结果</li>
+                <li><strong>数据规模与泛化能力：</strong>在大规模合成数据与真实扫描数据的混合训练集上训练，模型在零样本场景重建与空间推理任务中展现出较强的跨场景泛化能力</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>三维空间感知基础模型的核心在于构建一个几何一致、语义丰富的统一空间表示。这一表示是连接二维视觉感知与三维世界理解的桥梁，也是具身智能与虚拟现实等下游应用的基础设施。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:11:40 – 2:41:25</td>
+          <td>HY World：迈向统一的多模态世界模型</td>
+          <td><span class="speaker">王腾飞</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="7900">▶ 跳至视频此处</button>
+              <p><strong>王腾飞</strong> 介绍面向通用场景的统一多模态世界模型 HY World 的架构设计与核心能力：</p>
+              <ul>
+                <li><strong>统一多模态架构：</strong>HY World 采用共享编码-解码骨干网络配合模态特定适配器，在单一模型中整合文本、图像、视频与三维信息的理解与生成能力</li>
+                <li><strong>跨模态对齐策略：</strong>通过对比学习与跨模态注意力机制，将不同模态的语义表征映射至统一嵌入空间，确保模态间的语义一致性与相互检索能力</li>
+                <li><strong>视频预测与规划能力：</strong>模型能够基于当前视频帧与文本指令，预测未来若干帧的场景变化，在仿真环境与真实视频数据上均展现出合理的时间演化建模能力</li>
+                <li><strong>内容创作应用：</strong>在多模态理解与生成的统一框架下，HY World 支持文本到视频、图像到视频、视频到文本等多种跨模态转换任务，在内容创作场景中展现出较强的实用价值</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>统一多模态世界模型的关键在于打破模态壁垒，建立跨模态的共享语义空间。HY World 的方案表明，通过合理的架构设计与训练策略，单一模型即可胜任多模态理解、生成与预测的复合任务。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:41:25 – 3:11:34</td>
+          <td>从 Skyreels V4 到 Mureka V9：昆仑万维的多模态技术迭代</td>
+          <td><span class="speaker">成宇 — 昆仑万维</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="9685">▶ 跳至视频此处</button>
+              <p><strong>成宇</strong>（昆仑万维）分享多模态大模型产品从 Skyreels V4 到 Mureka V9 的迭代历程与技术选型经验：</p>
+              <ul>
+                <li><strong>Skyreels V4 阶段：</strong>以扩散模型为核心引擎，聚焦视频生成质量，在分辨率和帧率两个指标上达到当时业界领先水平，但推理速度与交互灵活性存在明显短板</li>
+                <li><strong>Mureka 系列演进：</strong>从 V5 到 V9 完成了三次关键架构升级——引入 DiT（Diffusion Transformer）骨干网络提升生成质量上限、构建多模态条件编码模块增强可控性、部署推理加速管线将单秒视频生成时间压缩至秒级</li>
+                <li><strong>多模态交互增强：</strong>在 Mureka V9 中实现文本、图像、音频三重条件联合控制，支持用户通过自然语言描述、参考图像风格与音频节奏共同指导视频生成过程</li>
+                <li><strong>产品化实践经验：</strong>在模型选型上遵循"质量优先、效率跟进"原则，在工程落地上重视推理管线的端到端优化，在用户体验层面强调条件控制的直观性与生成结果的可预期性</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>多模态大模型的产品化迭代需要在生成质量、推理效率与用户可控性三者之间持续权衡。昆仑万维从 Skyreels V4 到 Mureka V9 的演进表明，工业界多模态技术落地的核心挑战不在于单一指标的突破，而在于端到端产品体验的系统性优化。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:11:34 – 3:51:43</td>
+          <td>LPM 1.0：基于视频生成的交互表演模型</td>
+          <td><span class="speaker">曾爱玲</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="11494">▶ 跳至视频此处</button>
+              <p><strong>曾爱玲</strong> 介绍 LPM 1.0 交互表演模型的系统设计与关键技术：</p>
+              <ul>
+                <li><strong>LPM 模型定位：</strong>聚焦人物交互表演场景，以视频生成为核心技术底座，构建从动作生成、表情同步到场景融合的完整自动化内容制作管线</li>
+                <li><strong>动作生成模块：</strong>基于人体骨骼关键点序列预测与运动先验约束，生成符合物理规律且具有表演表现力的人物动作序列</li>
+                <li><strong>表情同步机制：</strong>通过音频-面部运动对齐网络，实现语音内容与面部表情的时序精确匹配，涵盖唇形同步与情绪表达两个维度</li>
+                <li><strong>场景融合技术：</strong>采用前景人物与背景场景的分层渲染策略，在保持人物动作连续性的同时实现与任意场景的自然融合</li>
+                <li><strong>应用场景：</strong>面向虚拟主播、数字人表演与影视预演三类典型场景，提供端到端的视频生成解决方案</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>交互表演模型是多模态视频生成技术的重要应用方向。LPM 1.0 将人物动作、表情与场景三者纳入统一的视频生成框架，为虚拟人物内容的自动化制作提供了系统化的技术方案。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:51:43 – 4:10:00</td>
+          <td><strong>圆桌讨论</strong></td>
+          <td><span class="speaker">全体讲者</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="13903">▶ 跳至视频此处</button>
+              <p>全体讲者围绕多模态技术与世界模型的融合路径展开深入讨论，就以下议题形成共识：</p>
+              <ul>
+                <li><strong>多模态感知是世界模型从"看懂"到"交互"的桥梁：</strong>世界模型的核心能力边界取决于其对多模态信息的整合深度。单纯的视觉理解只能支撑"看懂"，融入语言、听觉与触觉等多通道感知才能支撑真正的"交互"。当前多模态对齐技术已初步打通各模态之间的语义通路，下一步需要在统一表示空间中实现模态间的因果推理。</li>
+                <li><strong>视频生成技术的快速迭代为世界模型提供了新的训练与验证范式：</strong>高质量视频生成能力的跃升使研究者得以构建"生成-验证"闭环——先用生成模型产出世界状态的预测结果，再通过判别模型评估预测的物理合理性，由此驱动世界模型的持续优化。</li>
+                <li><strong>三维空间感知与实时交互的结合将推动具身智能与虚拟现实场景的实质性进展：</strong>三维空间感知提供环境的结构化理解，实时交互赋予系统对动态变化的即时响应能力，二者的结合是具身智能从仿真走向真实世界部署的关键前提。</li>
+                <li><strong>学术研究与产业落地的协同关系：</strong>多模态世界模型领域存在学术研究与产业需求之间的阶段性错位。学界在基础架构与训练方法上的突破需要产业界在工程化、规模化与产品化层面的承接，反之产业界在落地中遇到的边界条件也为学术研究提供了关键的问题定义。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>圆桌共识</h4>
+                <p>多模态技术正从"让模型看懂世界"迈向"让模型在世界中交互"的新阶段。多模态感知整合、视频生成能力跃升与三维空间理解的突破，三者合力推动世界模型的能力边界不断拓展。产业界与学术界的深度协同，是加速这一进程的关键驱动力。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+(function() {
+  var video = document.getElementById('forum-video');
+  var placeholder = document.getElementById('video-placeholder');
+  var input = document.getElementById('m3u8-input');
+  var m3u8Url = null;
+  var startOffset = 43 * 60; // 跳过前 43 分钟空白
+
+  function initPlayer(url) {
+    m3u8Url = url;
+    placeholder.style.display = 'none';
+    video.style.display = 'block';
+
+    if (Hls.isSupported()) {
+      var hls = new Hls({ startPosition: startOffset });
+      hls.loadSource(url);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, function() {
+        video.currentTime = startOffset;
+        video.play().catch(function(){});
+        bindSeekButtons();
+      });
+      hls.on(Hls.Events.ERROR, function(evt, data) {
+        if (data.fatal) {
+          if (data.type === Hls.ErrorTypes.NETWORK_ERROR) { hls.startLoad(); }
+          else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) { hls.recoverMediaError(); }
+        }
+      });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = url + '#t=' + startOffset;
+      video.addEventListener('loadedmetadata', function() {
+        video.play().catch(function(){});
+        bindSeekButtons();
+      });
+    }
+
+    try { localStorage.setItem('forum_multimodal_m3u8', url); } catch(e) {}
+  }
+
+  window.loadVideo = function(u) {
+    var url = u || input.value.trim();
+    if (!url) { alert('请先粘贴 m3u8 地址'); return; }
+    initPlayer(url);
+  };
+
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { loadVideo(); }
+  });
+
+  // Check URL params
+  var m = location.search.match(/[?&]m3u8=([^&]+)/);
+  if (m) { var u = decodeURIComponent(m[1]); input.value = u; initPlayer(u); }
+  else {
+    try {
+      var saved = localStorage.getItem('forum_multimodal_m3u8');
+      if (saved) { input.value = saved; initPlayer(saved); }
+    } catch(e) {}
+  }
+
+  function bindSeekButtons() {
+    document.querySelectorAll('.seek-video').forEach(function(btn) {
+      btn.onclick = function(e) {
+        e.stopPropagation();
+        var sec = parseInt(this.getAttribute('data-seek'));
+        if (video && sec >= 0) {
+          video.currentTime = sec;
+          video.play().catch(function(){});
+          video.scrollIntoView({ behavior: 'smooth' });
+        }
+      };
+    });
+  }
+
+  document.querySelectorAll('.seek-video').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      if (!m3u8Url) {
+        e.stopPropagation();
+        var sec = parseInt(this.getAttribute('data-seek'));
+        alert('请先获取视频链接！\n\n时间戳: ' + (sec ? new Date(sec*1000).toISOString().substr(11,8) : '--'));
+      }
+    });
+  });
+
+  // Session expand/collapse
+  document.querySelectorAll('.session-row.has-detail').forEach(function(row) {
+    row.addEventListener('click', function() {
+      this.classList.toggle('open');
+      var next = this.nextElementSibling;
+      if (next && next.classList.contains('session-detail')) { next.classList.toggle('open'); }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

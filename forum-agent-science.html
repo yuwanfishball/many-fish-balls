@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026智源大会 — Agent for Science 直播回放</title>
+<style>
+  :root {
+    --primary: #1a3a5c;
+    --accent: #2857ff;
+    --bg: #f5f6f8;
+    --card-bg: #ffffff;
+    --text: #2c3e50;
+    --text-light: #5a6d80;
+    --border: #e2e6ed;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --radius: 10px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", "AR PL UKai CN", serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding-bottom: 40px;
+  }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+
+  /* ========== Header ========== */
+  .header {
+    position: relative;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: #fff;
+    padding: 32px 0;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  .header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", serif;
+  }
+  .back-link {
+    position: absolute;
+    top: 18px;
+    left: 24px;
+    color: rgba(255,255,255,.7);
+    text-decoration: none;
+    font-size: .9rem;
+    transition: color .2s;
+    z-index: 2;
+  }
+  .back-link:hover { color: #fff; }
+
+  /* ========== Video Player ========== */
+  .video-wrapper {
+    background: #000;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .video-wrapper video {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 540px;
+  }
+
+  /* ========== Card ========== */
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 0;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 16px 20px;
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--primary);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ========== Session Table ========== */
+  .schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .schedule-table thead th {
+    text-align: left;
+    font-size: .73rem;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--text-light);
+    padding: 8px 18px;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .time-slot {
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+    min-width: 100px;
+    font-size: .82rem;
+  }
+  .speaker { font-size: .82rem; color: var(--text-light); }
+
+  /* ========== Session Rows ========== */
+  .session-row { cursor: default; }
+  .session-row td { padding: 10px 18px; }
+  .session-row.has-detail {
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .session-row.has-detail:hover { background: #f5f7fa; }
+  .session-arrow {
+    text-align: center;
+    font-size: .6rem;
+    color: var(--text-light);
+    width: 36px;
+    transition: transform .25s;
+    vertical-align: middle;
+  }
+  .session-row.has-detail.open .session-arrow { transform: rotate(90deg); }
+  .session-row.no-detail .session-arrow { color: transparent; }
+  .session-detail { display: none; }
+  .session-detail.open { display: table-row; }
+  .session-detail td {
+    padding: 0 18px 16px !important;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .session-detail-content {
+    font-size: .88rem;
+    color: var(--text);
+    padding: 8px 0 8px 6px;
+  }
+  .session-detail-content p { margin-bottom: 8px; }
+  .session-detail-content ul { padding-left: 20px; margin-bottom: 8px; }
+  .session-detail-content ul li { margin-bottom: 4px; }
+
+  /* ========== Seek Button ========== */
+  .seek-video {
+    display: inline-block;
+    padding: 4px 14px;
+    margin-bottom: 8px;
+    border: 1px solid var(--accent);
+    border-radius: 99px;
+    background: #fff;
+    color: var(--accent);
+    font-size: .78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .seek-video:hover { background: var(--accent); color: #fff; }
+
+  /* ========== Highlight Box ========== */
+  .highlight-box {
+    background: #fff8e1;
+    border-left: 4px solid #f0b400;
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+  }
+  .highlight-box h4 { color: #b8860b; margin-bottom: 4px; }
+
+  /* ========== Summary Box ========== */
+  .summary-box {
+    padding: 18px 20px;
+    font-size: .88rem;
+    color: var(--text-light);
+    line-height: 1.8;
+  }
+
+  @media (max-width: 768px) {
+    .header h1 { font-size: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a class="back-link" href="index.html">← 返回</a>
+  <h1>🎬 2026智源大会 · Agent for Science（全天）</h1>
+</header>
+
+<div class="container">
+
+  <!-- 视频播放器 -->
+  <div class="video-wrapper" id="video-wrapper">
+    <video id="forum-video" controls preload="metadata" crossorigin="anonymous" playsinline
+           style="display:block;width:100%;height:auto;max-height:540px;"></video>
+  </div>
+
+  <!-- 论坛简介 -->
+  <div class="card">
+    <div class="card-header">📖 论坛简介</div>
+    <div class="summary-box">
+      <p>当前，人工智能正从被动工具向主动科研伙伴演进。<strong>Agent for Science（科学智能体）</strong>作为 AI for Science 的前沿方向，聚焦于构建能够自主完成文献发现、假设生成、实验设计、结果分析与论文撰写的智能体系统，系统性优化科研工作流的效率与质量。本届论坛立足产学研多维视角，集结蒙特利尔大学、西湖大学、UBC、香港大学、港科大（广州）、上海交通大学、中国人民大学、中关村人工智能研究院等机构的专家学者，围绕科学智能体的基础架构设计、自动化科研系统实现、可信赖 AI 机制、生物基础模型构建等核心议题展开深入研讨。</p>
+      <p style="margin-top:10px">上午场由论坛主席<strong>刘邦</strong>（蒙特利尔大学计算机系副教授）主持，聚焦科学智能体的理论框架与技术实现，涵盖人本化智能体设计、科研流程自动化、可信高效 AI 系统、开放数据世界的自主智能体等议题，并组织圆桌会议进行跨视角深度对话。下午场由论坛主席<strong>朱余韬</strong>（中国人民大学高瓴人工智能学院博士后）主持，围绕大模型驱动的科学发现、生物基础模型构建、通用科研智能体等方向展开报告，并举办 Agent for Science 创意大赛路演，展示来自清华、北大、上海交大、西湖大学等全球高校学生团队的前沿探索成果。</p>
+      <p style="margin-top:10px;font-size:.8rem;color:#999;">🕐 2026年6月13日 09:00–17:30 · 视频时间 0:00–6:47:42 · 📍 G08 会议室 · 线上同步直播</p>
+      <p style="margin-top:4px;font-size:.8rem;color:#999;">👤 论坛主席：刘邦（蒙特利尔大学计算机系副教授）&amp; 朱余韬（中国人民大学高瓴人工智能学院博士后）</p>
+    </div>
+  </div>
+
+  <!-- 日程详情 -->
+  <div class="card">
+    <div class="card-header">📋 议程详情（点击展开）</div>
+    <table class="schedule-table">
+      <thead><tr><th style="width:36px"></th><th>时间</th><th>环节 / 主题</th><th>嘉宾 / 讲者</th></tr></thead>
+      <tbody>
+
+        <!-- ===== 上午场 ===== -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">0:02:43 – 0:28:58</td>
+          <td>主持人开场 & The Density of Discovery：Human-Centered Agents for Trustworthy Science</td>
+          <td><span class="speaker">刘邦 — 蒙特利尔大学计算机系副教授、Mila 核心成员、CIFAR AI Chair</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="163">▶ 跳至视频此处</button>
+              <p><strong>刘邦</strong> 致开场辞后，系统阐述了以人为中心的科学智能体设计框架，提出"发现密度"（Density of Discovery）这一衡量科学智能体效能的关键指标：</p>
+              <ul>
+                <li><strong>论坛设立的学术背景：</strong>在 AI 能力快速提升的当下，如何构建以人为中心、可信赖的科学智能体系统，使 AI 从被动工具演进为主动的科研合作伙伴。论坛将围绕智能体在文献发现、假设生成、实验设计、结果分析与论文撰写等科研全流程中的系统化应用展开深入探讨。</li>
+                <li><strong>科学发现的密度瓶颈：</strong>当前科研流程中，大量时间消耗在文献检索、数据清洗、实验调试等重复性环节，真正的科学发现密度较低。智能体的核心价值在于压缩低创造性环节的时间占比，提升单位时间内有效科学决策的密度。</li>
+                <li><strong>人本化智能体设计原则：</strong>科学智能体需在自主性与可控性之间取得平衡——既要有独立执行复杂任务的能力，又需保持与人类科学家的透明交互，确保研究过程的可追溯与可审计。</li>
+                <li><strong>可信赖科学 AI 的三层架构：</strong>提出包含基础能力层（文献理解、代码生成、数据分析）、协作交互层（人机对话、假设协商、结果解释）和质量保障层（可复现性验证、统计严谨性检查、知识一致性审计）的三层体系。</li>
+                <li><strong>实践案例：</strong>在材料科学、药物发现和神经科学三个领域展示了人本化智能体在真实科研场景中的应用效果与当前局限性。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>科学智能体的目标不是替代科学家，而是通过压缩低创造性环节、放大高价值决策密度，让人类科学家将精力聚焦于只有人类才能完成的创造性突破。可信赖性不是可选项，而是科学智能体进入真实科研流程的前提条件。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">0:28:58 – 1:01:48</td>
+          <td>AI-Driven Research Automation</td>
+          <td><span class="speaker">张岳 — 西湖大学工学院副院长、终身教授</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="1738">▶ 跳至视频此处</button>
+              <p><strong>张岳</strong> 从自然语言处理与科研自动化交叉视角，系统展示了 AI 驱动科研流程自动化的技术路线与工程实践：</p>
+              <ul>
+                <li><strong>科研自动化的层次模型：</strong>将科研自动化分为四个层级——工具辅助级（单步 NLP 任务）、流程编排级（多步固定流程）、自适应规划级（动态调整研究计划）和自主探索级（独立提出假设并验证），当前技术整体处于第二至第三层级之间。</li>
+                <li><strong>文献理解的深度自动化：</strong>基于大语言模型的文献挖掘系统，能够自动完成跨语言文献检索、关键主张提取、矛盾发现和研究空白识别，将文献综述的效率提升数倍。</li>
+                <li><strong>实验设计与代码生成：</strong>展示了一个端到端系统，从研究问题出发，自动生成实验方案、编写代码、执行实验并分析结果，在 NLP 领域的基准测试中展现出与初级研究者相当的水平。</li>
+                <li><strong>自动化科研的边界与挑战：</strong>当前系统在需要深层领域知识、跨学科迁移和创造性假设生成的任务上仍存在明显局限，高质量自动化的实现依赖于领域知识的结构化表示和验证闭环的完善。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>科研自动化不是"一键生成论文"的简单流程，而是对科研方法论的结构化建模与系统性优化。当前技术可以显著加速文献调研和实验执行环节，但假设生成和创造性突破仍需人类科学家的深度参与。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:01:48 – 1:32:13</td>
+          <td>可信高效 AI 与智能体系统</td>
+          <td><span class="speaker">李霄霄 — UBC 电气与计算机工程系副教授、CIFAR AI Chair</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="3708">▶ 跳至视频此处</button>
+              <p><strong>李霄霄</strong> 从可信 AI 与认知科学交叉视角，探讨科学智能体的可靠性保障与效率优化机制：</p>
+              <ul>
+                <li><strong>可信 AI 的四维框架：</strong>在科学发现场景中，AI 系统的可信赖性需从鲁棒性（对分布外输入的稳定表现）、可解释性（决策过程可被科学家理解与审查）、公平性（避免数据偏见导致错误科学结论）和可复现性（相同输入产生一致输出）四个维度综合保障。</li>
+                <li><strong>智能体决策的可审计性：</strong>提出一种基于决策轨迹记录和关键节点标记的审计机制，使科学智能体的每一步推理和行动都能被回溯检查，满足科学研究的严谨性要求。</li>
+                <li><strong>效率与可靠性的平衡策略：</strong>在有限计算资源下，通过自适应计算分配——对高风险决策（如实验方案确定）分配更多推理资源，对低风险任务（如文献摘要）使用轻量级模型——实现效率与可靠性的动态平衡。</li>
+                <li><strong>认知科学启发：</strong>借鉴人类科学家在不确定条件下进行理性决策的认知机制，为智能体引入校准良好的不确定性量化与风险感知能力。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>科学智能体若无可靠性与可审计性保障，将无法进入对严谨性要求严格的真实科研流程。效率与可信赖性不是权衡关系，而是互为前提——只有可信的系统才能被持续使用，只有高效的架构才能在实践中落地。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:32:13 – 2:04:49</td>
+          <td>AI Agents 与大模型驱动的科学发现</td>
+          <td><span class="speaker">黄超 — 香港大学助理教授、HKUDS 实验室负责人</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="5533">▶ 跳至视频此处</button>
+              <p><strong>黄超</strong> 从大语言模型与图机器学习融合视角，展示 AI Agent 在科学知识图谱构建与科学发现中的应用：</p>
+              <ul>
+                <li><strong>科学知识图谱的自动构建：</strong>利用大语言模型从海量科学文献中自动抽取实体、关系与研究发现，构建动态更新的跨学科知识图谱，实现科学知识的语义化关联与检索。</li>
+                <li><strong>图结构与语言模型的深度融合：</strong>将知识图谱的结构化信息与大语言模型的语义理解能力相结合，使智能体能够同时利用结构化知识关系和自然语言表达进行推理，在假设生成质量上显著优于纯文本或纯图方法。</li>
+                <li><strong>跨学科知识迁移：</strong>通过图结构建模不同学科领域的概念映射关系，实现跨学科知识的自动化迁移——例如将物理学中的数学模型迁移至生物学问题，为交叉学科研究提供新路径。</li>
+                <li><strong>智能体工具链设计：</strong>介绍了面向科学发现的 AI Agent 工具链架构，包括知识检索模块、假设生成模块、实验模拟模块和结果验证模块的协调工作机制。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>科学知识的结构化表示是智能体实现深度科学推理的基础。将知识图谱的精确性与大模型的灵活性相结合，能够突破单一技术路径在科学发现任务中的能力上限，为跨学科科学发现提供新的方法论支撑。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:04:49 – 2:36:26</td>
+          <td>数据科学家：面向开放复杂数据世界的自主智能体系统</td>
+          <td><span class="speaker">骆昱宇 — 港科大（广州）助理教授、OpenManus 作者</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="7489">▶ 跳至视频此处</button>
+              <p><strong>骆昱宇</strong> 以 OpenManus 等开源自主智能体系统为切入点，阐述面向开放复杂数据世界的智能体设计理念与技术实践：</p>
+              <ul>
+                <li><strong>开放数据世界的核心挑战：</strong>真实科研场景中的数据具有来源多样、格式异构、质量参差和语义模糊四大特征，传统 ETL 流水线难以应对这种开放性，需要智能体具备自主理解数据结构、动态适配处理策略和鲁棒应对异常的能力。</li>
+                <li><strong>Data-centric AI 与智能体的结合：</strong>将数据质量评估、异常检测、模式发现等 Data-centric AI 技术嵌入智能体的感知与决策链路，使其能够主动识别数据问题并自主采取修复策略。</li>
+                <li><strong>自主数据科学家的能力栈：</strong>提出了包含数据理解、问题定义、方法选择、实验执行和结果解释五个模块的自主数据科学家架构，各模块通过结构化接口连接，支持模块级的迭代升级与能力扩展。</li>
+                <li><strong>OpenManus 的实践经验：</strong>分享了开源项目 OpenManus 在社区驱动下快速迭代的开发历程，以及在多个科学数据处理基准上的评测结果与经验教训。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>开放复杂数据是科学智能体面临的第一道现实关卡。让智能体具备对数据本身的深度理解和自主处理能力，是打通从"能读文献"到"能做科研"这一关键鸿沟的基础前提。开源社区驱动的迭代模式正在加速这一进程。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:36:26 – 3:09:55</td>
+          <td><strong>圆桌讨论</strong></td>
+          <td><span class="speaker">刘邦（主持）、张岳、李霄霄、黄超、骆昱宇</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="9386">▶ 跳至视频此处</button>
+              <p>全体上午讲者参与，围绕以下议题展开深入讨论：</p>
+              <ul>
+                <li><strong>科学智能体的自主性边界：</strong>当前阶段科学智能体的合理自主性边界应在何处——嘉宾一致认为，文献检索和数据分析环节可实现高度自动化，实验设计环节适合人机协作的半自主模式，而假设生成和方向判断仍需以人类科学家为主导。这一边界将随技术进步而动态移动，但人的判断始终是科学责任归属的最终锚点。</li>
+                <li><strong>开源与闭源的生态选择：</strong>科学智能体的开源生态对于学术研究的可复现性至关重要，但模型训练的高昂成本也推动了闭源商业模式的探索。嘉宾认为学术界应主导开源基础能力栈的建设，而企业可在垂直领域提供闭源的深度优化方案，两者互补而非对立。</li>
+                <li><strong>跨学科协作的组织模式：</strong>AI 研究者与领域科学家之间的有效协作是科学智能体落地的关键瓶颈。嘉宾分享了各自机构在建立跨学科联合实验室、双导师培养机制和共同学术出版方面的实践经验。</li>
+                <li><strong>评测标准的建立：</strong>当前缺乏公认的科学智能体评测基准——不仅需要衡量任务完成度，还需要评估科学严谨性、可复现性和发现的新颖性。嘉宾呼吁社区共同构建包含多学科、多难度层级的标准化评测体系。</li>
+                <li><strong>未来三年的关键突破方向：</strong>嘉宾预测科学智能体将在以下三个方向上率先取得突破——结构化领域的自动化文献综述生成、高通量实验的智能设计与执行、以及特定子领域内的闭环科学发现。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>圆桌共识</h4>
+                <p>科学智能体将在未来三年内从学术原型走向实际科研场景的局部部署，但完整的端到端自主科研仍需要更长时间的技术积累与跨学科协作机制建设。当前阶段的核心策略应是围绕具体科研痛点进行针对性突破，而非追求通用全自主科研系统。开源的科学生态和标准化的评测体系是行业健康发展的基础保障。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- ===== 下午场 ===== -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:11:08 – 3:38:47</td>
+          <td>下午开场 & 大模型算法与科学智能</td>
+          <td><span class="speaker">朱余韬（开场）/ 郑书新 — 中关村人工智能研究院副院长、前微软亚洲研究院首席研究员</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="11468">▶ 跳至视频此处</button>
+              <p><strong>朱余韬</strong> 开场介绍下午议程后，<strong>郑书新</strong> 从产业研究视角系统阐述大模型算法在科学发现中的前沿应用与工程实践：</p>
+              <ul>
+                <li><strong>下午议程概览：</strong>聚焦大模型驱动的科学发现前沿、生物基础模型构建、通用科研智能体等方向，并预告 Agent for Science 创意大赛项目路演环节，来自全球高校的 12 支学生团队将展示各自在科学智能体领域的创新成果。</li>
+                <li><strong>大模型驱动的科学发现范式：</strong>提出了"大模型即科研操作系统"的理念——大模型不仅是单一任务的求解工具，更是串联文献分析、假设生成、实验模拟与结果综合的底层操作系统，正在重塑科学研究的全流程方法论。</li>
+                <li><strong>科学大模型的训练策略：</strong>分享在科学领域预训练与微调中的实践经验，包括领域语料配比策略、科学推理能力的定向增强方法、以及多模态科学数据（文本、图表、分子式、数值仿真）的统一建模技术。</li>
+                <li><strong>产业级科学智能体的落地条件：</strong>从算力基础设施、数据治理规范、模型评估体系和人才梯队建设四个维度，分析了科学智能体从实验室走向产业应用所需的关键支撑条件。</li>
+                <li><strong>代表性应用案例：</strong>展示了在材料基因组、药物分子设计和气候模拟三个领域使用大模型驱动的科学智能体取得的阶段性成果。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>大模型正在从科学研究的辅助工具演进为科研操作系统。这一转变不仅要求模型能力的持续提升，更需要构建配套的数据基础设施、评估标准和人才培养体系，形成完整的科学智能体产业生态。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:38:47 – 4:01:16</td>
+          <td>面向生物基础模型构建：从蛋白质基础模型到虚拟细胞基础模型</td>
+          <td><span class="speaker">唐建 — Mila 副教授、CIFAR 讲席教授、TorchDrug 作者</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="13127">▶ 跳至视频此处</button>
+              <p><strong>唐建</strong> 系统阐述了生物基础模型的构建路径，从蛋白质到虚拟细胞的多尺度建模方法论：</p>
+              <ul>
+                <li><strong>蛋白质基础模型的最新进展：</strong>基于大规模蛋白质序列与结构数据预训练的蛋白质基础模型，已能在蛋白质功能预测、结构折叠、突变效应评估等任务上达到实验级精度，并显著加速了抗体设计和酶优化等药物研发关键环节。</li>
+                <li><strong>从分子到细胞的跨越路径：</strong>虚拟细胞基础模型的构建需要完成从单分子（蛋白质、核酸）到分子互作网络（信号通路、代谢网络）再到细胞整体行为（增殖、分化、应激响应）的三级建模跃升，每一级都面临独特的数据稀疏性和多尺度耦合挑战。</li>
+                <li><strong>图表示学习与知识图谱的融合：</strong>利用图神经网络对生物分子网络进行表征学习，结合知识图谱中的先验生物学知识，为虚拟细胞模型提供结构化先验约束，缓解数据不足的问题。</li>
+                <li><strong>药物发现中的端到端应用：</strong>展示了从靶点识别、先导化合物优化到临床前评估的端到端 AI 辅助药物发现管线，以及 TorchDrug 开源平台在加速这一流程中的关键作用。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>从蛋白质基础模型到虚拟细胞基础模型，是 AI 从理解生命的"零部件"迈向理解生命的"系统行为"的关键跃迁。这一跃迁的核心挑战在于跨尺度建模——如何将分子层面的精确性与细胞层面的涌现行为统一在同一计算框架内。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">4:01:16 – 4:24:52</td>
+          <td>通用科研智能体的设计与实践</td>
+          <td><span class="speaker">陈思衡 — 上海交通大学人工智能学院副教授、SciMaster 研发者</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="14476">▶ 跳至视频此处</button>
+              <p><strong>陈思衡</strong> 以 SciMaster 通用科研智能体的研发实践为主线，展示通用科研智能体的设计理念与技术突破：</p>
+              <ul>
+                <li><strong>通用科研智能体的设计目标：</strong>SciMaster 致力于构建跨学科通用的科研智能体系统，其核心设计原则包括模块化架构支持学科热插拔、统一的知识表示框架兼容多学科本体、以及自适应的推理策略根据任务复杂度动态调整。</li>
+                <li><strong>多智能体协作的科研模式：</strong>借鉴科研团队的组织模式，设计了包含"文献分析师""实验设计师""数据科学家""审稿人"等多个角色智能体的协作框架，各角色通过结构化的信息交换协议协同推进研究任务。</li>
+                <li><strong>科学推理链的显式建模：</strong>不同于通用大模型的隐式推理，SciMaster 将科学推理过程显式建模为观察→假设→实验→结论的可审计推理链，每步推理均附带引文支持和置信度校准。</li>
+                <li><strong>在真实科研任务中的评测：</strong>在多个自然科学与社会科学领域的真实科研任务上进行了系统性评测，分析了当前系统在不同学科、不同任务类型上的表现差异及其成因。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>通用科研智能体的核心挑战不是模型能力不足，而是如何将科学方法论显式地嵌入智能体的推理架构中。多智能体协作模拟了真实科研团队的分工模式，显式推理链保障了科学严谨性，两者的结合是通向可信赖自主科研的关键路径。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">4:24:52 – 4:46:40</td>
+          <td>AI4AI：AI 距离自动做研究还有多远</td>
+          <td><span class="speaker">孙天祥 — 日行迹（Analemma）创始人兼 CEO、前 MOSS 大模型主导开发者</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="15892">▶ 跳至视频此处</button>
+              <p><strong>孙天祥</strong> 从创业者和一线实践者的双重视角，对 AI 自动做研究的现状与可行路径进行了客观评估：</p>
+              <ul>
+                <li><strong>能力现状的客观定位：</strong>当前 AI 系统在科研各环节的能力分布极不均衡——在文献检索（接近人类专家水平）、代码生成（中级程序员水平）和数据分析（初级数据科学家水平）方面进展显著，但在实验设计、假设生成和理论创新方面仍处于早期探索阶段，整体距离端到端全自主科研尚有显著差距。</li>
+                <li><strong>FARS 多智能体自动化科研系统的实践：</strong>分享了其主导的 FARS（Fully Automated Research System）项目在 NLP 子领域实现闭环科研自动化的技术方案与经验教训，包括任务分解策略、多智能体调度机制和自我纠错回路的设计。</li>
+                <li><strong>从 MOSS 到 Analemma 的创业思考：</strong>结合从学术大模型 MOSS 到创业公司 Analemma 的转型经历，分析了科学智能体商业化的可行路径、市场规模和当前的资本环境，认为垂直领域的深度应用是比通用科研平台更现实的商业化切入点。</li>
+                <li><strong>关键瓶颈的识别：</strong>指出当前限制科学智能体能力的三个核心瓶颈——领域知识的结构化缺失（大量专业知识以非结构化形式存在）、实验验证的物理闭环空缺（模拟与现实的差距）和科学创造力的算法建模难题（创造力难以被形式化为优化目标）。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>AI 距离完全自动做研究仍有相当距离，但这一距离正在以超出预期的速度缩短。当前的务实策略是聚焦于垂直领域的深度突破，在特定子任务上实现超越人类效率的自动化，以点带面地推进科学智能体的实用化进程。创业视角下的科学智能体赛道机会与挑战并存，关键在于找准技术能力与市场需求的交叉点。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">4:46:40 – 5:16:11</td>
+          <td><strong>Agent for Science 创意大赛项目路演 ①</strong></td>
+          <td><span class="speaker">12 支全球高校学生团队</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="17200">▶ 跳至视频此处</button>
+              <p>来自清华大学、北京大学、上海交通大学、西湖大学、同济大学、中国人民大学、蒙特利尔大学等高校的 12 支入围团队进行公开项目路演，展示各自在科学智能体领域的前沿探索：</p>
+              <ul>
+                <li><strong>赛道覆盖：</strong>参赛项目涵盖 AI 驱动的药物发现、自动化文献综述生成、科学实验自动化编排、跨学科知识迁移、科学假设自动生成与验证等多个前沿方向。</li>
+                <li><strong>评审维度：</strong>由安波（南洋理工大学校长讲席教授）、刘邦、骆昱宇、朱余韬等评委从技术创新性、科学合理性、实用价值和展示表达四个维度进行综合评审。</li>
+                <li><strong>路演形式：</strong>每支队伍进行限时宣讲，随后接受评委提问与现场互动，展示团队对科学智能体技术路线和应用场景的深入思考。</li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">5:16:11 – 5:42:54</td>
+          <td><strong>Agent for Science 创意大赛项目路演 ②</strong></td>
+          <td><span class="speaker">12 支全球高校学生团队</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="18971">▶ 跳至视频此处</button>
+              <p>路演继续进行，更多团队展示科学智能体在不同科研场景中的创新应用：</p>
+              <ul>
+                <li><strong>奖项设置：</strong>大赛设置最高 10,000 元奖金，旨在激励全球学生投身科学智能体的研究与开发，推动 AI for Science 领域的青年人才培养。</li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">5:42:54 – 6:47:42</td>
+          <td><strong>Agent for Science 创意大赛项目路演 ③</strong></td>
+          <td><span class="speaker">12 支全球高校学生团队</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="20574">▶ 跳至视频此处</button>
+              <p>路演收尾阶段，最终展示及评审总结：</p>
+              <div class="highlight-box">
+                <h4>大赛意义</h4>
+                <p>创意大赛不仅是学生团队展示创新成果的平台，更是科学智能体领域青年人才培养和学术生态建设的重要一环。12 支团队的多元探索展示了科学智能体从理论到实践的丰富可能性，也为学术界和产业界提供了观察下一代 AI 科研人才梯队的窗口。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+(function() {
+  var video = document.getElementById('forum-video');
+  var m3u8Url = 'https://event-cdn.baai.ac.cn/vod-71f4bf/50666c8b67d871f1b6ae1776b3cf0102/7cdec2b48de940fe88d17e5df47c23da-58bd9285c9d0652a4413418e41aece59-hd.m3u8';
+  var startOffset = 0; // 视频从 09:00 开始，无前置空白
+
+  function initPlayer(url) {
+    if (Hls.isSupported()) {
+      var hls = new Hls({ startPosition: startOffset });
+      hls.loadSource(url);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, function() {
+        video.currentTime = startOffset;
+        video.play().catch(function(){});
+        bindSeekButtons();
+      });
+      hls.on(Hls.Events.ERROR, function(evt, data) {
+        if (data.fatal) {
+          if (data.type === Hls.ErrorTypes.NETWORK_ERROR) { hls.startLoad(); }
+          else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) { hls.recoverMediaError(); }
+        }
+      });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = url + '#t=' + startOffset;
+      video.addEventListener('loadedmetadata', function() {
+        video.play().catch(function(){});
+        bindSeekButtons();
+      });
+    }
+  }
+
+  window.loadVideo = function(url) {
+    if (!url) return;
+    initPlayer(url);
+  };
+
+  function bindSeekButtons() {
+    document.querySelectorAll('.seek-video').forEach(function(btn) {
+      btn.onclick = function(e) {
+        e.stopPropagation();
+        var sec = parseInt(this.getAttribute('data-seek'));
+        if (video && sec >= 0) {
+          video.currentTime = sec;
+          video.play().catch(function(){});
+          video.scrollIntoView({ behavior: 'smooth' });
+        }
+      };
+    });
+  }
+
+  // Session expand/collapse
+  document.querySelectorAll('.session-row.has-detail').forEach(function(row) {
+    row.addEventListener('click', function() {
+      this.classList.toggle('open');
+      var next = this.nextElementSibling;
+      if (next && next.classList.contains('session-detail')) { next.classList.toggle('open'); }
+    });
+  });
+
+  // 直接加载视频
+  initPlayer(m3u8Url);
+})();
+</script>
+
+</body>
+</html>

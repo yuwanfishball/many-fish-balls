@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026智源大会 — 智算前沿 · AI 赋能系统 直播回放</title>
+<style>
+  :root {
+    --primary: #1a3a5c;
+    --accent: #2857ff;
+    --bg: #f5f6f8;
+    --card-bg: #ffffff;
+    --text: #2c3e50;
+    --text-light: #5a6d80;
+    --border: #e2e6ed;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --radius: 10px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", "AR PL UKai CN", serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding-bottom: 40px;
+  }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+
+  /* ========== Header ========== */
+  .header {
+    position: relative;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: #fff;
+    padding: 32px 0;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  .header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", serif;
+  }
+  .back-link {
+    position: absolute;
+    top: 18px;
+    left: 24px;
+    color: rgba(255,255,255,.7);
+    text-decoration: none;
+    font-size: .9rem;
+    transition: color .2s;
+    z-index: 2;
+  }
+  .back-link:hover { color: #fff; }
+
+  /* ========== Video Player ========== */
+  .video-wrapper {
+    background: #000;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .video-wrapper video {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 540px;
+  }
+
+  /* ========== Card ========== */
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 0;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 16px 20px;
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--primary);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ========== Session Table ========== */
+  .schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .schedule-table thead th {
+    text-align: left;
+    font-size: .73rem;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--text-light);
+    padding: 8px 18px;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .time-slot {
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+    min-width: 100px;
+    font-size: .82rem;
+  }
+  .speaker { font-size: .82rem; color: var(--text-light); }
+
+  /* ========== Session Rows ========== */
+  .session-row { cursor: default; }
+  .session-row td { padding: 10px 18px; }
+  .session-row.has-detail {
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .session-row.has-detail:hover { background: #f5f7fa; }
+  .session-arrow {
+    text-align: center;
+    font-size: .6rem;
+    color: var(--text-light);
+    width: 36px;
+    transition: transform .25s;
+    vertical-align: middle;
+  }
+  .session-row.has-detail.open .session-arrow { transform: rotate(90deg); }
+  .session-row.no-detail .session-arrow { color: transparent; }
+  .session-detail { display: none; }
+  .session-detail.open { display: table-row; }
+  .session-detail td {
+    padding: 0 18px 16px !important;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .session-detail-content {
+    font-size: .88rem;
+    color: var(--text);
+    padding: 8px 0 8px 6px;
+  }
+  .session-detail-content p { margin-bottom: 8px; }
+  .session-detail-content ul { padding-left: 20px; margin-bottom: 8px; }
+  .session-detail-content ul li { margin-bottom: 4px; }
+
+  /* ========== Seek Button ========== */
+  .seek-video {
+    display: inline-block;
+    padding: 4px 14px;
+    margin-bottom: 8px;
+    border: 1px solid var(--accent);
+    border-radius: 99px;
+    background: #fff;
+    color: var(--accent);
+    font-size: .78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .seek-video:hover { background: var(--accent); color: #fff; }
+
+  /* ========== Highlight Box ========== */
+  .highlight-box {
+    background: #fff8e1;
+    border-left: 4px solid #f0b400;
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+  }
+  .highlight-box h4 { color: #b8860b; margin-bottom: 4px; }
+
+  /* ========== Summary Box ========== */
+  .summary-box {
+    padding: 18px 20px;
+    font-size: .88rem;
+    color: var(--text-light);
+    line-height: 1.8;
+  }
+
+  @media (max-width: 768px) {
+    .header h1 { font-size: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a class="back-link" href="index.html">← 返回</a>
+  <h1>🎬 2026智源大会 · 智算前沿 — AI 赋能系统</h1>
+</header>
+
+<div class="container">
+
+  <!-- 视频播放器 -->
+  <div class="video-wrapper" id="video-wrapper">
+    <video id="forum-video" controls preload="metadata" crossorigin="anonymous" playsinline
+           style="display:block;width:100%;height:auto;max-height:540px;"></video>
+  </div>
+
+  <!-- 论坛简介 -->
+  <div class="card">
+    <div class="card-header">📖 论坛简介</div>
+    <div class="summary-box">
+      <p>随着大模型规模化演进，算力基础设施与AI系统软件正成为决定智能化进程的战略支点。本论坛汇聚芯片设计、编译技术、AI框架、训练平台等领域的产学研专家，从<strong>底层硬件架构到上层智能体框架</strong>，系统审视AI赋能计算系统的全链路技术突破。论坛议题贯穿算子自动生成、国产大模型实践、算力基础设施重构、编程体验升级、多芯片编译后端，以及处理器逻辑自动设计等方向，旨在为AI系统生态的自主创新提供清晰的技术路线图与可落地的方案参考。</p>
+      <p style="margin-top:10px">论坛由<strong>林咏华</strong>（北京智源人工智能研究院副院长兼总工程师）主持，集结来自北京大学、清华大学、中科院计算所、上海交通大学、香港科技大学（广州）、北京航空航天大学等顶尖高校，以及科大讯飞、清微智能、昇腾、摩尔线程等产业一线的专家学者，围绕AI系统领域的核心议题展开系统性研讨。</p>
+      <p style="margin-top:10px;font-size:.8rem;color:#999;">🕐 2026年6月12日 13:30–17:45 · 视频时长约 4 小时 · 📍 106 会议室 · 线上同步直播</p>
+    </div>
+  </div>
+
+  <!-- 议程详情 -->
+  <div class="card">
+    <div class="card-header">📋 议程详情（点击展开）</div>
+    <table class="schedule-table">
+      <thead><tr><th style="width:36px"></th><th>时间</th><th>环节 / 主题</th><th>嘉宾 / 讲者</th></tr></thead>
+      <tbody>
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">0:00 – 15:00</td>
+          <td>开场主持</td>
+          <td><span class="speaker">林咏华 — 智源研究院副院长兼总工程师</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="0">▶ 跳至视频此处</button>
+              <p><strong>林咏华</strong> 致开场辞，指出AI系统正处在从单一算力扩张向全链路协同优化的转型节点。随着大模型参数规模持续增长，传统以GPU为中心的算力堆叠模式面临能效瓶颈与系统复杂度双重挑战。论坛将围绕芯片硬件创新、编译中间件优化、AI框架演进以及智能体基础设施四个层面，逐层剖析AI赋能计算系统的技术路径与产业实践。</p>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">15:00 – 35:00</td>
+          <td>灵玑 OS：智能体框架共性基础设施</td>
+          <td><span class="speaker">谢涛 — 北京大学讲席教授</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="900">▶ 跳至视频此处</button>
+              <p><strong>谢涛</strong> 系统阐述了灵玑OS作为智能体框架共性基础设施的设计理念与技术实现路径：</p>
+              <ul>
+                <li><strong>智能体框架的核心矛盾：</strong>当前智能体开发面临工具调用碎片化、多智能体协作缺乏统一调度协议、以及不同模型间的异构适配成本高昂三个关键瓶颈</li>
+                <li><strong>灵玑OS的设计原则：</strong>通过抽象统一的智能体运行环境（Agent Runtime），将工具注册、记忆管理、任务编排与多智能体通信作为操作系统级的基础服务提供，使上层应用不再重复造轮子</li>
+                <li><strong>共性基础设施分层：</strong>借鉴操作系统的分层架构思想，将智能体框架划分为硬件抽象层、模型适配层、智能体运行时层和应用编排层，每层提供标准化接口，实现模块间的松耦合</li>
+                <li><strong>生态与开源策略：</strong>通过开源社区驱动灵玑OS的生态建设，降低智能体开发门槛，推动行业从各自为战的定制开发模式转向标准化平台模式</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>智能体框架的碎片化是制约AI应用大规模落地的关键障碍。像操作系统统一硬件资源一样，灵玑OS致力于为智能体提供统一的基础设施层，使开发者从底层适配中解放出来，专注于应用创新。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">35:00 – 55:00</td>
+          <td>KernelGen：多芯片算子生成技术展望</td>
+          <td><span class="speaker">刘广 — 智源研究院系统智能研究组负责人</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="2100">▶ 跳至视频此处</button>
+              <p><strong>刘广</strong> 介绍了KernelGen在跨芯片算子自动生成领域的技术方案与阶段性成果：</p>
+              <ul>
+                <li><strong>多芯片算子开发痛点：</strong>不同AI芯片（NVIDIA GPU、昇腾NPU、寒武纪MLU、摩尔线程GPU等）均有独立的算子编程模型与优化规则，开发者需为同一计算逻辑编写多套算子实现，人力成本极高</li>
+                <li><strong>算子自动生成技术路线：</strong>KernelGen采用"算法描述—自动调优—多后端编译"的流水线架构，开发者只需以高层描述语言表达计算逻辑，系统即可自动生成面向不同芯片的高性能算子</li>
+                <li><strong>核心技术创新：</strong>结合程序合成与机器学习驱动的自动调优策略，在搜索空间中高效定位最优算子实现，相较手工调优可达到85%以上的性能水平</li>
+                <li><strong>生态意义：</strong>KernelGen从根本上解决了国产AI芯片生态中算子库不完备的核心问题，为新芯片快速融入主流AI框架提供了标准化的算子供给通道</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>算子自动生成不仅是性能优化工具，更是多芯片生态竞争的制高点。将算子开发从"手工调优"推向"自动生成"，是国产AI芯片打破生态壁垒的关键路径。KernelGen的长期目标是实现"一次描述，处处高效运行"的算子开发范式。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">55:00 – 1:15:00</td>
+          <td>讯飞星火大模型国产化创新实践</td>
+          <td><span class="speaker">刘聪 — 科大讯飞副总裁、研究院院长</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="3300">▶ 跳至视频此处</button>
+              <p><strong>刘聪</strong> 基于讯飞星火大模型的全栈国产化实践，分享了从训练到部署的系统性经验：</p>
+              <ul>
+                <li><strong>全栈国产化路径：</strong>讯飞星火在训练芯片（昇腾NPU）、推理芯片、AI框架（MindSpore / 飞桨）及模型部署等环节实现了完整的国产化替代，验证了国产算力栈支撑千亿级大模型训练的可行性</li>
+                <li><strong>国产算力的工程挑战：</strong>在国产芯片上进行大规模分布式训练时，面临显存带宽受限、通信效率波动、框架适配成本高等现实问题，团队通过算子级优化与通信拓扑定制进行了针对性突破</li>
+                <li><strong>精度对齐与迁移策略：</strong>从GPU生态向国产芯片迁移过程中，算子精度对齐是最大难点。团队建立了分模块精度验证体系与渐进式迁移流程，有效控制了精度损失</li>
+                <li><strong>产业应用反馈：</strong>在教育、医疗、汽车等垂直场景中，国产化部署的星火大模型已达到可用的推理性能，但训练效率与GPU方案仍有差距，需硬件生态持续迭代</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>大模型国产化已从技术验证阶段进入工程落地阶段。讯飞星火的实践证明，国产算力栈在推理侧已达到可商用水平，训练侧仍需在显存带宽与互联通信等硬件基础能力上持续突破。全栈国产化不是单一环节的替代，而是芯片—框架—模型—应用四层协同的系统工程。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:15:00 – 1:35:00</td>
+          <td>跨越极限 · 重构 AI 算力基础设施</td>
+          <td><span class="speaker">李彬 — 清微智能软件副总裁</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="4500">▶ 跳至视频此处</button>
+              <p><strong>李彬</strong> 从算力基础设施架构演进的视角，探讨了后摩尔时代AI算力的重构方向：</p>
+              <ul>
+                <li><strong>传统算力架构的瓶颈：</strong>以GPU为中心的集群架构在扩展至万卡规模时，互联带宽、功耗散热和故障恢复构成了三大天花板，线性算力堆叠的效率边际递减已十分明显</li>
+                <li><strong>存算一体与近存计算：</strong>通过将计算单元嵌入存储单元，减少数据搬运开销，可在特定场景（如推荐推理、稀疏计算）实现数量级的能效提升</li>
+                <li><strong>异构算力池化：</strong>将GPU、NPU、FPGA等不同算力资源统一池化管理，由调度层根据任务特征动态匹配最优算力，是提升集群整体利用率的关键方向</li>
+                <li><strong>清微智能的实践：</strong>介绍了清微在可重构计算架构上的探索，通过硬件运行时重构能力，在推理任务中实现了性能和功耗的动态平衡</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>算力基础设施的重构不是选择某一种"替代架构"，而是构建一个异构、池化、可动态调度的算力网络。后摩尔时代的竞争力不在于单一芯片的峰值算力，而在于系统层面的算力效率与弹性调度能力。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:35:00 – 1:55:00</td>
+          <td>硬件架构创新，CANN 编程体验全新升级</td>
+          <td><span class="speaker">李守平 — 昇腾计算业务基础软件业务总经理</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="5700">▶ 跳至视频此处</button>
+              <p><strong>李守平</strong> 介绍了昇腾CANN（异构计算架构）在编程体验与开发者生态方面的最新进展：</p>
+              <ul>
+                <li><strong>CANN的架构定位：</strong>CANN作为昇腾芯片的上层软件栈，承担着硬件能力抽象与开发者接口提供的关键角色，是连接芯片硬件与AI框架的中间层枢纽</li>
+                <li><strong>编程体验升级方向：</strong>从底层算子编程向声明式编程演进，提供更丰富的融合算子模板与自动算子融合能力，降低开发者在昇腾平台上实现高性能模型的工程门槛</li>
+                <li><strong>调试与调优工具链：</strong>推出可视化Profiling工具与智能调优建议引擎，帮助开发者快速定位性能瓶颈并获取针对性的优化建议，将逐卡调优周期从数周压缩至数天</li>
+                <li><strong>框架适配进展：</strong>已完成对PyTorch、飞桨、MindSpore等主流框架的深度适配，开发者从GPU迁移至昇腾的代码改动量持续降低</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>AI芯片竞争的下半场已经从"硬件能不能跑"转向"开发者好不好用"。CANN的编程体验升级聚焦于降低迁移成本、缩短调优周期、提升调试效率三个维度，目标是让国产芯片的开发体验对标甚至超越成熟GPU生态。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:55:00 – 2:15:00</td>
+          <td>TileIR &amp; MTX：打造支撑多 DSL 的编译后端</td>
+          <td><span class="speaker">徐伟 — 摩尔线程软件部副总经理</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="6900">▶ 跳至视频此处</button>
+              <p><strong>徐伟</strong> 介绍了TileIR与MTX在多芯片编译器后端领域的技术方案：</p>
+              <ul>
+                <li><strong>多DSL编译的挑战：</strong>AI编译器领域存在Triton、TVM TensorIR、MLIR等多套领域特定语言，不同的前端表示对应不同的优化策略，后端需同时支持多种IR输入并进行统一的代码生成</li>
+                <li><strong>TileIR的中间表示设计：</strong>在TVM TensorIR的基础上进行扩展，构建了一个统一的多层级中间表示（IR），向上兼容多种DSL的语义表达，向下可映射至不同硬件指令集</li>
+                <li><strong>MTX矩阵原语抽象：</strong>针对不同芯片的矩阵计算单元（Tensor Core、NPU MAC阵列等）提供统一的矩阵计算原语抽象，使上层变换和优化不依赖具体硬件的矩阵指令集细节</li>
+                <li><strong>多后端代码生成：</strong>基于TileIR的统一IR，通过模块化的后端插件架构实现向不同GPU/NPU的一键代码生成，各后端只需实现对应硬件的指令映射和内存布局适配</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>多芯片生态并存的时代，编译基础设施的核心价值在于提供统一的抽象层。TileIR与MTX通过中间表示的统一化和矩阵原语的标准化，让一次编译优化可以惠及多款芯片，避免芯片厂商各自封闭地重建编译栈。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:15:00 – 2:35:00</td>
+          <td>工业代码大模型发展与挑战</td>
+          <td><span class="speaker">杨健 — 北京航空航天大学副教授</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="8100">▶ 跳至视频此处</button>
+              <p><strong>杨健</strong> 从工业场景的特殊性出发，剖析了代码大模型在工业领域落地的独特挑战与技术方向：</p>
+              <ul>
+                <li><strong>工业代码与通用代码的差异：</strong>工业代码具有领域知识密集、安全可靠性要求高、遗留系统占比大三个显著特征，通用代码大模型在工业场景中的直接可用率偏低</li>
+                <li><strong>工业代码的上下文理解难题：</strong>工业代码往往深度耦合于特定的硬件规格、通信协议与业务流程，模型需要理解的不只是代码本身，还包括代码运行的系统环境与物理约束</li>
+                <li><strong>安全合规的刚性约束：</strong>工业代码生成需满足功能安全标准，可追溯性和可解释性的要求远高于通用软件开发场景</li>
+                <li><strong>落地路径建议：</strong>工业场景应优先在代码审查、测试生成、文档自动化等辅助性环节应用大模型，待模型能力和可信度验证充分后，再逐步向核心代码生成环节推进</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>工业代码大模型的核心矛盾不在于代码生成能力本身，而在于领域知识的深度嵌入与安全合规的严格保障。通用模型的能力无法直接平移至工业场景，需要围绕领域数据、工业知识图谱和安全标准三个维度进行针对性适配。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:35:00 – 2:55:00</td>
+          <td>面向大模型的 Data-centric AI 基础设施</td>
+          <td><span class="speaker">张文涛 — 北京大学研究员、博导</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="9300">▶ 跳至视频此处</button>
+              <p><strong>张文涛</strong> 系统阐述了以数据为中心的大模型基础设施构建方法论：</p>
+              <ul>
+                <li><strong>Data-centric AI 的核心理念：</strong>在模型架构快速趋同的当下，数据质量与数据工程效率已成为模型能力差异化的主要来源，系统化的数据管理比模型微调更能决定最终效果</li>
+                <li><strong>大模型数据工程的全生命周期：</strong>涵盖数据发现与采集、清洗与去重、质量评估与过滤、配比与采样、版本与溯源五个阶段，每个阶段均需要工具链支撑</li>
+                <li><strong>数据质量评估体系：</strong>提出了多维度的数据质量度量框架，包括信息密度、语义多样性、偏见与毒性检测、领域知识覆盖度等指标</li>
+                <li><strong>基础设施工具链设计：</strong>通过分布式数据流水线、智能采样策略和增量更新机制，支撑TB至PB级训练数据的敏捷管理</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>模型架构创新正在进入平台期，数据工程将成为下一阶段模型能力提升的核心驱动力。构建系统化的Data-centric AI基础设施，在数据维度上进行专业化和规模化的投入，其回报率将在未来几年持续放大。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:55:00 – 3:15:00</td>
+          <td>启蒙：处理器逻辑全自动设计</td>
+          <td><span class="speaker">承书尧 — 中科院计算所助理研究员</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="10500">▶ 跳至视频此处</button>
+              <p><strong>承书尧</strong> 介绍了"启蒙"项目在处理器逻辑全自动设计方面的前沿探索：</p>
+              <ul>
+                <li><strong>芯片设计自动化的代际演进：</strong>芯片设计自动化经历了从版图自动布线、逻辑综合到高层次综合（HLS）的技术演进，但仍依赖大量人工进行架构设计和微架构决策。启蒙项目旨在将AI引入处理器的架构设计与逻辑生成环节，实现更高维度的设计自动化</li>
+                <li><strong>AI参与处理器逻辑设计的技术路径：</strong>通过强化学习探索设计空间、图神经网络进行逻辑优化、以及大语言模型辅助RTL代码生成，在处理器核心模块（如ALU、Cache控制器、分支预测器）的设计中进行了自动化尝试</li>
+                <li><strong>设计质量与人工对照：</strong>在部分中规模模块的对比实验中，AI自动生成的设计在PPA（功耗、性能、面积）指标上达到了人工设计85%–95%的水平，验证了AI参与芯片设计的可行性</li>
+                <li><strong>当前局限与下一步方向：</strong>全芯片级自动设计仍面临设计空间爆炸、验证覆盖率不足、以及跨模块接口时序收敛三大技术挑战，短期内最优路径是人机协同的设计范式</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>AI参与芯片设计是计算系统自我进化的终极体现——用AI来设计运行AI的芯片。目前AI已在模块级设计中展现可用性，走向全芯片级自动设计仍需在搜索算法、验证方法论和EDA工具链三个层面取得系统性突破。启蒙项目的核心价值在于验证了这条技术路线的可行性。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:15:00 – 3:35:00</td>
+          <td>DeepEye：自主数据智能体系统</td>
+          <td><span class="speaker">骆昱宇 — 港科大（广州）助理教授</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="11700">▶ 跳至视频此处</button>
+              <p><strong>骆昱宇</strong> 介绍了DeepEye自主数据智能体系统的设计理念与应用实践：</p>
+              <ul>
+                <li><strong>自主数据智能体的定义：</strong>DeepEye是一个能够自主完成数据理解、分析规划、代码生成与结果解释全流程的智能体系统，目标是将数据分析从"人提需求、工具执行"的模式升级为"自然语言交互、智能体自主分析"</li>
+                <li><strong>系统架构：</strong>采用规划—执行—反思的三阶段循环架构，规划模块将用户的分析意图分解为可执行的分析步骤，执行模块通过代码生成和工具调用完成各步骤，反思模块对中间结果进行验证并动态调整后续分析策略</li>
+                <li><strong>核心能力突破：</strong>在表格数据的多步推理、跨表关联分析和可视化推荐三个关键任务上，DeepEye的表现显著优于通用大模型直接输出代码的方案，归因于其引入了数据分析领域的结构化知识和验证反馈机制</li>
+                <li><strong>与AI系统的关联：</strong>DeepEye的分析能力需要底层算力系统的支撑，特别是在大规模数据集的多维聚合查询场景中，智能体需与AI计算基础设施紧密协同，实现分析规划与执行效率的联合优化</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>自主数据智能体的核心竞争力不在于单一模型的能力，而在于将领域知识、规划能力、执行反馈三个要素系统化整合。DeepEye在数据分析场景中的实践表明，智能体架构中引入领域特定的反思与纠偏机制，是实现可靠自主分析的关键。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:35:00 – 3:55:00</td>
+          <td>需求编译：智能体软件工程演进的教学与前沿探索</td>
+          <td><span class="speaker">林云 — 上海交大计算机学院副教授</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="12900">▶ 跳至视频此处</button>
+              <p><strong>林云</strong> 提出了"需求编译"这一将自然语言需求直接转化为可执行软件的新型软件工程范式：</p>
+              <ul>
+                <li><strong>需求编译范式的定义：</strong>区别于传统"需求文档→架构设计→编码实现→测试验证"的瀑布式流程，需求编译旨在建立一条从自然语言需求描述直接到可运行软件系统的自动化管道</li>
+                <li><strong>关键技术支柱：</strong>包括需求的形式化解析与歧义消解、基于组件库的自动化架构合成、代码生成与已有系统集成的接口适配，以及面向非功能需求的自动化验证</li>
+                <li><strong>教学实践反馈：</strong>在上海交大软件工程课程中引入需求编译理念后，学生从关注具体代码实现转向关注需求建模与验证，软件工程的抽象思维能力和系统设计视野得到显著提升</li>
+                <li><strong>智能体软件工程的演进方向：</strong>随着智能体编程能力的增强，软件工程的核心价值正从"如何写代码"向"如何定义需求并验证其正确性"迁移，需求编译将成为智能体时代软件工程的基石范式</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>需求编译不仅是编译技术的延伸，更是软件工程在AI时代的范式重构。当代码生成逐渐变为自动化环节，软件工程的创新重心将前移至需求工程领域。教学层面需同步转型，从培养编码能力转向培养需求分析与系统验证能力。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:55:00 – 4:15:00</td>
+          <td>ForgeTrain：全球首个完全由 AI 编写的生产级训练框架</td>
+          <td><span class="speaker">李宇轩 — 清华大学"水木学者"博士后</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="14100">▶ 跳至视频此处</button>
+              <p><strong>李宇轩</strong> 介绍了ForgeTrain这一标志性成果——全球首个完全由AI自主编写并达到生产级质量的AI训练框架：</p>
+              <ul>
+                <li><strong>ForgeTrain的里程碑意义：</strong>ForgeTrain的全部代码由AI智能体在人类仅提供高层设计目标和约束条件的前提下自主生成，最终构建出一个功能完整的分布式训练框架，其训练性能在标准基准上反超了同等规模的人工实现</li>
+                <li><strong>AI自主编程的实现路径：</strong>系统采用多智能体协作架构，分工完成架构设计、模块编码、单元测试、性能优化和文档编写等子任务。各智能体通过标准化的接口契约进行协同，确保各模块的可组合性和一致性</li>
+                <li><strong>质量保障机制：</strong>通过自动化测试的持续验证、性能回归的即时检测、以及多智能体交叉审查三项机制，保障AI生成代码的质量。项目过程中发现并修复的缺陷类型分布显著不同于人工编程，表明AI的编码错误模式有其独特性</li>
+                <li><strong>"AI 制造 AI"的 Level 4 含义：</strong>参考自动驾驶分级体系，ForgeTrain达到的Level 4意味着AI可在限定领域内独立完成复杂系统的构建，仅需人类进行最终验收而非过程干预。这一成果标志着AI在软件工程领域的自主性达到了新高度</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>ForgeTrain验证了"AI制造AI"在工程层面是可行的。这不仅是AI训练框架本身的进步，更是对软件生产方式的根本性挑战——当AI能够独立构建高质量的生产级系统软件，软件工程的方法论、工具链和人才培养模式都需要被重新审视。通向Level 5的道路需要AI在需求理解、架构创新和长期维护三个维度取得进一步突破。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">4:15:00 – 4:30:00</td>
+          <td><strong>圆桌论坛</strong></td>
+          <td><span class="speaker">全体讲者</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="15300">▶ 跳至视频此处</button>
+              <p>全体讲者参与，由<strong>林咏华</strong>主持，围绕以下核心议题展开深入讨论：</p>
+              <ul>
+                <li><strong>AI系统生态的多芯片格局：</strong>与会专家一致认为，未来AI芯片格局将是多厂商并存、异构融合的局面，单一芯片难以覆盖从训练到推理、从云端到终端的全场景需求。编译器和框架等中间层软件是连接碎片化硬件生态的关键纽带，标准化中间表示是打破生态壁垒的技术共识。</li>
+                <li><strong>AI参与芯片设计的现实路径：</strong>AI辅助芯片设计已从概念验证进入模块级实用阶段，尤其在RTL代码生成、验证激励生成和PPA优化辅助三个环节价值显著。与会专家预估，在未来三至五年内AI辅助设计的芯片模块将在部分商用芯片中出现，但全芯片自主设计仍需更长的技术积累周期。</li>
+                <li><strong>国产算力的规模化挑战：</strong>国产芯片在推理侧已具备规模化部署条件，但在大规模训练场景中仍面临显存带宽、片间互联和软件生态三大短板。与会专家建议借鉴开源社区的协作模式，通过联合共建的方式加速国产软件栈的成熟。</li>
+                <li><strong>智能体对AI系统的影响：</strong>智能体应用将深刻改变AI系统的设计和运维方式。推理负载将从批处理模式向交互式实时模式转变，对系统的响应延迟、弹性调度和资源利用率提出全新要求。AI系统的设计需提前布局以适配智能体时代的负载特征。</li>
+                <li><strong>"AI制造AI"的演进方向：</strong>ForgeTrain的成果开启了AI自主构建系统软件的新篇章。圆桌专家展望了AI在AI框架、编译器、芯片设计等系统软件领域的自主能力演进路径，并对AI自主系统的质量保障、安全边界和伦理框架提出了建设性意见。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>圆桌共识</h4>
+                <p>AI系统正处于从"为AI设计系统"到"AI参与设计系统"再到"AI自主构建系统"的演进路径上。多芯片异构融合是不可逆的趋势，编译器和框架等中间层软件的价值将持续放大。国产算力的突破需要硬件、软件、生态三个维度的协同推进，开源协作是加速软件栈成熟的高效路径。AI自主构建系统软件的可行性已被验证，质量和安全是决定该方向商业化节奏的关键变量。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+(function() {
+  var video = document.getElementById('forum-video');
+  var m3u8Url = 'https://vod-2020.baai.ac.cn/record/06120834-25-8b228ba83cdb0a05c39aebc3138d51cf/06120834-25-16eac0d0fb6772aa3f51183830afe2aa/2026-06-13-08-19-25_2026-06-13-12-25-13.m3u8';
+
+  function initPlayer(url) {
+    m3u8Url = url;
+    video.style.display = 'block';
+
+    if (Hls.isSupported()) {
+      var hls = new Hls({ startPosition: 0 });
+      hls.loadSource(url);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, function() {
+        video.play().catch(function(){});
+        bindSeekButtons();
+      });
+      hls.on(Hls.Events.ERROR, function(evt, data) {
+        if (data.fatal) {
+          if (data.type === Hls.ErrorTypes.NETWORK_ERROR) { hls.startLoad(); }
+          else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) { hls.recoverMediaError(); }
+        }
+      });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = url;
+      video.addEventListener('loadedmetadata', function() {
+        video.play().catch(function(){});
+        bindSeekButtons();
+      });
+    }
+
+    try { localStorage.setItem('forum-ai-computing_m3u8', url); } catch(e) {}
+  }
+
+  function bindSeekButtons() {
+    document.querySelectorAll('.seek-video').forEach(function(btn) {
+      btn.onclick = function(e) {
+        e.stopPropagation();
+        var sec = parseInt(this.getAttribute('data-seek'));
+        if (video && sec >= 0) {
+          video.currentTime = sec;
+          video.play().catch(function(){});
+          video.scrollIntoView({ behavior: 'smooth' });
+        }
+      };
+    });
+  }
+
+  // Auto-init with embedded URL
+  initPlayer(m3u8Url);
+
+  // Session expand/collapse
+  document.querySelectorAll('.session-row.has-detail').forEach(function(row) {
+    row.addEventListener('click', function() {
+      this.classList.toggle('open');
+      var next = this.nextElementSibling;
+      if (next && next.classList.contains('session-detail')) { next.classList.toggle('open'); }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

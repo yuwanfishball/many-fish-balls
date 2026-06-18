@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026智源大会 — InnoVibe 共创场（青年学者前沿报告）直播回放</title>
+<style>
+  :root {
+    --primary: #1a3a5c;
+    --accent: #2857ff;
+    --bg: #f5f6f8;
+    --card-bg: #ffffff;
+    --text: #2c3e50;
+    --text-light: #5a6d80;
+    --border: #e2e6ed;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --radius: 10px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", "AR PL UKai CN", serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding-bottom: 40px;
+  }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+
+  /* ========== Header ========== */
+  .header {
+    position: relative;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: #fff;
+    padding: 32px 0;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  .header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", serif;
+  }
+  .back-link {
+    position: absolute;
+    top: 18px;
+    left: 24px;
+    color: rgba(255,255,255,.7);
+    text-decoration: none;
+    font-size: .9rem;
+    transition: color .2s;
+    z-index: 2;
+  }
+  .back-link:hover { color: #fff; }
+
+  /* ========== Video Player ========== */
+  .video-wrapper {
+    background: #000;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .video-wrapper video {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 540px;
+  }
+
+  /* ========== Card ========== */
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 0;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 16px 20px;
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--primary);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ========== Session Table ========== */
+  .schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .schedule-table thead th {
+    text-align: left;
+    font-size: .73rem;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--text-light);
+    padding: 8px 18px;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .time-slot {
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+    min-width: 100px;
+    font-size: .82rem;
+  }
+  .speaker { font-size: .82rem; color: var(--text-light); }
+
+  /* ========== Session Rows ========== */
+  .session-row { cursor: default; }
+  .session-row td { padding: 10px 18px; }
+  .session-row.has-detail {
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .session-row.has-detail:hover { background: #f5f7fa; }
+  .session-arrow {
+    text-align: center;
+    font-size: .6rem;
+    color: var(--text-light);
+    width: 36px;
+    transition: transform .25s;
+    vertical-align: middle;
+  }
+  .session-row.has-detail.open .session-arrow { transform: rotate(90deg); }
+  .session-row.no-detail .session-arrow { color: transparent; }
+  .session-detail { display: none; }
+  .session-detail.open { display: table-row; }
+  .session-detail td {
+    padding: 0 18px 16px !important;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .session-detail-content {
+    font-size: .88rem;
+    color: var(--text);
+    padding: 8px 0 8px 6px;
+  }
+  .session-detail-content p { margin-bottom: 8px; }
+  .session-detail-content ul { padding-left: 20px; margin-bottom: 8px; }
+  .session-detail-content ul li { margin-bottom: 4px; }
+
+  /* ========== Seek Button ========== */
+  .seek-video {
+    display: inline-block;
+    padding: 4px 14px;
+    margin-bottom: 8px;
+    border: 1px solid var(--accent);
+    border-radius: 99px;
+    background: #fff;
+    color: var(--accent);
+    font-size: .78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .seek-video:hover { background: var(--accent); color: #fff; }
+
+  /* ========== Highlight Box ========== */
+  .highlight-box {
+    background: #fff8e1;
+    border-left: 4px solid #f0b400;
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+  }
+  .highlight-box h4 { color: #b8860b; margin-bottom: 4px; }
+
+  /* ========== Summary Box ========== */
+  .summary-box {
+    padding: 18px 20px;
+    font-size: .88rem;
+    color: var(--text-light);
+    line-height: 1.8;
+  }
+
+  @media (max-width: 768px) {
+    .header h1 { font-size: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a class="back-link" href="index.html">← 返回</a>
+  <h1>🎤 2026智源大会 · InnoVibe 共创场（青年学者前沿报告）</h1>
+</header>
+
+<div class="container">
+
+  <!-- 视频播放器 -->
+  <div class="video-wrapper" id="video-wrapper">
+    <video id="forum-video" controls preload="metadata" crossorigin="anonymous" playsinline
+           style="display:block;width:100%;height:auto;max-height:540px;"></video>
+  </div>
+
+  <!-- 论坛简介 -->
+  <div class="card">
+    <div class="card-header">📖 论坛简介</div>
+    <div class="summary-box">
+      <p><strong>InnoVibe 共创场</strong>是智源大会旗下、由青源会与智源研究院联合主办的青年学者特色活动。2026 年度共创场延续了往届"97 后 AI 学术新星"的遴选传统，面向全球征集前沿研究报告，汇聚来自北京大学、清华大学、中国人民大学、复旦大学、香港大学、香港中文大学、南洋理工大学、新加坡国立大学、中国科学院，以及 DeepSeek、阿里通义千问等顶尖机构的 18 位青年学者。报告主题覆盖<strong>多模态与世界模型、智能体、AI for Science 以及基础架构与安全</strong>四大方向，每位讲者在 10 分钟内以高度凝练的方式呈现其核心研究突破。</p>
+      <p style="margin-top:10px">本届共创场呈现出三个显著特点：一是研究视野从单一任务扩展到通用基座模型与世界模拟器，体现了青年学者对大问题意识的集体跃升；二是智能体研究从工具执行迈向自主科研与开放环境适应，方法论成熟度显著提高；三是 AI for Science 方向涌现出分子生成、生物分子设计等可直接对接产业需求的计算方案。这场活动不仅是对青年学者研究能力的集中检阅，也为观察国内 AI 基础研究的新生代力量提供了重要窗口。</p>
+      <p style="margin-top:10px;font-size:.8rem;color:#999;">🕐 2026年6月12日 13:35–16:25 · 视频时间 55:32–3:45:32 · 📍 东门内序厅 · 主持人：翁书晨、吴文莉（智源研究院研究员）</p>
+    </div>
+  </div>
+
+  <!-- 议程详情 -->
+  <div class="card">
+    <div class="card-header">📋 议程详情（点击展开）</div>
+    <table class="schedule-table">
+      <thead><tr><th style="width:36px"></th><th>时间</th><th>环节 / 主题</th><th>嘉宾 / 讲者</th></tr></thead>
+      <tbody>
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">55:32 – 1:05:32</td>
+          <td>通用世界基座模型</td>
+          <td><span class="speaker">陈博远 — 北京大学元培学院（本科生）、逆矩阵科技创始人</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="3332">▶ 跳至视频此处</button>
+              <p><strong>陈博远</strong> 介绍了其主导研发的全球首款通用世界基座模型<strong>悟界·Physis-v0.1</strong>的核心思路。该工作的出发点在于：当前大语言模型本质上是文本 token 的条件概率模型，缺乏对物理世界因果结构的理解。报告提出将 AI 的核心任务从"预测下一个 token"重新定义为<strong>"预测下一物理状态"（Next Physical State Prediction）</strong>，让模型在物理规律的约束下学习表征。</p>
+              <ul>
+                <li><strong>技术路线：</strong>以强化学习为核心驱动，通过主动干预（Action）来探查物理因果链，而非被动拟合观测数据。模型在交互中学习重力、碰撞、刚体运动等基本物理规律的内隐表征。</li>
+                <li><strong>架构设计：</strong>采用模块化编码器-解码器结构，将视觉感知、物理推理和运动预测分离为可独立训练的子模块，最终通过端到端联合优化实现统一表征。</li>
+                <li><strong>开源计划：</strong>该模型完成训练后将全面开源，旨在降低世界模型研究的准入门槛，推动社区围绕通用物理基座展开协作。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>世界模型有望成为与大语言模型同等量级的下一代基础模型范式。关键突破在于让模型通过主动交互习得物理因果，而非停留在像素层面的统计拟合。这一方向将为具身智能、自动驾驶和科学仿真提供统一的物理认知底座。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:05:32 – 1:15:32</td>
+          <td>迈向通用智能体训练：从 Agent RL 到环境进化</td>
+          <td><span class="speaker">董冠霆 — 中国人民大学（博士生）</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="3932">▶ 跳至视频此处</button>
+              <p><strong>董冠霆</strong> 系统梳理了通用智能体训练从传统强化学习到环境协同进化的技术演进路径，指出当前智能体训练的核心瓶颈已从算法设计转向环境多样性不足。</p>
+              <ul>
+                <li><strong>Agent RL 的现状与局限：</strong>当前基于大模型的智能体在固定环境中通过 RL 微调已取得显著进展，但训练环境一旦固化，智能体便难以泛化到未见场景。环境设计本身成为能力天花板。</li>
+                <li><strong>环境进化的核心思想：</strong>将环境本身视作可优化的变量，通过对抗生成或课程学习机制，让环境随智能体能力的提升而动态调整复杂度。智能体与环境构成共进化系统。</li>
+                <li><strong>具体实现方案：</strong>提出了基于大模型的环境生成器，可根据智能体当前表现自动合成新的训练场景、任务变体和奖励结构，实现从"人在回路"到"自动课程"的转变。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>通用智能体的瓶颈不在于算法复杂度，而在于环境多样性。让环境与智能体协同进化，是将 Agent 从特定任务执行者提升为通用问题解决者的关键一步。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:15:32 – 1:25:32</td>
+          <td>我们为什么需要能读懂上下文的语言模型</td>
+          <td><span class="speaker">窦士涵 — 复旦大学（博士生）</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="4532">▶ 跳至视频此处</button>
+              <p><strong>窦士涵</strong> 从语言学和认知科学的双重视角出发，论证了上下文理解能力是当前大语言模型迈向深层语言智能的关键瓶颈，并给出了具体的技术改进方案。</p>
+              <ul>
+                <li><strong>问题定义：</strong>当前语言模型虽然在标准基准上表现优异，但在需要结合长程上下文进行推理的场景中仍频繁出错。具体表现为：无法准确解析多轮对话中的指代消解、难以跟踪文档级叙事中的实体状态变化、在处理隐含意图时过度依赖表层模式匹配。</li>
+                <li><strong>认知依据：</strong>人类语言理解高度依赖语境建模——同一语句在不同上下文中的语义可能完全相反。人脑通过海马体-前额叶协同机制实现了高效的上下文检索与整合，这一机制为模型设计提供了启发。</li>
+                <li><strong>技术方案：</strong>提出了层次化上下文编码架构，将文档级、段落级和句级上下文分别建模后融合，辅以显式的上下文相关性门控机制，使模型能动态判断当前生成需关注哪一层级的上下文信息。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>"读懂上下文"不是锦上添花的能力，而是语言智能的本质特征。一个无法在真实对话场景中持续追踪语境的模型，即便在基准测试中取得高分，也并未真正掌握语言理解的核心能力。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:25:32 – 1:35:32</td>
+          <td>大模型可扩展强化学习的三条边界</td>
+          <td><span class="speaker">何秉翔 — 清华大学（博士生）</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="5132">▶ 跳至视频此处</button>
+              <p><strong>何秉翔</strong> 基于对大模型强化学习训练过程的系统性实验分析，提出了制约可扩展性的三条核心边界，并给出了每条边界的应对策略。</p>
+              <ul>
+                <li><strong>第一条边界——奖励信号密度：</strong>在复杂推理任务中，稀疏奖励导致训练效率随任务长度增加而急剧衰减。解决方案是通过过程奖励模型（PRM）将稀疏的最终结果奖励分解为每个推理步骤的中间信号，使每一步都有明确的优化方向。</li>
+                <li><strong>第二条边界——探索-利用的平衡点漂移：</strong>随着模型规模扩大，策略空间的局部最优数量增长速度快于探索能力的增长。需引入基于不确定性的动态探索调度机制，在训练的早中期保持足够的策略多样性，在中后期逐步收缩至最优策略。</li>
+                <li><strong>第三条边界——计算资源在训练和推理间的分配：</strong>当前将大部分计算资源投入训练、推理时依赖固定预算的做法，在面对开放式任务时效率低下。报告提出训练-推理联合优化框架，让模型在训练阶段学习如何自适应地分配推理时的计算量。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>大模型强化学习的 Scaling Law 不同于预训练阶段的参数-数据规模律。奖励密度、探索策略和训练-推理资源分配构成了三条独立但相互耦合的约束边界，逐一突破这三条边界的优先级因任务类型而异。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:35:32 – 1:45:32</td>
+          <td>视频生成模型：推理机制、系统化评测与世界模型展望</td>
+          <td><span class="speaker">黄子琪 — 南洋理工大学（博士生）</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="5732">▶ 跳至视频此处</button>
+              <p><strong>黄子琪</strong> 从视频生成模型的内在推理机制出发，提出了系统化的评测框架，并论证了视频生成模型作为世界模拟器的技术可行性与当前局限。</p>
+              <ul>
+                <li><strong>推理机制的发现：</strong>通过分析视频扩散模型在去噪过程中的中间表征，发现模型在生成过程中自发地形成了对物体几何结构、遮挡关系和运动动力学的内隐推理能力。这种能力并非显式编程的结果，而是在大规模视频数据训练中涌现的。</li>
+                <li><strong>系统化评测框架：</strong>现有的 FVD、IS 等视频生成指标不能衡量模型对物理规律的遵循程度。报告提出了涵盖物理一致性（重力、碰撞、流体）、时序因果性和空间几何准确性三个维度的评测方案，并给出了各维度的定量化指标。</li>
+                <li><strong>世界模型展望：</strong>视频生成模型向世界模型的升级需解决三个核心问题——长期一致性（超过 30 秒的物理状态追踪）、可控交互性（用户干预后的物理合理响应）、以及从像素空间到物理状态空间的抽象映射。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>视频生成模型的价值不止于内容创作。当生成质量达到足够高的物理一致性时，这类模型将自然进化为可交互的世界模拟器——但目前仍需在长期一致性和可控性两个维度上取得突破。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:45:32 – 1:55:32</td>
+          <td>从执行型 Agent 到研究型 Agent：基于假设树的自主科研框架 Arbor</td>
+          <td><span class="speaker">金佳杰 — 中国人民大学（博士生）</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="6332">▶ 跳至视频此处</button>
+              <p><strong>金佳杰</strong> 提出了 Arbor 自主科研框架，将 AI Agent 的能力边界从"按指令执行任务"推进到"自主形成科学假设并进行实验验证"。</p>
+              <ul>
+                <li><strong>假设树（Hypothesis Tree）：</strong>Arbor 的核心数据结构是一棵动态生长的假设树。根节点为初始研究问题，每个分支代表一个候选假设，叶子节点关联该假设的实验验证结果。Agent 在每个节点上执行三个操作：基于现有证据生成子假设、设计验证实验、根据实验结果更新树结构（证实、证伪或修正假设）。</li>
+                <li><strong>搜索与剪枝策略：</strong>假设空间呈指数级增长，报告提出了基于置信度的剪枝策略和基于信息增益的探索优先级排序，使 Agent 在有限实验预算内覆盖最有潜力的假设路径。</li>
+                <li><strong>与传统执行型 Agent 的本质区别：</strong>执行型 Agent 将任务视为在给定状态空间中寻找最优动作序列，研究型 Agent 的核心挑战在于状态空间本身是不确定的——Agent 需要通过实验来逐步揭示真实的状态结构。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>研究型 Agent 的终极目标不是替代科学家，而是作为科学家的认知外骨骼——承担假设空间的系统化搜索和实验验证的重复劳动，让人类研究者将精力集中于提出高价值的研究问题和判断发现的深层意义。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:55:32 – 2:05:32</td>
+          <td>迈向真实世界 AI 智能体：技术演进与代表性研究</td>
+          <td><span class="speaker">李晓熙 — 中国人民大学（博士生）</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="6932">▶ 跳至视频此处</button>
+              <p><strong>李晓熙</strong> 以综述性视角梳理了真实世界 AI 智能体从仿真到落地过程中的技术演进脉络，重点关注开放环境中智能体所面临的独特挑战及代表性解决方案。</p>
+              <ul>
+                <li><strong>技术代际划分：</strong>报告将真实世界智能体研究划分为三个阶段——1.0 时代以单一任务中预设环境的规则系统为主；2.0 时代引入强化学习，但局限于仿真环境和受控场景；3.0 时代的核心标志是大模型赋能下的开放环境泛化能力，智能体可借助大模型的常识推理应对训练中从未出现的场景。</li>
+                <li><strong>三个核心挑战：</strong>首先是感知不确定性，真实世界的传感器噪声和局部可观测性远超仿真设定；其次是动作空间的开放性，真实环境中可执行的动作不能预先枚举；第三是任务目标的模糊性，用户指令往往缺乏明确的成功标准。</li>
+                <li><strong>代表性解决方案：</strong>在感知层面采用视觉-语言模型进行多模态对齐；在动作层面通过代码生成将自然语言规划转化为可执行的操作序列；在目标层面引入交互式澄清机制，让 Agent 主动提问以消除指令歧义。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>让智能体走出仿真环境、进入真实世界，不仅需要更强的模型能力，更需要重新设计智能体与环境的交互协议。核心转变在于：从追求最优解转向追求鲁棒可接受的解，从一次决策转向在线持续修正。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:05:32 – 2:15:32</td>
+          <td>大模型时代下的个性化服务：用户行为的理解、推理与评测</td>
+          <td><span class="speaker">林欣余 — 新加坡国立大学（博士生）</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="7532">▶ 跳至视频此处</button>
+              <p><strong>林欣余</strong> 聚焦大模型在个性化服务场景中的用户行为建模问题，从理解、推理和评测三个层面提出了系统性的研究框架。</p>
+              <ul>
+                <li><strong>用户行为理解：</strong>当前大模型对用户行为的理解停留在文本描述的浅层语义匹配，缺乏对用户意图、偏好演化以及情境因素的结构化建模。报告提出了多粒度用户画像构建方法，将用户的短期行为序列、中长期兴趣漂移和情境触发条件进行分层编码。</li>
+                <li><strong>行为推理：</strong>传统推荐系统依赖协同过滤，无法解释推荐背后的因果逻辑。报告展示了基于大模型的反事实推理框架，可回答"如果用户查看了 X，是否会也对 Y 产生兴趣"这类因果性问题，从而提供可解释的个性化建议。</li>
+                <li><strong>评测体系建设：</strong>现有的个性化评测指标（点击率、停留时长等）与用户真实满意度之间存在显著偏差。报告提出了结合显式反馈、隐式行为信号和长期留存的多维度个性化评测方案，更准确地反映个性化系统的实际服务质量。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>个性化不是"给用户推更多同类内容"的算法优化，而是对用户意图、情境和偏好演化的深层理解。大模型的出现使得从特征工程驱动转向认知驱动的个性化成为可能，但评测体系需同步更新。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:15:32 – 2:25:32</td>
+          <td>SLDM：高效 3D 分子生成新方案</td>
+          <td><span class="speaker">倪雨嫣 — 中国科学院数学与系统科学研究院（博士生）</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="8132">▶ 跳至视频此处</button>
+              <p><strong>倪雨嫣</strong> 提出了 SLDM（Structured Latent Diffusion Model），一种面向 3D 分子生成的高效扩散模型，在生成质量和计算效率两方面均实现了显著提升。</p>
+              <ul>
+                <li><strong>问题背景：</strong>药物发现中的先导化合物优化依赖于对化学空间的系统性探索，但传统分子生成方法要么计算开销过大（如基于 DFT 的量子化学方法），要么生成的分子三维构象偏离物理真实性（如基于 SMILES 的一维序列方法）。</li>
+                <li><strong>SLDM 的核心设计：</strong>在潜空间而非原始原子坐标空间执行扩散过程，通过等变图神经网络将分子从三维几何空间编码到紧致的结构化潜空间。潜空间中的扩散过程保留了分子的对称性约束（旋转、平移、手性），同时将采样效率提升近一个数量级。</li>
+                <li><strong>实验验证：</strong>在标准分子生成基准（QM9、GEOM-Drugs）上，SLDM 在分子稳定性、可合成性和靶点结合亲和力三个维度上均优于现有方法，且推理速度显著快于此前的 SOTA 扩散模型。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>将扩散过程从原始数据空间迁移到结构化潜空间，是平衡分子生成质量与计算效率的有效策略。这一方法论不仅适用于药物分子，也可推广到催化剂设计、材料基因组等其他分子科学领域。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:25:32 – 2:35:32</td>
+          <td>模型结构设计对网络训练推理机制的影响</td>
+          <td><span class="speaker">邱子涵 — 阿里通义千问（Qwen）研究员</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="8732">▶ 跳至视频此处</button>
+              <p><strong>邱子涵</strong> 基于在通义千问系列模型上的大规模工程实践经验，系统分析了模型结构设计的微观选择如何影响训练和推理的全链路性能。</p>
+              <ul>
+                <li><strong>注意力机制的工程权衡：</strong>比较了 MHA（多头注意力）、GQA（分组查询注意力）和 MLA（多头潜在注意力）在大规模训练中的表现差异。GQA 在推理显存和训练收敛速度之间达到了当前最优的平衡点，但 MLA 在超长上下文场景下展现出 KV 缓存效率的显著优势。</li>
+                <li><strong>激活函数选型对训练稳定性的影响：</strong>SwiGLU 等门控激活函数虽然增加了前向计算开销，但在训练后期能有效抑制梯度方差，对千亿参数以上模型的训练稳定性至关重要。</li>
+                <li><strong>推理效率的系统性优化：</strong>从模型结构层面降低推理成本的技术路线包括——通过稀疏注意力模式减少 KV 缓存占用、通过分组共享减少参数冗余、以及通过动态宽度调整实现不同算力条件下的弹性部署。结构层面的优化比纯工程层面的量化/剪枝更能保持模型能力。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>模型结构不是独立于训练和推理的静态设计，而是贯穿全链路的系统性变量。每一个结构决策都同时在训练效率、推理成本和最终模型能力三个轴上产生连锁影响，优秀的结构设计是在这三个维度之间寻找帕累托最优解。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:35:32 – 2:45:32</td>
+          <td>龙虾热潮、nanobot、CLI 与 AI 开源方法论</td>
+          <td><span class="speaker">任旭滨 — 香港大学（博士生）</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="9332">▶ 跳至视频此处</button>
+              <p><strong>任旭滨</strong> 以独特的跨领域视角，从社交媒体传播、微型自动化工具和命令行哲学三个看似不相干的切入点出发，探讨了 AI 开源社区的方法论内核。</p>
+              <ul>
+                <li><strong>"龙虾热潮"作为传播学案例：</strong>以社交媒体上"龙虾"相关话题的病毒式传播为例，分析了开源 AI 项目在社区中的传播规律——技术质量并非扩散速度的唯一决定因素，叙事框架和社区参与感同样关键。开源项目从"好用"到"流行"之间存在一条需要主动设计的传播链路。</li>
+                <li><strong>Nanobot 与微型工具哲学：</strong>提出了"nanobot"概念——专注于单一任务的超轻量级 AI 工具，每条命令只做一件事且做到极致。这与 Unix 哲学一脉相承：复杂系统应由可组合的简单组件构成，而非追求功能完备但难以维护的单体架构。</li>
+                <li><strong>CLI 作为 AI 交互的范式基础：</strong>命令行界面因其可组合性（通过管道串联）、可复现性（精确的历史记录）和低资源开销，是 AI 工具交互的理想范式之一。报告展示了基于 CLI 的 AI agent 开发工作流，通过组合小型工具实现复杂的自动化链条。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>AI 开源的核心方法论可以凝练为三条原则：像理解社交传播一样理解社区动力学，像设计 Unix 工具一样设计 AI 组件，像使用命令行一样使用 AI 接口。好的开源不仅是代码的开放，更是协作范式的设计。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:45:32 – 2:55:32</td>
+          <td>构建全面的机器人记忆系统：数据、评测和模型</td>
+          <td><span class="speaker">宋文轩 — 香港科技大学（广州）（博士生）</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="9932">▶ 跳至视频此处</button>
+              <p><strong>宋文轩</strong> 从数据构建、评测基准和模型设计三个维度，提出了面向具身智能机器人的完整记忆系统方案，解决了机器人长期自主运行中的经验积累与知识复用问题。</p>
+              <ul>
+                <li><strong>记忆分类体系：</strong>将机器人记忆划分为四个子系统——语义记忆（物体和场景的概念知识）、情景记忆（具体经历的时间序列记录）、程序记忆（技能的肌肉记忆与运动模式）和空间记忆（环境几何布局的拓扑与度量表征）。四类记忆在编码方式、存储格式和检索机制上各不相同。</li>
+                <li><strong>训练数据构建：</strong>采用人在回路的遥操作数据采集与合成数据增强相结合的策略。人工遥操作提供高质量的动作-场景配对，合成数据则通过环境随机化覆盖边缘场景。两部分数据的配比和调度策略对记忆模型的泛化能力有决定性影响。</li>
+                <li><strong>评测基准：</strong>提出了涵盖记忆召回精度、知识泛化距离和长期一致性三个维度的评测框架，弥补了现有机器人评测中缺乏记忆维度系统化考量的不足。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>记忆是机器人从单次任务执行者进化为长期自主伙伴的核心能力缺口。一个没有记忆系统的机器人每次开机都从零开始，而有记忆的机器人能够将每次交互转化为未来能力的增量。这不仅是工程问题，更是系统架构层面的根本性设计选择。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:55:32 – 3:05:32</td>
+          <td>面向自主学习的多智能体课堂</td>
+          <td><span class="speaker">涂尚卿 — 清华大学（博士生）</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="10532">▶ 跳至视频此处</button>
+              <p><strong>涂尚卿</strong> 提出了"多智能体课堂"训练范式，将多个学习型智能体置于共享环境中，通过相互教学与竞争实现超越单智能体独立训练的集体学习效率。</p>
+              <ul>
+                <li><strong>范式动机：</strong>传统单智能体强化学习面临采样效率低和探索不充分的双重困境。多智能体课堂的引入将训练从"环境-智能体"的二元交互扩展为"环境-智能体群体"的多方交互，每个智能体既是学习者也是其他智能体的训练环境的一部分。</li>
+                <li><strong>核心机制设计：</strong>包含三个互补的学习通道——同行教学（能力强的智能体生成训练任务给能力弱的智能体）、对抗博弈（两个智能体在零和或非零和博弈中互相激发策略创新）以及观察学习（智能体通过观察他人的成功与失败来加速自身学习，无需亲历所有状态）。</li>
+                <li><strong>课堂编排策略：</strong>不同学习通道的调度顺序和切换时机对最终学习效果影响显著。报告提出了基于群体能力方差的自适应编排算法，在训练的早期阶段侧重观察学习以快速建立基础能力，中期引入对抗博弈以激发策略多样性，后期利用同行教学实现精细化提升。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>多智能体课堂将训练从孤立个体的试错过程转变为群体协同的知识生成过程。这一范式不仅提升了样本效率，更重要的是产生了单一智能体独立训练中不会自然涌现的策略多样性——而这正是通用智能体泛化能力的来源。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:05:32 – 3:15:32</td>
+          <td>"点"表征：空间认知的稀疏基底</td>
+          <td><span class="speaker">吴虓杨 — 香港大学（博士生）</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="11132">▶ 跳至视频此处</button>
+              <p><strong>吴虓杨</strong> 提出了以稀疏"点"作为空间认知基本单元的表征理论和技术实现，论证了稀疏表征在三维视觉和空间推理中的高效性。</p>
+              <ul>
+                <li><strong>稀疏编码的生物学依据：</strong>人脑的空间认知并不依赖密集的三维体素网格。海马体中的位置细胞和内嗅皮层中的网格细胞以稀疏的"参考点"集合来编码空间信息，这一机制在能效和泛化能力上远超密集表征。</li>
+                <li><strong>"点"表征的技术实现：</strong>提出了一组可学习的稀疏关键点集合作为空间表征的基本单元。与稠密的体素表征或隐式神经场不同，这组关键点的数量远少于场景中的原始点云数量，但通过自适应位置优化，能够在信息密度最高的空间区域集中表征容量。</li>
+                <li><strong>下游任务适配：</strong>在三维物体识别、场景理解和机器人导航三个任务上验证了稀疏点表征的有效性。在机器人导航任务中，基于稀疏关键点的空间记忆可在单次观察后构建出支持长距离导航的拓扑地图，显著优于需要多次遍历的稠密建图方法。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>稀疏性是高效空间认知的本质特征而非妥协。从密集表征转向稀疏"点"表征，不仅是计算效率的优化，更是向人脑空间编码机制的对齐。这一思路可广泛应用于自动驾驶、增强现实和机器人导航中的实时空间建模。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:15:32 – 3:25:32</td>
+          <td>从世界模型通往机器人自主提升</td>
+          <td><span class="speaker">杨佳智 — 香港中文大学（博士生）</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="11732">▶ 跳至视频此处</button>
+              <p><strong>杨佳智</strong> 从统一表征的视角出发，提出了通过可扩展多模态基础模型实现机器人从仿真到真实世界能力迁移与持续自主提升的完整路线图。</p>
+              <ul>
+                <li><strong>统一表征的简化路径：</strong>当前机器人系统普遍为视觉、语言、触觉和本体感知分别设计专用编码器，导致模态间的表征鸿沟。报告提出以统一的多模态 Transformer 架构替代分立编码，使不同模态在共享表征空间中自然对齐，从而降低系统复杂度并提升跨模态迁移效率。</li>
+                <li><strong>世界模型作为内部模拟器：</strong>机器人利用世界模型在行动前进行"心理预演"——在内部模拟中预测行动后果、评估候选策略的可行性。这种方式将试错成本从物理世界转移到模型内部，大幅降低了对真实交互数据的依赖。</li>
+                <li><strong>自主提升闭环：</strong>构建了"执行→观察→世界模型更新→策略优化→再执行"的持续学习回路。机器人在执行任务的过程中持续收集数据、更新其内部世界模型，并基于更精确的世界模型优化策略，形成正向飞轮。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>机器人自主提升的飞轮效应依赖于两个核心组件：一个足够精确的内部世界模型用于安全的"心理预演"，以及一套统一的多模态表征让不同传感和运动通道共享同一个认知空间。两者的结合是机器人走出实验室、适应开放环境的关键。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:25:32 – 3:35:32</td>
+          <td>ODesign：生物分子相互作用的全新构建与设计</td>
+          <td><span class="speaker">张昊天 — 香港中文大学（博士生）</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="12332">▶ 跳至视频此处</button>
+              <p><strong>张昊天</strong> 提出了 ODesign 计算框架，实现了从靶点结构出发直接设计结合分子的端到端流程，为药物设计和合成生物学中的分子工具构建提供了全新方案。</p>
+              <ul>
+                <li><strong>核心任务定义：</strong>生物分子相互作用设计的本质是反问题——给定靶点蛋白质的三维结构，需要设计出能以高亲和力和高特异性与之结合的另一分子（多肽、核酸或小分子）。传统方法依赖高通量筛选或专家经验导向的逐轮优化，设计周期长且成功率低。</li>
+                <li><strong>ODesign 的技术方案：</strong>框架由三个模块串联构成——结合位点识别模块利用几何深度学习从靶点表面检测可成药口袋；分子生成模块基于等变扩散模型在口袋内部逐步生长出候选分子的三维结构；亲和力评估模块通过结构预测和自由能估算对候选分子进行排序。</li>
+                <li><strong>实验验证：</strong>在多肽-蛋白质和抗体-抗原两个应用场景上进行了湿实验验证。ODesign 设计的多肽在表面等离子体共振实验中测得纳摩尔级别的结合亲和力，验证了框架的实用性。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>计算驱动的生物分子设计正在从辅助工具升级为核心生产力。ODesign 的价值在于将"设计-合成-测试"的传统实验闭环转变为"计算设计-选择性合成验证"的高效模式，显著压缩了从靶点到候选分子的研发周期。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:35:32 – 3:45:32</td>
+          <td>代码智能体与软件自动化的变革趋势</td>
+          <td><span class="speaker">张克驰 — 北京大学（博士生）</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="12932">▶ 跳至视频此处</button>
+              <p><strong>张克驰</strong> 以宏观视角梳理了代码智能体从辅助编码到自主软件工程的能力跃迁路径，并对软件自动化领域的结构性变革趋势进行了前瞻分析。</p>
+              <ul>
+                <li><strong>能力阶梯：</strong>报告将代码智能体的能力演进划分为四个层级——第一层级是代码补全（在当前文件内预测后续 token），第二层级是跨文件编辑（理解项目结构后进行多文件协同修改），第三层级是自主调试与修复（从错误信息出发定位根因并生成修复方案），第四层级是需求驱动的完整软件开发（从自然语言需求规格出发，完成架构设计、编码、测试和部署的全流程）。当前最先进的代码智能体已稳定达到第三层级，正在向第四层级突破。</li>
+                <li><strong>软件工程的范式迁移：</strong>代码智能体带来的不仅是编码效率的量变，更是软件生产方式的质变。传统的"需求文档→架构设计→编码→测试"串行流程正在被"需求描述→智能体并行探索→人工审查→自动合并"的新范式替代，人工角色从生产者转变为审查者和架构决策者。</li>
+                <li><strong>开源生态的加速效应：</strong>开放代码仓库构成了代码智能体训练数据的核心来源。报告指出，开源社区与代码智能体之间形成了双向加速的正反馈循环——更好的代码智能体促进了更多开源贡献，更多的开源代码又进一步提升了代码智能体的训练数据质量。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>代码智能体的终极形态不是一个更聪明的自动补全工具，而是能理解需求、设计架构、编写实现、验证正确性的自主软件工程系统。这一变革将重新定义"程序员"的角色——从代码的书写者转变为系统意图的表达者和质量的把关者。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+(function() {
+  var video = document.getElementById('forum-video');
+  var m3u8Url = 'https://vod-2020.baai.ac.cn/record/06110746-8-cd5d1778264a0e30c0f9a557f9162b35/06110746-8-e916ec4f8e794a74770b8d4ed6b66cd/2026-06-12-12-39-28_2026-06-12-17-38-52.m3u8';
+  var startOffset = 55 * 60 + 32; // 论坛从视频 55:32 处开始
+
+  function initPlayer() {
+    if (Hls.isSupported()) {
+      var hls = new Hls({ startPosition: startOffset });
+      hls.loadSource(m3u8Url);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, function() {
+        video.currentTime = startOffset;
+        video.play().catch(function(){});
+        bindSeekButtons();
+      });
+      hls.on(Hls.Events.ERROR, function(evt, data) {
+        if (data.fatal) {
+          if (data.type === Hls.ErrorTypes.NETWORK_ERROR) { hls.startLoad(); }
+          else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) { hls.recoverMediaError(); }
+        }
+      });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = m3u8Url + '#t=' + startOffset;
+      video.addEventListener('loadedmetadata', function() {
+        video.play().catch(function(){});
+        bindSeekButtons();
+      });
+    }
+  }
+
+  function bindSeekButtons() {
+    document.querySelectorAll('.seek-video').forEach(function(btn) {
+      btn.onclick = function(e) {
+        e.stopPropagation();
+        var sec = parseInt(this.getAttribute('data-seek'));
+        if (video && sec >= 0) {
+          video.currentTime = sec;
+          video.play().catch(function(){});
+          video.scrollIntoView({ behavior: 'smooth' });
+        }
+      };
+    });
+  }
+
+  // Session expand/collapse
+  document.querySelectorAll('.session-row.has-detail').forEach(function(row) {
+    row.addEventListener('click', function() {
+      this.classList.toggle('open');
+      var next = this.nextElementSibling;
+      if (next && next.classList.contains('session-detail')) { next.classList.toggle('open'); }
+    });
+  });
+
+  initPlayer();
+})();
+</script>
+
+</body>
+</html>

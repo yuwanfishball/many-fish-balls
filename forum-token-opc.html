@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026智源大会 — Token 经济与 OPC 直播回放</title>
+<style>
+  :root {
+    --primary: #1a3a5c;
+    --accent: #2857ff;
+    --bg: #f5f6f8;
+    --card-bg: #ffffff;
+    --text: #2c3e50;
+    --text-light: #5a6d80;
+    --border: #e2e6ed;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --radius: 10px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", "AR PL UKai CN", serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding-bottom: 40px;
+  }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+
+  /* ========== Header ========== */
+  .header {
+    position: relative;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: #fff;
+    padding: 32px 0;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  .header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", serif;
+  }
+  .back-link {
+    position: absolute;
+    top: 18px;
+    left: 24px;
+    color: rgba(255,255,255,.7);
+    text-decoration: none;
+    font-size: .9rem;
+    transition: color .2s;
+    z-index: 2;
+  }
+  .back-link:hover { color: #fff; }
+
+  /* ========== Video Player ========== */
+  .video-wrapper {
+    background: #000;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .video-wrapper video {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 540px;
+  }
+
+  /* ========== Card ========== */
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 0;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 16px 20px;
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--primary);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ========== Session Table ========== */
+  .schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .schedule-table thead th {
+    text-align: left;
+    font-size: .73rem;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--text-light);
+    padding: 8px 18px;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .time-slot {
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+    min-width: 100px;
+    font-size: .82rem;
+  }
+  .speaker { font-size: .82rem; color: var(--text-light); }
+
+  /* ========== Session Rows ========== */
+  .session-row { cursor: default; }
+  .session-row td { padding: 10px 18px; }
+  .session-row.has-detail {
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .session-row.has-detail:hover { background: #f5f7fa; }
+  .session-arrow {
+    text-align: center;
+    font-size: .6rem;
+    color: var(--text-light);
+    width: 36px;
+    transition: transform .25s;
+    vertical-align: middle;
+  }
+  .session-row.has-detail.open .session-arrow { transform: rotate(90deg); }
+  .session-row.no-detail .session-arrow { color: transparent; }
+  .session-detail { display: none; }
+  .session-detail.open { display: table-row; }
+  .session-detail td {
+    padding: 0 18px 16px !important;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .session-detail-content {
+    font-size: .88rem;
+    color: var(--text);
+    padding: 8px 0 8px 6px;
+  }
+  .session-detail-content p { margin-bottom: 8px; }
+  .session-detail-content ul { padding-left: 20px; margin-bottom: 8px; }
+  .session-detail-content ul li { margin-bottom: 4px; }
+
+  /* ========== Seek Button ========== */
+  .seek-video {
+    display: inline-block;
+    padding: 4px 14px;
+    margin-bottom: 8px;
+    border: 1px solid var(--accent);
+    border-radius: 99px;
+    background: #fff;
+    color: var(--accent);
+    font-size: .78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .seek-video:hover { background: var(--accent); color: #fff; }
+
+  /* ========== Highlight Box ========== */
+  .highlight-box {
+    background: #fff8e1;
+    border-left: 4px solid #f0b400;
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+  }
+  .highlight-box h4 { color: #b8860b; margin-bottom: 4px; }
+
+  /* ========== Summary Box ========== */
+  .summary-box {
+    padding: 18px 20px;
+    font-size: .88rem;
+    color: var(--text-light);
+    line-height: 1.8;
+  }
+
+  @media (max-width: 768px) {
+    .header h1 { font-size: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a class="back-link" href="index.html">← 返回</a>
+  <h1>🎬 2026智源大会 · Token 经济与 OPC</h1>
+</header>
+
+<div class="container">
+
+  <!-- 视频播放器 -->
+  <div class="video-wrapper" id="video-wrapper">
+    <video id="forum-video" controls preload="metadata" crossorigin="anonymous" playsinline
+           style="display:block;width:100%;height:auto;max-height:540px;"></video>
+  </div>
+
+  <!-- 论坛简介 -->
+  <div class="card">
+    <div class="card-header">📖 论坛简介</div>
+    <div class="summary-box">
+      <p>随着大模型能力的快速跃升，<strong>Token</strong> 已从模型输出的计量单位演变为度量、交易和分配智能的核心载体。本论坛由智源研究院与罗汉堂联合发起，聚焦 Token 经济学的理论基础与 OPC（One-Person Company，单人公司）模式的产业实践。论坛从<strong>宏观、技术、应用</strong>三个层次逐层展开：宏观层审视 Token 定价机制与智能密度度量，技术层探讨算力基础设施的经济账与可持续发展，应用层呈现 OPC 模式下的创业实践与组织形态变革。</p>
+      <p style="margin-top:10px">论坛由<strong>文继荣</strong>（中国人民大学高瓴人工智能学院执行院长）与<strong>陈龙</strong>（罗汉堂秘书长）联合担任主席，<strong>刘勇</strong>（中国人民大学高瓴人工智能学院长聘副教授）全程主持。讲者阵容涵盖知名高校学者、AI芯片及基础设施企业高管、以及 OPC 创业实践者，围绕 Token 经济模型、智能成本优化、AI 安全治理以及单人公司的现实路径展开深度研讨。</p>
+      <p style="margin-top:10px;font-size:.8rem;color:#999;">🕐 2026年6月12日 13:30–17:30 · 视频时长约 5 小时 · 📍 G08 会议室 · 线上同步直播</p>
+    </div>
+  </div>
+
+  <!-- 议程详情 -->
+  <div class="card">
+    <div class="card-header">📋 议程详情（点击展开）</div>
+    <table class="schedule-table">
+      <thead><tr><th style="width:36px"></th><th>时间</th><th>环节 / 主题</th><th>嘉宾 / 讲者</th></tr></thead>
+      <tbody>
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">40:00 – 1:10:00</td>
+          <td>Token 为什么不经济？</td>
+          <td><span class="speaker">文继荣 — 中国人民大学高瓴人工智能学院执行院长</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="2400">▶ 跳至视频此处</button>
+              <p><strong>文继荣</strong> 从经济学第一性原理出发，系统审视了当前大模型 Token 定价机制的结构性缺陷：</p>
+              <ul>
+                <li><strong>Token 作为计量单位的先天不足：</strong>Token 的经济价值取决于信息密度、语义粒度和任务复杂度三个变量，但当前按 Token 数量统一定价的模式忽略了这些维度上的巨大差异，导致"高密度Token被低估、低密度Token被高估"的价格扭曲</li>
+                <li><strong>当前定价模式的效率损失：</strong>统一定价造成了三个层面的资源配置低效——模型厂商难以通过差异化定价优化收入结构、开发者无法准确评估任务成本、终端用户面临隐性的跨任务交叉补贴</li>
+                <li><strong>智能密度度量体系的构建方向：</strong>提出以"完成任务的有效信息量"替代"Token数量"作为定价基础，从信息论和任务复杂度两个维度建立更精细的智能度量框架，使定价更准确反映模型输出的实际经济价值</li>
+                <li><strong>从 Token 经济到智能经济的转型路径：</strong>Token 计价的改革不仅是定价模型的调整，更是驱动行业从"拼参数、堆算力"的粗放模式，转向"比效能、论价值"的精细化发展轨道的关键杠杆</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>Token 作为计量单位面临的根本矛盾在于：它是一个"物理量"而非"价值量"。按Token统一定价就像按重量卖书而不考虑内容质量——表面公平，实则扭曲了真实价值。智能密度度量和差异化定价体系的建立，是Token经济走向成熟的必要条件。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:10:00 – 1:40:00</td>
+          <td>Token 时代的商业与组织</td>
+          <td><span class="speaker">陈龙 — 罗汉堂秘书长</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="4200">▶ 跳至视频此处</button>
+              <p><strong>陈龙</strong> 从商业组织演进的宏观视角，分析了Token时代对企业形态、产业分工和生产关系的重塑效应：</p>
+              <ul>
+                <li><strong>Token 作为生产要素的定价信号：</strong>当智能以Token的形式被量化、交易和消费，企业的生产要素组合、成本结构和价值创造逻辑都将发生根本性变化。Token价格不仅是商业参数，更是整个AI产业链资源配置的指挥棒</li>
+                <li><strong>组织边界消融与重构：</strong>随着Token化智能的获取成本持续下降，企业将重新权衡"内部自建"与"外部调用"的边界。传统以人力密度和部门层级定义的组织结构，正被以智能调用效率为核心的网状协作模式替代</li>
+                <li><strong>OPC 的经济学基础：</strong>单人公司的可行性源于Token化智能将创业门槛从"组建团队"压低至"定义需求"。当一个人可以借助AI调用完成产品设计、开发、营销和客服等全链条任务，团队规模不再是竞争力的前置条件，创意和决策质量才是核心变量</li>
+                <li><strong>新型商业契约的演进：</strong>Token时代的商业关系将从雇佣合约向智能服务合约迁移，企业间协作将从部门间的组织协调转向Agent间的接口调用，商业契约的形式和执行机制需要同步更新</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>Token不仅是AI时代的"电力计量单位"，更是重塑商业组织形态的底层力量。OPC的出现不是简单的"一个人=一家公司"，而是智能平价化后创业门槛断崖式下降的自然结果。商业竞争的核心将从"组织多少人"转向"调用多少智能"。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:40:00 – 2:05:00</td>
+          <td>基础设施撬动智能生产的经济账</td>
+          <td><span class="speaker">李伯勋 — 上海无问芯穹智能科技 CTO</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="6000">▶ 跳至视频此处</button>
+              <p><strong>李伯勋</strong> 从算力基础设施的经济学视角，拆解了智能生产成本的关键变量与优化路径：</p>
+              <ul>
+                <li><strong>智能生产成本的构成分析：</strong>将推理成本分解为芯片采购、电力消耗、集群运维、负载波动闲置四个主要组成部分，指出当前推理资源的平均利用率不足50%是成本低效的核心问题</li>
+                <li><strong>异构算力的经济性比较：</strong>不同芯片在不同精度、不同batch size下的推理性价比差异可达数倍，通过异构调度将不同任务匹配至最优芯片类型，是提升整体算力经济性的关键手段</li>
+                <li><strong>Token 成本的下降曲线：</strong>Token的单位成本正以每年60%–80%的速度下降，但成本下降并未全部转化为终端价格优势，中间层的调度损耗和网络传输成本正在成为新的瓶颈</li>
+                <li><strong>基础设施层对 OPC 的支撑作用：</strong>推理成本每下降一个数量级，OPC的经济可行性边界就向外扩展一圈。基础设施层的效率提升是OPC模式从"少数人可行"走向"多数人可用"的前提</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>Token成本下降的真正驱动力不在芯片制程的进步，而在系统层面的资源利用效率。异构调度、弹性伸缩和负载优化的组合效应，在同等硬件条件下可将智能生产成本降低50%以上。基础设施的经济性优化，是Token经济走向大众化的物理基础。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:05:00 – 2:30:00</td>
+          <td>Token 时代：AI 算力发展的新机遇，新范式</td>
+          <td><span class="speaker">漆维 — 昆仑芯研发副总裁</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="7500">▶ 跳至视频此处</button>
+              <p><strong>漆维</strong> 从芯片厂商的视角，阐述了Token经济对AI算力产业格局的重塑效应：</p>
+              <ul>
+                <li><strong>Token 经济驱动的算力需求结构变化：</strong>随着推理在算力总需求中的占比快速攀升（预计2027年将超过训练需求），芯片架构设计需从"训练优先"转向"推理优先"，对低延迟、高吞吐、低功耗提出了全新要求</li>
+                <li><strong>算力即服务（CaaS）的产业范式：</strong>Token计价正在推动算力供给从"卖硬件、租机时"向"卖Token处理能力"演进，芯片厂商和云服务商的商业模式将从设备销售转向基于Token吞吐量的服务计费</li>
+                <li><strong>国产芯片在Token经济中的机遇窗口：</strong>Token经济的核心诉求是单位成本下的有效Token产出，而非单卡的峰值算力指标。国产芯片在推理场景中可通过软硬协同优化，在特定任务上实现与高端GPU相当的Token生产成本</li>
+                <li><strong>算力市场的去中心化趋势：</strong>Token化的算力交易将催生去中心化的算力市场，个人和小型组织可将闲置算力以Token服务的形式接入网络，形成算力供给的长尾效应</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>Token经济正在重塑算力产业的游戏规则：竞争的焦点从"谁能造出更快芯片"转向"谁能以更低成本交付有效Token"。这一转变对国产芯片是结构性利好——推理场景中对极致峰值性能的依赖降低，对系统效率和软硬协同优化的权重提升，恰好是差异化竞争的突破口。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:30:00 – 2:55:00</td>
+          <td>智能经济的可持续发展与伦理安全能力建设</td>
+          <td><span class="speaker">曾毅 — 中国人民大学高瓴人工智能学院吴玉章讲席教授</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="9000">▶ 跳至视频此处</button>
+              <p><strong>曾毅</strong> 从可持续发展与安全治理的双重视角，为Token经济构建了伦理与安全的分析框架：</p>
+              <ul>
+                <li><strong>Token 经济的能耗可持续性：</strong>大模型推理的全球电力消耗正以每年翻倍的速度增长，Token经济的规模化扩张必须与能源可持续性同步考量。按当前增长趋势，若不进行系统性优化，Token的边际能耗将在三年内抵消单位成本下降带来的经济效益</li>
+                <li><strong>智能普惠与数字鸿沟的平衡：</strong>Token化智能的获取成本在绝对值上持续下降，但优质模型与长尾模型之间的能力差距正在扩大。需通过开放生态和分层服务体系，确保Token经济的收益不会在头部集中</li>
+                <li><strong>Token 安全的责任归属难题：</strong>当智能以Token形式在多个经济主体之间流转，安全事件的追责边界变得模糊。需要建立Token溯源、安全分级和责任分层三层机制，使Token的交易不仅有经济契约，也有安全契约</li>
+                <li><strong>伦理能力建设的三层架构：</strong>提出从技术层（Token安全检测）、制度层（智能交易治理规则）、文化层（AI伦理素养教育）三个维度同步推进，构建Token经济的可持续安全底座</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>Token经济的可持续发展不能仅看成本曲线，还必须纳入能耗约束和安全治理成本。Token安全不是附加的合规项，而是Token经济能否规模化运转的基础设施——缺乏安全治理的Token市场，迟早会因信任崩塌而陷入交易萎缩。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:55:00 – 3:20:00</td>
+          <td>Token 经济学对 OPC 的机遇与挑战</td>
+          <td><span class="speaker">尤洋 — 新加坡国立大学校长青年教授、潞晨科技创始人</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="10500">▶ 跳至视频此处</button>
+              <p><strong>尤洋</strong> 从技术创业者与经济学观察者的双重视角，剖析了Token经济学对OPC模式的具体影响：</p>
+              <ul>
+                <li><strong>人民币作为 Token 价值的长期锚定：</strong>提出"人民币才是衡量大模型经济价值的长期客观计量单位"这一核心判断。Token的内在价值最终需要以法币为锚进行评估，Token定价的合理化是OPC成本可预测的前提</li>
+                <li><strong>OPC 的成本结构剖析：</strong>以潞晨科技的实际运营数据为基础，展示了OPC模式下的成本分布——智能调用成本（API/Token消耗）占比远高于传统公司的IT支出，但人力结构成本下降80%以上，整体盈亏平衡点显著前移</li>
+                <li><strong>Token 经济中的价值分配：</strong>当前Token经济链中，模型厂商占据了过高的价值份额，而OPC等终端价值创造者的利润空间受到挤压。随着模型供给的丰富化和开源模型的成熟，价值将逐步从模型层向应用层和终端服务层流动</li>
+                <li><strong>OPC 的规模天花板与突破路径：</strong>单人公司的瓶颈不在任务执行的广度，而在决策带宽的限制。当业务复杂度超过个人认知负荷，OPC需要通过Agent化的管理助手和自动化的决策辅助系统来扩展有效管理半径</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>Token经济的成熟度决定了OPC模式的可行性边界。当前阶段OPC适合高创意密度、低组织依赖的领域，随着Token成本的持续下降和智能体协作能力的提升，OPC的适用范围将以每年20%–30%的速度扩展。法币锚定的Token定价是行业从野蛮生长走向健康发展的关键一步。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:20:00 – 3:30:00</td>
+          <td>非对称优势 × AI 放大器 — OPC 风潮下的新可能</td>
+          <td><span class="speaker">王钰博 — 北京声序智能科技有限公司创始人</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="12000">▶ 跳至视频此处</button>
+              <p><strong>王钰博</strong> 以自身OPC创业实践为案例，展示了非对称优势与AI工具结合所产生的竞争力放大效应：</p>
+              <ul>
+                <li><strong>非对称优势的定义与识别：</strong>OPC创业者的竞争优势来自个体独有的领域知识纵深、跨领域关联能力和快速决策闭环三个维度。这些能力在大公司层级化决策体系中难以复制，构成了OPC在细分领域的天然壁垒</li>
+                <li><strong>AI 作为能力放大器：</strong>AI工具将OPC创业者的个人专长从"可服务10个客户"放大至"可服务1000个客户"，突破了个体时间与精力的物理限制。关键在于将个人隐性知识转化为可被AI理解和执行的显性流程</li>
+                <li><strong>声序智能的实践验证：</strong>以单人团队在语音交互垂直领域通过AI工具链完成产品迭代、客户交付和持续优化的完整闭环，验证了OPC模式在ToB场景中的商业可行性</li>
+                <li><strong>OPC 的风险与可持续性：</strong>单人公司面临的核心风险包括个人状态波动导致的业务连续性隐患、AI工具链变更带来的隐性迁移成本，以及个人品牌过度集中的客户流失风险</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>OPC的核心竞争力不在于"一个人做了十个人的事"，而在于"一个人的独特认知通过AI放大后，形成了十个人的团队难以复制的产品洞察"。非对称优势 × AI放大器的组合效应，使得OPC在特定细分领域具备了与大公司同台竞争的非对称能力。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:30:00 – 3:40:00</td>
+          <td>打造多 Agent 协作的组织：心光团队的 OPC 实践</td>
+          <td><span class="speaker">徐璐 — 心光 App 联合创始人</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="12600">▶ 跳至视频此处</button>
+              <p><strong>徐璐</strong> 分享了心光团队在多Agent协作与OPC实践中的一手经验与方法论：</p>
+              <ul>
+                <li><strong>多 Agent 协作的架构设计：</strong>心光团队构建了由产品Agent、开发Agent、测试Agent和运营Agent组成的协作网络，各Agent通过共享上下文和任务队列进行协调。关键设计原则是每个Agent拥有明确的能力边界和输出接口，避免Agent间的职责重叠和冲突</li>
+                <li><strong>人机协作的分工原则：</strong>将决策分为三个层级——Agent自主决策（常规、可逆的操作）、人审Agent执行（重要、半可逆的决策）、人独决策（战略级、不可逆的方向性决策）。实践表明约70%的日常任务可归入Agent自主决策层</li>
+                <li><strong>OPC 团队的隐性知识管理：</strong>个人经验向Agent工作流的转化是OPC效率持续提升的核心引擎。心光团队建立了"经验→提示词→工作流→Agent技能"的四级知识沉淀机制，使个人能力的系统化复用成为可能</li>
+                <li><strong>OPC 的组织文化转变：</strong>从"管理团队"到"管理Agent网络"的转变，要求创始人具备系统思维和流程设计能力，这与传统管理者的核心能力结构有本质差异</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>多Agent协作不是简单地用AI替换人力，而是对工作流程和组织逻辑的系统性重构。OPC成功的关键在于将个人能力转化为可被Agent执行的标准流程，让"一个人+一组Agent"的组合持续产出超越传统小团队的综合效能。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:40:00 – 5:00:00</td>
+          <td><strong>圆桌讨论</strong></td>
+          <td><span class="speaker">文继荣（主持）、刘道福、李远芳、曾毅、刘勇、谢威宇</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="13200">▶ 跳至视频此处</button>
+              <p>由<strong>文继荣</strong>主持，寒武纪联合创始人兼副总裁<strong>刘道福</strong>、罗汉堂资深经济学家<strong>李远芳</strong>、中国人民大学教授<strong>曾毅</strong>与<strong>刘勇</strong>、趋境科技首席架构师<strong>谢威宇</strong>共同参与，围绕以下核心议题展开深度对话：</p>
+              <ul>
+                <li><strong>Token 定价的市场化路径：</strong>圆桌嘉宾一致认为，Token统一定价的现状不可持续，差异化定价是大势所趋。智能密度、任务紧急度和质量保证三个维度是定价分层的自然维度。市场化的Token定价机制将在两到三年内初步成型，开源模型的丰富供给是推动定价透明化的重要力量。</li>
+                <li><strong>AI时代的"零到一百"理论：</strong>寒武纪刘道福提出了"零到一百"的产业观察——AI正在吞噬从0到100的所有中间执行环节，人类的不可替代价值集中于两端的"从-1到0的创意提出"和"从99到100的极限突破"。这一判断为OPC模式提供了产业层面的理论支撑：当AI承担全部中间环节，个体的创意定义能力和极致追求能力成为核心竞争力。</li>
+                <li><strong>OPC 对就业结构的冲击与重塑：</strong>OPC模式的大规模扩散将改变传统的雇佣关系格局。与会专家认为，OPC不会消灭工作岗位，但会将"岗位制"就业部分替代为"项目制"合作，个人将从"隶属于一个组织"转向"对接多个平台"。社会保障体系和职业教育培训需对此进行前瞻性调整。</li>
+                <li><strong>Token 经济的治理框架：</strong>圆桌呼吁建立Token经济的透明化治理体系，包括Token质量评估标准、跨模型Token的价值换算机制、以及Token交易的安全审计制度。建议由行业协会和标准组织牵头，在Token经济规模化之前建立基础性的治理共识。</li>
+                <li><strong>中国在Token经济中的机遇：</strong>与会专家指出，中国在AI应用场景的丰富度、移动互联网时代积累的平台运营经验、以及制造业中大量可被AI优化的中间环节三个方面，具备发展Token经济的独特土壤。关键在于构建开放竞争的Token供给市场和鼓励创新的监管环境。</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>圆桌共识</h4>
+                <p>Token已从技术术语进化为经济概念，是AI时代度量、交易和分配智能的基础单位。Token经济的核心命题是"如何让智能的定价反映其真实价值，让智能的获取足够普惠，让智能的交易足够安全"。OPC不是昙花一现的创业热潮，而是Token经济降低创业门槛后的结构性趋势。论坛总结出Token经济发展的三个阶段性目标：短期建立差异化Token定价体系，中期形成开放竞争的Token供给市场，长期构建可持续的智能经济治理框架。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+(function() {
+  var video = document.getElementById('forum-video');
+  var m3u8Url = 'https://vod-2020.baai.ac.cn/record/06110746-12-fd0a6b43ab20e2991981b18ea48035d1/06110746-12-572b43e56473798d0b33f9d21304a1c2/2026-06-12-12-50-01_2026-06-12-18-06-41.m3u8';
+
+  function initPlayer(url) {
+    m3u8Url = url;
+    video.style.display = 'block';
+
+    if (Hls.isSupported()) {
+      var hls = new Hls({ startPosition: 0 });
+      hls.loadSource(url);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, function() {
+        video.play().catch(function(){});
+        bindSeekButtons();
+      });
+      hls.on(Hls.Events.ERROR, function(evt, data) {
+        if (data.fatal) {
+          if (data.type === Hls.ErrorTypes.NETWORK_ERROR) { hls.startLoad(); }
+          else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) { hls.recoverMediaError(); }
+        }
+      });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = url;
+      video.addEventListener('loadedmetadata', function() {
+        video.play().catch(function(){});
+        bindSeekButtons();
+      });
+    }
+
+    try { localStorage.setItem('forum-token-opc_m3u8', url); } catch(e) {}
+  }
+
+  function bindSeekButtons() {
+    document.querySelectorAll('.seek-video').forEach(function(btn) {
+      btn.onclick = function(e) {
+        e.stopPropagation();
+        var sec = parseInt(this.getAttribute('data-seek'));
+        if (video && sec >= 0) {
+          video.currentTime = sec;
+          video.play().catch(function(){});
+          video.scrollIntoView({ behavior: 'smooth' });
+        }
+      };
+    });
+  }
+
+  // Auto-init with embedded URL
+  initPlayer(m3u8Url);
+
+  // Session expand/collapse
+  document.querySelectorAll('.session-row.has-detail').forEach(function(row) {
+    row.addEventListener('click', function() {
+      this.classList.toggle('open');
+      var next = this.nextElementSibling;
+      if (next && next.classList.contains('session-detail')) { next.classList.toggle('open'); }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

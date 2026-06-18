@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026智源大会 — 世界模型（全天） 直播回放</title>
+<style>
+  :root {
+    --primary: #1a3a5c;
+    --accent: #2857ff;
+    --bg: #f5f6f8;
+    --card-bg: #ffffff;
+    --text: #2c3e50;
+    --text-light: #5a6d80;
+    --border: #e2e6ed;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --radius: 10px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", "AR PL UKai CN", serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding-bottom: 40px;
+  }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+
+  /* ========== Header ========== */
+  .header {
+    position: relative;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: #fff;
+    padding: 32px 0;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  .header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    font-family: "STKaiti", "KaiTi", "华文楷体", "KaiTi SC", serif;
+  }
+  .back-link {
+    position: absolute;
+    top: 18px;
+    left: 24px;
+    color: rgba(255,255,255,.7);
+    text-decoration: none;
+    font-size: .9rem;
+    transition: color .2s;
+    z-index: 2;
+  }
+  .back-link:hover { color: #fff; }
+
+  /* ========== Video Player ========== */
+  .video-wrapper {
+    background: #000;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .video-wrapper video {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 540px;
+  }
+
+  /* ========== Card ========== */
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 0;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 16px 20px;
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--primary);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ========== Session Table ========== */
+  .schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .schedule-table thead th {
+    text-align: left;
+    font-size: .73rem;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--text-light);
+    padding: 8px 18px;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .time-slot {
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+    min-width: 100px;
+    font-size: .82rem;
+  }
+  .speaker { font-size: .82rem; color: var(--text-light); }
+
+  /* ========== Session Rows ========== */
+  .session-row { cursor: default; }
+  .session-row td { padding: 10px 18px; }
+  .session-row.has-detail {
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .session-row.has-detail:hover { background: #f5f7fa; }
+  .session-arrow {
+    text-align: center;
+    font-size: .6rem;
+    color: var(--text-light);
+    width: 36px;
+    transition: transform .25s;
+    vertical-align: middle;
+  }
+  .session-row.has-detail.open .session-arrow { transform: rotate(90deg); }
+  .session-row.no-detail .session-arrow { color: transparent; }
+  .session-detail { display: none; }
+  .session-detail.open { display: table-row; }
+  .session-detail td {
+    padding: 0 18px 16px !important;
+    background: #fafbfc;
+    border-bottom: 2px solid var(--border);
+  }
+  .session-detail-content {
+    font-size: .88rem;
+    color: var(--text);
+    padding: 8px 0 8px 6px;
+  }
+  .session-detail-content p { margin-bottom: 8px; }
+  .session-detail-content ul { padding-left: 20px; margin-bottom: 8px; }
+  .session-detail-content ul li { margin-bottom: 4px; }
+
+  /* ========== Seek Button ========== */
+  .seek-video {
+    display: inline-block;
+    padding: 4px 14px;
+    margin-bottom: 8px;
+    border: 1px solid var(--accent);
+    border-radius: 99px;
+    background: #fff;
+    color: var(--accent);
+    font-size: .78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .seek-video:hover { background: var(--accent); color: #fff; }
+
+  /* ========== Highlight Box ========== */
+  .highlight-box {
+    background: #fff8e1;
+    border-left: 4px solid #f0b400;
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+  }
+  .highlight-box h4 { color: #b8860b; margin-bottom: 4px; }
+
+  /* ========== Summary Box ========== */
+  .summary-box {
+    padding: 18px 20px;
+    font-size: .88rem;
+    color: var(--text-light);
+    line-height: 1.8;
+  }
+
+  @media (max-width: 768px) {
+    .header h1 { font-size: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a class="back-link" href="index.html">← 返回</a>
+  <h1>🌍 2026智源大会 · 世界模型（全天）</h1>
+</header>
+
+<div class="container">
+
+  <!-- 视频播放器 -->
+  <div class="video-wrapper" id="video-wrapper">
+    <video id="forum-video" controls preload="metadata" crossorigin="anonymous" playsinline
+           style="display:block;width:100%;height:auto;max-height:540px;"></video>
+  </div>
+
+  <!-- 论坛简介 -->
+  <div class="card">
+    <div class="card-header">📖 论坛简介</div>
+    <div class="summary-box">
+      <p>世界模型（World Model）被广泛视为通往通用人工智能的关键路径之一。它旨在构建能够<strong>理解物理规律、预测未来状态、模拟环境演化</strong>的计算系统，使 AI 从"被动感知"跃迁至"主动推演"。2026 智源大会世界模型论坛汇集来自学术界与产业界的十一位专家，围绕世界模型的理论基础、技术架构与产业落地展开全天深度研讨，共设 12 个环节，涵盖视觉-语言世界建模、物理仿真基座、可交互世界模型、具身世界模型及 3D 生成等多个前沿方向。</p>
+      <p style="margin-top:10px">论坛上半场聚焦视觉-语言联合表征、可交互仿真环境、物理动力学基座与机器人规模化世界模型等基础研究课题；下半场从产业视角切入，由智源研究院、极佳视界、蚂蚁灵波科技、自变量机器人、腾讯混元、星源智联等机构分享具身世界模型的落地实践，并在终场圆桌中对全论坛议题进行系统性总结与技术产业化展望。</p>
+      <p style="margin-top:10px;font-size:.8rem;color:#999;">🕐 2026年6月13日 08:55–17:00 · 视频时长约 6 小时 · 📍 海慧厅 A · 线上同步直播</p>
+    </div>
+  </div>
+
+  <!-- 议程详情 -->
+  <div class="card">
+    <div class="card-header">📋 议程详情（点击展开）</div>
+    <table class="schedule-table">
+      <thead><tr><th style="width:36px"></th><th>时间</th><th>环节 / 主题</th><th>嘉宾 / 讲者</th></tr></thead>
+      <tbody>
+        <!-- 1. 于智薇 | 论坛介绍 -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">00:13 – 03:50</td>
+          <td>论坛介绍</td>
+          <td><span class="speaker">于智薇 — 智源研究院研究员</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="13">▶ 跳至视频此处</button>
+              <p><strong>于智薇</strong> 为全天论坛做导览介绍，系统阐述世界模型论坛的设立背景、议程架构与研讨目标。世界模型正从学术概念向工程实践加速演进，本论坛围绕<strong>视觉-语言联合表征、物理动力学基座、可交互仿真、具身世界模型</strong>四条主线展开，旨在为学术界与产业界搭建深度对话平台，厘清各技术路线的优势边界与协同可能。</p>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 2. 陈德龙 | 视觉-语言JEPA与视觉-语言世界建模 -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">03:50 – 35:22</td>
+          <td>视觉-语言 JEPA 与视觉-语言世界建模</td>
+          <td><span class="speaker">陈德龙 — 香港科技大学博士 &amp; AMI Labs</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="230">▶ 跳至视频此处</button>
+              <p><strong>陈德龙</strong> 提出基于 JEPA（Joint Embedding Predictive Architecture）的视觉-语言统一世界表征方案：</p>
+              <ul>
+                <li><strong>JEPA 核心机制：</strong>在联合嵌入空间而非原始像素空间进行预测——视觉编码器与语言编码器将多模态输入映射至共享潜空间，预测器在此空间中学习状态转移，显著降低建模维度的同时保留语义完整性</li>
+                <li><strong>视觉-语言统一表征：</strong>通过对比学习对齐视觉场景结构与语言概念层次，使模型在隐空间中同时捕获物理布局与语义关系，为下游世界状态预测提供信息密度更高的表征基底</li>
+                <li><strong>与生成式路线的比较：</strong>相较于逐像素生成的自回归路线，JEPA 在长时域预测任务上展现出更优的计算效率与样本利用率，尤其适合需要持续推演的世界模型场景</li>
+                <li><strong>实验验证：</strong>在视频预测与机器人操作两类任务上，视觉-语言 JEPA 相较纯视觉基线在时序一致性和跨场景泛化能力方面均有显著提升</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>世界模型的底层不应是像素级生成，而应是抽象表征空间中的结构化预测。视觉-语言 JEPA 通过共享潜空间将视觉感知与语言理解统一为同一表征体系的两种投影，为构建高效世界模型提供了理论基础与工程验证。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 3. 刘扬 | Matrix-Game -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">35:22 – 1:07:25</td>
+          <td>Matrix-Game：可交互世界模型探索现状和未来</td>
+          <td><span class="speaker">刘扬 — Skywork 首席科学家</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="2122">▶ 跳至视频此处</button>
+              <p><strong>刘扬</strong> 以 Matrix-Game 为技术载体，展示智能体与虚拟环境实时交互仿真的前沿进展：</p>
+              <ul>
+                <li><strong>可交互世界模型的设计原则：</strong>区别于仅做单向预测的传统世界模型，可交互模型需支持用户在任意时刻介入、修改条件并观察因果变化——其核心是构建"假设-推演-反馈"的闭环交互机制</li>
+                <li><strong>Matrix-Game 架构：</strong>以游戏化虚拟环境为沙盒，将物理规则、智能体行为与环境反馈封装为统一交互接口，支持灵活的场景构建、策略注入与多智能体协同推演</li>
+                <li><strong>实时性挑战：</strong>交互场景要求世界模型在亚秒级延迟内完成状态更新与渲染——Matrix-Game 通过分层推理策略（粗粒度全局预测 + 细粒度局部修正）在保真度与实时性之间取得平衡</li>
+                <li><strong>应用方向：</strong>自动驾驶仿真中的边缘案例生成、仓储机器人策略预训练、复杂系统应急决策推演等场景已开展早期验证</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>世界模型的真正价值不在于"看得准"，而在于"可以试"。只有在模型中能够自由实验、实时交互、反事实推理，世界模型才能从"观察工具"升级为"决策沙盒"，为智能体提供可靠的行动预演环境。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 4. 陈博远 | Physis -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:07:25 – 1:37:29</td>
+          <td>Physis：预测下一个物理状态，迈向通用世界基座</td>
+          <td><span class="speaker">陈博远 — 逆矩阵创始人兼首席研发官，智源世界模型创新中心负责人</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="4045">▶ 跳至视频此处</button>
+              <p><strong>陈博远</strong> 发布 Physis 物理世界基座模型，系统阐述基于物理规则与场景动力学的仿真基座构建方案：</p>
+              <ul>
+                <li><strong>Physis 的定位：</strong>构建通用物理状态预测基座——输入当前场景的物理状态（覆盖刚体、流体、形变体、颗粒体等多类材质），输出符合物理定律的下一时刻状态，目标是成为物理仿真领域的"通用基座模型"</li>
+                <li><strong>物理约束融合：</strong>在数据驱动学习的基础上嵌入物理方程正则化——质量守恒、动量守恒、能量守恒等定律作为软约束注入训练过程，确保预测结果不违反基本物理规律</li>
+                <li><strong>层次化多尺度建模：</strong>针对微观粒子动力学到宏观连续介质力学的跨尺度问题，Physis 采用层次化潜变量结构，各尺度使用自适应的时空分辨率，实现从分子到工程结构的多粒度仿真</li>
+                <li><strong>工程化进展：</strong>在工业流体仿真、材料形变预测等场景中，Physis 已将传统数值求解器所需的小时级计算压缩至秒级推理，验证误差控制在工程可接受范围内</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>物理世界基座模型的核心技术挑战是"数据效率与物理一致性的平衡"——纯数据驱动的方法容易违反物理定律，纯物理方程的方法计算开销过大。Physis 的混合架构证明，将物理定律作为正则化约束注入神经网络训练，是兼顾效率与精度的可行路径。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 5. 高深远 | 通用机器人的规模化世界模型 -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">1:37:29 – 2:09:48</td>
+          <td>通用机器人的规模化世界模型</td>
+          <td><span class="speaker">高深远 — 香港科技大学博士</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="5849">▶ 跳至视频此处</button>
+              <p><strong>高深远</strong> 聚焦机器人训练降本的核心命题，提出规模化世界模型的落地方案：</p>
+              <ul>
+                <li><strong>机器人世界模型的经济学：</strong>真实机器人数据采集成本约为仿真数据的 100–1000 倍，单一实验室年采集量仅够训练单一任务策略。世界模型通过"模型内推演"替代大量真实交互，可将训练成本降低一个数量级</li>
+                <li><strong>混合数据策略：</strong>大规模仿真数据覆盖常规场景，互联网视频数据提供场景多样性，少量高质量真实机器人数据用于领域适配——三者的配比优化是决定模型迁移能力的关键</li>
+                <li><strong>跨具身表征：</strong>世界模型输出的状态表征需与具体机器人形态解耦——学习"物体在受力后会如何运动"而非"这台机械臂会使物体如何运动"，是实现跨平台迁移的前提</li>
+                <li><strong>Sim-to-Real 闭环：</strong>通过域随机化与对抗域适应，在仿真中训练的世界模型迁移至真实机器人后，预测误差从初期的约 40% 降至当前最优方法的 15% 以内</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>机器人世界模型的规模化落地的核心逻辑是经济账——仿真数据替代真实数据的比例每提高 10%，总训练成本就下降约 8%。关键技术瓶颈不在于模型架构，而在于仿真-真实之间的迁移效率。突破这一瓶颈将使机器人学习从"富人俱乐部"走向"大众化"。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 6. 王仲远 | 智源对世界模型的思考 -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:09:48 – 2:28:13</td>
+          <td>智源对世界模型的思考</td>
+          <td><span class="speaker">王仲远 — 智源研究院院长</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="7788">▶ 跳至视频此处</button>
+              <p><strong>王仲远</strong> 从研究院战略高度阐述世界模型的顶层路线与智源的整体研发规划：</p>
+              <ul>
+                <li><strong>世界模型的战略定位：</strong>智源将世界模型列为与语言大模型并行的核心支柱——语言大模型解决"认知理解"，世界模型解决"物理理解"，二者共同构成通用人工智能的两大基础设施</li>
+                <li><strong>技术路线图：</strong>短期（1-2 年）聚焦物理仿真基座与自动驾驶仿真两大场景；中期（3-5 年）构建跨领域的通用物理世界基座模型；长期目标是将世界模型作为具身智能体的实时推理引擎</li>
+                <li><strong>智源世界模型创新中心：</strong>以 Physis 项目为核心载体，联合高校与企业构建开放的世界模型研究生态，在数据、算力、评测三个维度提供公共基础设施</li>
+                <li><strong>中国的战略机遇：</strong>在具身智能、工业仿真、自动驾驶等领域，中国拥有全球最丰富的应用场景和数据资源，这为具身世界模型的研发与落地提供了独特的战略优势</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>在语言大模型格局趋于稳定的背景下，世界模型将成为下一阶段 AI 竞争的核心战场。智源的判断是：世界模型的竞争不是"模型参数量的军备竞赛"，而是"物理理解深度与应用场景广度"的比拼——这一维度的竞争更依赖产业场景而非单纯算力，中国具备差异化优势。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 7. 朱政 | 世界模型：迈向具身基础模型新时代 -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">2:28:13 – 3:00:45</td>
+          <td>世界模型：迈向具身基础模型新时代</td>
+          <td><span class="speaker">朱政 — 极佳视界联合创始人、首席科学家</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="8893">▶ 跳至视频此处</button>
+              <p><strong>朱政</strong> 论证世界模型正在打通虚拟模型与实体机器人之间的技术壁垒，开启具身基础模型新范式：</p>
+              <ul>
+                <li><strong>具身基础模型的范式转变：</strong>传统方法为每个机器人任务单独采集数据、单独训练策略，导致研发成本随任务数量线性增长。具身世界模型作为基础模型，一次性学习广泛的环境动力学知识，为多种下游任务提供共享的预测能力，使新任务成本从"万级样本"降至"百级样本"</li>
+                <li><strong>虚拟-实体闭环：</strong>在 4D 重建的虚拟环境中训练世界模型与策略网络，通过域适应技术将模型迁移至真实机器人，再将真实交互数据回流至虚拟环境更新模型——形成持续优化的数据飞轮</li>
+                <li><strong>4D 重建基础设施：</strong>大规模 4D 重建管线将真实环境的几何、纹理、动态信息纳入统一表征，这是支撑具身世界模型训练的关键数据基础设施</li>
+                <li><strong>商业落地场景：</strong>自动驾驶仿真（边缘案例生成与安全验证）、仓储物流机器人（拣选策略预训练）、工业数字孪生（设备状态预测性维护）是当前最接近规模化的三大落地场景</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>具身智能的下一个突破点不是策略网络的架构创新，而是世界模型的精度提升。当模型在虚拟空间中能够以 90% 以上的准确率预测"动作→结果"的映射，实体机器人的训练效率将实现数量级跃升——这是打通虚拟到实体壁垒的核心逻辑。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 8. 沈宇军 | 蚂蚁灵波科技 -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:00:45 – 3:33:05</td>
+          <td>蚂蚁灵波科技在具身世界模型领域的思考与实践</td>
+          <td><span class="speaker">沈宇军 — 蚂蚁灵波科技首席科学家</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="10845">▶ 跳至视频此处</button>
+              <p><strong>沈宇军</strong> 从企业端视角分享蚂蚁灵波科技在具身智能与机器人仿真领域的落地经验：</p>
+              <ul>
+                <li><strong>灵波科技的业务场景：</strong>聚焦服务型机器人在复杂室内环境中的精细化操作——包括多品类物体抓取与放置、柔性材料操作、人机协作空间中的安全路径规划等高频任务</li>
+                <li><strong>操作级世界模型：</strong>不同于宏观场景级模型，灵波构建的"操作级世界模型"分辨率达到毫米级，能够预测柔性物体（如衣物、食品包装）在抓取力作用下的形变行为——这是传统物理引擎难以精确模拟的复杂场景</li>
+                <li><strong>企业端数据闭环：</strong>在真实服务场景中持续部署机器人采集操作数据，通过自动化标注与筛选管线将高质量交互数据回流至模型训练，形成"部署越多→数据越多→模型越准"的正向循环</li>
+                <li><strong>安全分层架构：</strong>世界模型预测 → 仿真环境验证 → 物理约束检测 → 实时执行监控——四层安全机制确保模型预测结果在真实物理场景中的可靠性</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>服务型机器人对世界模型的精度要求远超自动驾驶——操作一杯茶水涉及的物理交互复杂度高于车道保持。企业端破局的关键在于场景聚焦与数据飞轮：在特定场景中做到极致精度，再逐步扩展场景覆盖范围，而非追求一开始就构建"通用"世界模型。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 9. 王昊 | 事件驱动的世界模型 -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">3:33:05 – 4:07:43</td>
+          <td>事件驱动的世界模型：迈向通用具身智能的预训练</td>
+          <td><span class="speaker">王昊 — 自变量机器人联合创始人兼CTO</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="12785">▶ 跳至视频此处</button>
+              <p><strong>王昊</strong> 提出以"事件"为核心组织单元的新型世界模型预训练范式：</p>
+              <ul>
+                <li><strong>事件驱动范式的核心洞察：</strong>物理世界的变化并非均匀连续——大多数时间场景处于稳态，关键信息集中在稀疏的"物理事件"节点（接触、碰撞、断裂、释放等）。事件驱动的世界模型将计算资源聚焦于这些关键节点，非事件时段仅维持低开销的状态追踪</li>
+                <li><strong>事件 Token 化：</strong>设计专门的物理事件 Token 词汇表——将接触、滑动、碰撞、形变、断裂等物理事件编码为离散符号，使语言模型式的自回归预训练策略能够直接应用于物理交互数据</li>
+                <li><strong>预训练-微调框架：</strong>在海量无标注的机器人交互数据上预训练事件检测器与状态变化预测器，再以少量任务标注数据微调——大幅降低对昂贵标注数据的依赖</li>
+                <li><strong>事件注意力机制：</strong>在标准 Transformer 架构中引入事件注意力头，使其在事件发生时自适应提升注意力权重，实现事件驱动的动态计算分配——常规时段低功耗运行，事件发生时全精度推理</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>事件是物理交互的基本语义单元，正如 Token 是语言的基本语义单元。构建事件驱动的世界模型，本质上是在为物理世界寻找其"自然语言"——一套能够高效表征物理变化的最小语义符号体系。这一范式不仅提升了计算效率，更重要的是使物理交互数据具备了类似文本数据的可预训练性。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 10. 郭春超 | 混元3D -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">4:07:43 – 4:44:12</td>
+          <td>混元 3D — 从物体生成到世界模型的研发探索</td>
+          <td><span class="speaker">郭春超 — 腾讯混元3D及世界模型负责人</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="14863">▶ 跳至视频此处</button>
+              <p><strong>郭春超</strong> 展示腾讯混元团队从 3D 物体生成向三维交互场景世界模型演进的技术路径：</p>
+              <ul>
+                <li><strong>混元 3D 的生成能力：</strong>基于多视图扩散与 3D 高斯溅射技术，支持从文本描述或单张图像在数秒内生成高质量三维资产——覆盖几何重建、材质推断与光照估计的完整管线</li>
+                <li><strong>从单物体到交互场景：</strong>将单物体生成能力扩展至完整三维交互场景的构建，需攻克三个核心难题——多物体空间关系推理（谁在谁上面、谁挡住谁）、物理合理性约束（物体不能悬浮或穿透）和交互动态建模（物体被推动后的级联运动）</li>
+                <li><strong>游戏引擎的技术反哺：</strong>腾讯在游戏引擎领域的深厚积累为混元 3D 提供了独特的工程优势——成熟的物理引擎可作为生成结果的物理校验器，大量游戏资产可作为 3D 生成的训练数据来源</li>
+                <li><strong>3D→4D 的演进方向：</strong>3D 生成解决"静态世界是什么样"，世界模型解决"动态世界会如何变"——混元团队的路线图是在 3D 生成基础上叠加时间维度的动态预测，完成从"生成空间"到"生成时空"的演进</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>3D 生成与世界模型共享同一底层表征——三维几何。3D 生成提供世界的"静态骨架"，世界模型赋予其"动态演化能力"。从 3D 走向 4D，不仅是技术维度的递进，更是从"生成一个世界的样子"到"理解一个世界的运行"的认知跃迁。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 11. 孙振国 | 具身世界模型与多模态交互 -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">4:44:12 – 5:14:55</td>
+          <td>具身世界模型与多模态交互</td>
+          <td><span class="speaker">孙振国 — 星源智联合创始人 &amp; 智源研究院具身交互世界模型实验室负责人</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="17052">▶ 跳至视频此处</button>
+              <p><strong>孙振国</strong> 系统阐述智能体与环境之间的多模态感知与交互技术体系：</p>
+              <ul>
+                <li><strong>多模态感知融合的必要性：</strong>单一视觉模态无法完整捕获物理交互的全部信息——触觉提供力反馈与表面属性，力觉提供关节扭矩与负载感知，听觉提供碰撞与摩擦的辅助信号。具身世界模型必须在统一表征空间中融合这些异构模态</li>
+                <li><strong>触觉的特殊地位：</strong>视觉可以"观察"物理世界，但理解交互的本质（如物体的软硬度、表面摩擦力、抓取稳定性）必须依赖触觉——触觉是世界模型从"看着像"到"预测准"的关键模态补充</li>
+                <li><strong>跨模态融合架构：</strong>采用模态特定编码器 + 共享跨模态 Transformer 的设计——各模态保留独立的低层编码以捕获模态特异性，在高层通过共享注意力层实现灵活的信息融合，同时支持部分模态缺失时的鲁棒推理</li>
+                <li><strong>交互式闭环设计：</strong>超越"预测→执行"的单向流程，构建支持人类实时介入的交互式闭环——操作员可在模型推演过程中随时修正预测方向或注入约束条件，实现人机协同的世界状态推演</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>核心观点</h4>
+                <p>具身世界模型的终极目标不是生成更逼真的视觉画面，而是构建一个可信赖的物理交互模拟器。这一目标必须依赖视觉、触觉、力觉的多模态深度融合——单模态世界模型如同"闭上一只眼睛看世界"，在物理交互的复杂性面前存在根本性的信息盲区。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 12. 圆桌讨论 -->
+        <tr class="session-row has-detail">
+          <td class="session-arrow">▶</td>
+          <td class="time-slot">5:14:55 – 5:59:00</td>
+          <td><strong>圆桌讨论</strong></td>
+          <td><span class="speaker">全体讲者</span></td>
+        </tr>
+        <tr class="session-detail">
+          <td></td>
+          <td colspan="3">
+            <div class="session-detail-content">
+              <button class="seek-video" data-seek="18895">▶ 跳至视频此处</button>
+              <p>全体讲者参与终场圆桌讨论，对全天议题进行系统性汇总，并就技术与产业关键问题展开深入交流：</p>
+              <ul>
+                <li><strong>世界模型的定义共识：</strong>与会嘉宾一致认为不宜在学术定义上过度纠缠——"凡能在实际任务中展现可靠物理预测能力的模型即可视为有效的世界模型"。评价标准应从"是否符合某学派定义"转向"在具体场景中的预测精度与泛化能力"</li>
+                <li><strong>视频生成 vs 物理建模路线之争：</strong>以 Sora 为代表的视频生成路线与以 Physis 为代表的显式物理建模路线并非对立关系——视频生成模型在海量数据中隐式学到物理规律的能力被低估，而显式物理模型在保证物理一致性方面具备不可替代的优势。两条路线将在中长期内走向融合</li>
+                <li><strong>产业落地的优先级排序：</strong>自动驾驶仿真（1-2 年可规模化）→ 仓储物流机器人（2-3 年）→ 工业数字孪生（3-5 年）→ 服务型机器人家庭场景（5 年以上）。优先级的核心考量是场景的物理交互开放度——场景越结构化、物理多样性越低，世界模型的可靠性越容易达到工业级标准</li>
+                <li><strong>数据瓶颈的破解路径：</strong>高质量仿真数据的大规模合成是当前最现实的破局手段，但仿真数据的"物理真实性上限"受限于仿真引擎本身的精度。建议行业联合建设"仿真-真实配对数据集"，为仿真到真实的迁移研究提供公共评测基准</li>
+                <li><strong>开源生态建设：</strong>世界模型领域亟需开源的基础架构包括：标准化物理场景数据集、多维度评测基准（物理准确性 + 时序一致性 + 反事实推理能力）、模块化世界模型训练框架。基础层开源、垂直层竞争是与会嘉宾的广泛共识</li>
+                <li><strong>安全与治理：</strong>高精度世界模型的双向风险——正向可用于灾害推演与应急规划，负向可能被滥用于生成物理级深度伪造或恶意环境模拟。建议在模型能力达到一定阈值后建立溯源水印与用途备案机制</li>
+              </ul>
+              <div class="highlight-box">
+                <h4>圆桌共识</h4>
+                <p>世界模型正处于从"学术探索期"到"工程落地期"的关键跨越阶段。产业化的核心瓶颈不在于单一算法突破，而在于<strong>数据-算法-算力-场景四要素的系统性协同</strong>。自动驾驶仿真与仓储物流是两个最接近商业落地的场景；服务型机器人的家庭应用仍需 5 年以上技术积累。行业建议：基础架构与数据集开源共享以加速整体进步，垂直场景模型保持差异化竞争。世界模型的终极价值不在于"生成更逼真的视频"，而在于<strong>为智能体提供理解物理世界的可操作框架</strong>。</p>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+(function() {
+  var video = document.getElementById('forum-video');
+  var m3u8Url = 'https://event-cdn.baai.ac.cn/vod-71f4bf/50666c8b67d871f181131776b2df0102/59014342d8964261af8fdc695608cdff-ae86065c14eac26a98ed0508df7ab451-hd.m3u8';
+  var playerReady = false;
+
+  function initPlayer() {
+    if (Hls.isSupported()) {
+      var hls = new Hls();
+      hls.loadSource(m3u8Url);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, function() {
+        playerReady = true;
+        bindSeekButtons();
+      });
+      hls.on(Hls.Events.ERROR, function(evt, data) {
+        if (data.fatal) {
+          if (data.type === Hls.ErrorTypes.NETWORK_ERROR) { hls.startLoad(); }
+          else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) { hls.recoverMediaError(); }
+        }
+      });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = m3u8Url;
+      video.addEventListener('loadedmetadata', function() {
+        playerReady = true;
+        bindSeekButtons();
+      });
+    }
+  }
+
+  function bindSeekButtons() {
+    document.querySelectorAll('.seek-video').forEach(function(btn) {
+      btn.onclick = function(e) {
+        e.stopPropagation();
+        var sec = parseInt(this.getAttribute('data-seek'));
+        if (video && sec >= 0) {
+          video.currentTime = sec;
+          video.play().catch(function(){});
+          video.scrollIntoView({ behavior: 'smooth' });
+        }
+      };
+    });
+  }
+
+  // Bind seek buttons for pre-player clicks
+  document.querySelectorAll('.seek-video').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      if (!playerReady) {
+        e.stopPropagation();
+        var sec = parseInt(this.getAttribute('data-seek'));
+        var h = Math.floor(sec / 3600);
+        var m = Math.floor((sec % 3600) / 60);
+        var s = sec % 60;
+        var ts = (h > 0 ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(s).padStart(2, '0');
+        alert('视频正在加载中，请稍候再试。\n\n目标时间戳: ' + ts);
+      }
+    });
+  });
+
+  // Session expand/collapse
+  document.querySelectorAll('.session-row.has-detail').forEach(function(row) {
+    row.addEventListener('click', function() {
+      this.classList.toggle('open');
+      var next = this.nextElementSibling;
+      if (next && next.classList.contains('session-detail')) { next.classList.toggle('open'); }
+    });
+  });
+
+  initPlayer();
+})();
+</script>
+
+</body>
+</html>
