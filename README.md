@@ -10,6 +10,6 @@
 - `opening-ceremony.html` — 开幕式及全体大会
 - `forum-*.html` — 各分论坛详细内容
 
-## 部署
+## 在线访问
 
-本网站通过 GitHub Pages 部署，访问地址见仓库 Settings → Pages。
+👉 **https://yuwanfishball.github.io/many-fish-balls/**
