@@ -113,6 +113,7 @@
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     overflow: hidden;
+    position: relative; z-index: 3;
   }
   .section-nav-tab {
     flex: 1; text-align: center; padding: 14px 20px;
@@ -226,6 +227,239 @@
     margin-bottom: 16px;
   }
   .result-info strong { color: var(--accent); }
+
+  /* ========== 点击跳转后灰色闪烁动画 ========== */
+  @keyframes grayFlash {
+    0%   { background-color: rgba(128,128,128,0.35); box-shadow: 0 0 20px rgba(128,128,128,0.5); }
+    100% { background-color: transparent; box-shadow: 0 0 0px rgba(128,128,128,0); }
+  }
+  .flash-target {
+    animation: grayFlash 1.2s ease-out;
+  }
+  /* 搜索结果卡片悬停提示可点击 */
+  .search-result-card {
+    cursor: pointer;
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .search-result-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+    transform: translateY(-1px);
+  }
+  .company-forum-card .cf-jump-link {
+    cursor: pointer;
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 700;
+  }
+  .company-forum-card .cf-jump-link:hover {
+    text-decoration: underline;
+  }
+
+  /* ========== 检索子模块切换 ========== */
+  .sub-nav {
+    display: flex; gap: 0;
+    margin-bottom: 24px;
+    background: var(--card-bg);
+    border-radius: 99px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    width: fit-content;
+    position: relative; z-index: 2;
+  }
+  .sub-nav-tab {
+    padding: 10px 28px;
+    font-size: .88rem; font-weight: 600;
+    color: var(--text-light); cursor: pointer;
+    border: none; background: transparent;
+    transition: all .25s;
+    font-family: inherit;
+    letter-spacing: .5px;
+    border-radius: 99px;
+  }
+  .sub-nav-tab:hover { color: var(--accent); }
+  .sub-nav-tab.active {
+    background: var(--accent);
+    color: #fff;
+  }
+  .sub-panel {
+    animation: fadeSlideIn .3s ease;
+  }
+
+  /* ========== 公司检索：Logo 轮播 ========== */
+  .carousel-container {
+    display: flex; align-items: center; gap: 0;
+    margin-bottom: 28px;
+    position: relative;
+  }
+  .carousel-arrow {
+    flex-shrink: 0;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text-light);
+    font-size: 1rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .2s;
+    z-index: 2;
+    box-shadow: var(--shadow);
+  }
+  .carousel-arrow:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: #f0f3ff;
+  }
+  .carousel-arrow:active { transform: scale(.92); }
+  .carousel-viewport {
+    flex: 1; overflow: hidden;
+    position: relative; z-index: 0;
+    padding: 16px 8px;
+  }
+  .carousel-track {
+    display: flex; align-items: center; gap: 12px;
+    transition: transform .45s cubic-bezier(.25,.1,.25,1);
+    will-change: transform;
+  }
+  .carousel-logo-item {
+    flex-shrink: 0;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 8px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .carousel-logo-item .logo-circle {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem; font-weight: 700;
+    color: #fff;
+    transition: transform .35s cubic-bezier(.25,.1,.25,1), opacity .35s ease, box-shadow .35s ease, filter .35s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .carousel-logo-item .logo-circle img {
+    display: block; position: absolute; inset: 0;
+  }
+  .carousel-logo-item .logo-circle .logo-initials {
+    position: relative; z-index: 0;
+  }
+  .carousel-logo-item .logo-name {
+    font-size: .75rem; font-weight: 600;
+    color: var(--text-light);
+    text-align: center;
+    max-width: 80px;
+    overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: opacity .35s ease, color .35s ease;
+    letter-spacing: .3px;
+  }
+  /* 选中态：transform 放大，不改变布局尺寸 */
+  .carousel-logo-item.selected .logo-circle {
+    transform: scale(1.25);
+    box-shadow: 0 4px 20px rgba(40,87,255,.25), 0 0 0 4px rgba(40,87,255,.12);
+    font-size: 1.3rem;
+  }
+  .carousel-logo-item.selected .logo-name {
+    font-size: .82rem;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  /* 未选中淡化：transform 缩小，仅视觉效果 */
+  .carousel-logo-item.dimmed .logo-circle {
+    opacity: .45; filter: grayscale(30%);
+    transform: scale(0.85);
+  }
+  .carousel-logo-item.dimmed .logo-name {
+    opacity: .4;
+  }
+  /* 远距离更淡 */
+  .carousel-logo-item.far-dimmed .logo-circle {
+    opacity: .25; filter: grayscale(50%);
+    transform: scale(0.75);
+  }
+  .carousel-logo-item.far-dimmed .logo-name {
+    opacity: .2;
+  }
+
+  /* ========== 公司详情 ========== */
+  .company-detail {
+    min-height: 120px;
+  }
+  .company-detail-empty {
+    text-align: center; padding: 40px 20px;
+    color: var(--text-light);
+  }
+  .company-detail-empty .icon { font-size: 2.5rem; margin-bottom: 12px; }
+  .company-detail-content {
+    animation: fadeSlideIn .35s ease;
+  }
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .company-detail-header {
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--border);
+  }
+  .company-detail-logo {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; font-weight: 700;
+    color: #fff; flex-shrink: 0;
+  }
+  .company-detail-name {
+    font-size: 1.15rem; font-weight: 700;
+    color: var(--text); margin: 0 0 2px;
+  }
+  .company-detail-type {
+    font-size: .78rem; color: var(--text-light); margin: 0;
+  }
+  .company-forum-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 18px 20px;
+    margin-bottom: 12px;
+    border-left: 4px solid var(--accent);
+    transition: all .2s;
+  }
+  .company-forum-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,.1);
+  }
+  .company-forum-card .cf-forum-name {
+    font-size: .95rem; font-weight: 700;
+    color: var(--text); margin-bottom: 6px;
+  }
+  .company-forum-card .cf-forum-name a {
+    color: var(--accent); text-decoration: none;
+  }
+  .company-forum-card .cf-forum-name a:hover { text-decoration: underline; }
+  .company-forum-card .cf-speech {
+    font-size: .85rem; color: var(--text-light);
+    margin: 3px 0; padding-left: 12px;
+    border-left: 2px solid #e0e0e0;
+  }
+  .company-forum-card .cf-speaker {
+    font-size: .78rem; color: #999;
+  }
+  .company-forum-card .cf-date {
+    font-size: .72rem; color: #b0bec5;
+    margin-top: 4px;
+  }
+  .cf-jump-link {
+    color: var(--accent); text-decoration: none;
+    transition: all .2s;
+  }
+  .cf-jump-link:hover {
+    text-decoration: underline;
+    color: #1a4ad9;
+  }
 
   /* ========== Cards ========== */
   .card {
@@ -451,6 +685,11 @@
     .keyword-filter { gap: 6px; }
     .keyword-btn { padding: 5px 12px; font-size: .78rem; }
     .search-input { padding: 12px 90px 12px 16px; font-size: .88rem; }
+    .sub-nav-tab { padding: 8px 18px; font-size: .8rem; }
+    .carousel-logo-item .logo-circle { width: 48px; height: 48px; font-size: 1rem; }
+    .carousel-logo-item.selected .logo-circle { width: 48px; height: 48px; font-size: 1rem; }
+    .carousel-logo-item .logo-name { font-size: .68rem; max-width: 60px; }
+    .carousel-arrow { width: 32px; height: 32px; font-size: .8rem; }
   }
 /* ========== 邀请信弹窗 ========== */
 .envelope-overlay {
@@ -884,7 +1123,7 @@
   <nav class="section-nav" id="section-nav">
     <button class="section-nav-tab active" data-section="overview"><span class="tab-icon">📋</span>总览</button>
     <button class="section-nav-tab" data-section="schedule"><span class="tab-icon">📅</span>会议日程</button>
-    <button class="section-nav-tab" data-section="search"><span class="tab-icon">🔍</span>关键词检索</button>
+    <button class="section-nav-tab" data-section="search"><span class="tab-icon">🔍</span>检索</button>
   </nav>
 
   <!-- ====== 总览 ====== -->
@@ -1203,44 +1442,6 @@
               <tr><td>从世界模型通往机器人自主提升</td></tr>
               <tr><td>ODesign：生物分子相互作用的全新构建与设计</td></tr>
               <tr><td>代码智能体与软件自动化的变革趋势</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div class="forum-card">
-        <div class="forum-header" data-forum="forum-talent">
-          <div class="forum-title-row">
-            <a class="forum-name-link" href="forum-talent-exchange.html" target="_blank">人工智能人才发展交流会</a>
-            <span class="forum-location">📍 G10</span>
-          </div>
-          <span class="forum-arrow">▶</span>
-        </div>
-        <div class="forum-body" id="forum-talent">
-          <table class="schedule-table">
-            <thead><tr><th>环节 / 主题</th></tr></thead>
-            <tbody>
-              <tr><td>AI 人才发展趋势与挑战</td></tr>
-              <tr><td>产学研融合视角下的 AI 人才培养</td></tr>
-              <tr><td>交流讨论</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="forum-card">
-        <div class="forum-header" data-forum="forum-aisafety">
-          <div class="forum-title-row">
-            <a class="forum-name-link" href="forum-ai-safety-exchange.html" target="_blank">AI 安全交流会</a>
-            <span class="forum-location">📍 G06C</span>
-          </div>
-          <span class="forum-arrow">▶</span>
-        </div>
-        <div class="forum-body" id="forum-aisafety">
-          <table class="schedule-table">
-            <thead><tr><th>环节 / 主题</th></tr></thead>
-            <tbody>
-              <tr><td>AI 安全前沿议题讨论</td></tr>
-              <tr><td>交流研讨</td></tr>
             </tbody>
           </table>
         </div>
@@ -1692,34 +1893,77 @@
     </div>
   </section>
 
-  <!-- ====== 关键词检索 ====== -->
+  <!-- ====== 检索 ====== -->
   <section class="section" id="search" style="display:none;">
-    <h2 class="section-title">关键词检索</h2>
+    <h2 class="section-title">检索</h2>
 
-    <!-- 搜索框 -->
-    <div class="search-wrapper">
-      <input type="text" class="search-input" id="search-input" placeholder="搜索论坛、主题、讲者、地点…" autocomplete="off">
-      <div class="search-actions">
-        <button class="search-clear" id="search-clear" title="清除">✕</button>
-        <span class="search-btn">🔍</span>
+    <!-- 子模块切换：关键词检索 / 公司检索 -->
+    <div class="sub-nav" id="search-sub-nav">
+      <button class="sub-nav-tab active" data-sub="keyword">关键词检索</button>
+      <button class="sub-nav-tab" data-sub="company">公司检索</button>
+    </div>
+
+    <!-- ===== 子模块：关键词检索 ===== -->
+    <div class="sub-panel" id="sub-panel-keyword">
+      <!-- 搜索框 -->
+      <div class="search-wrapper">
+        <input type="text" class="search-input" id="search-input" placeholder="搜索论坛、主题、讲者、地点…" autocomplete="off">
+        <div class="search-actions">
+          <button class="search-clear" id="search-clear" title="清除">✕</button>
+          <span class="search-btn">🔍</span>
+        </div>
+      </div>
+
+      <!-- 关键词标签筛选 -->
+      <div class="keyword-filter" id="keyword-filter">
+        <span class="keyword-filter-label">🏷 热点词：</span>
+      </div>
+
+      <!-- 结果统计 -->
+      <div class="result-info" id="result-info"></div>
+
+      <!-- 搜索结果列表 -->
+      <div id="search-results"></div>
+
+      <!-- 空状态 -->
+      <div class="empty-placeholder" id="search-empty" style="display:none;">
+        <div class="icon">🔍</div>
+        <p>没有找到匹配的结果，试试其他关键词吧</p>
       </div>
     </div>
 
-    <!-- 关键词标签筛选 -->
-    <div class="keyword-filter" id="keyword-filter">
-      <span class="keyword-filter-label">🏷 热点词：</span>
-    </div>
+    <!-- ===== 子模块：公司检索 ===== -->
+    <div class="sub-panel" id="sub-panel-company" style="display:none;">
+      <!-- Logo 轮播 -->
+      <div class="carousel-container" id="company-carousel">
+        <button class="carousel-arrow carousel-arrow-left" id="carousel-left" title="上一个">◀</button>
+        <div class="carousel-viewport" id="carousel-viewport">
+          <div class="carousel-track" id="carousel-track">
+            <!-- JS 动态填充 -->
+          </div>
+        </div>
+        <button class="carousel-arrow carousel-arrow-right" id="carousel-right" title="下一个">▶</button>
+      </div>
 
-    <!-- 结果统计 -->
-    <div class="result-info" id="result-info"></div>
-
-    <!-- 搜索结果列表 -->
-    <div id="search-results"></div>
-
-    <!-- 空状态 -->
-    <div class="empty-placeholder" id="search-empty" style="display:none;">
-      <div class="icon">🔍</div>
-      <p>没有找到匹配的结果，试试其他关键词吧</p>
+      <!-- 选中公司详情 -->
+      <div class="company-detail" id="company-detail">
+        <div class="company-detail-empty" id="company-detail-empty">
+          <div class="icon">🏢</div>
+          <p>请选择一家公司或机构，查看相关论坛主张和发言</p>
+        </div>
+        <div class="company-detail-content" id="company-detail-content" style="display:none;">
+          <div class="company-detail-header">
+            <div class="company-detail-logo" id="company-detail-logo"></div>
+            <div>
+              <h3 class="company-detail-name" id="company-detail-name"></h3>
+              <p class="company-detail-type" id="company-detail-type"></p>
+            </div>
+          </div>
+          <div class="company-forums" id="company-forums">
+            <!-- JS 动态填充 -->
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -1816,16 +2060,25 @@
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
-  /* ======== 模块切换：总览 / 会议日程 / 关键词检索 ======== */
+  /* ======== 模块切换：总览 / 会议日程 / 检索 ======== */
   (function() {
     var sectionTabs = document.querySelectorAll('#section-nav .section-nav-tab');
     var overviewSection = document.getElementById('overview');
     var scheduleSection = document.getElementById('schedule');
     var searchSection = document.getElementById('search');
+    var searchSubNav = document.getElementById('search-sub-nav');
+    var subKeyword = document.getElementById('sub-panel-keyword');
+    var subCompany = document.getElementById('sub-panel-company');
+    var subNavTabs = searchSubNav.querySelectorAll('.sub-nav-tab');
 
     // 页面初始加载时只显示总览，隐藏日程和检索
     scheduleSection.style.display = 'none';
     searchSection.style.display = 'none';
+
+    // 工具函数：通知子面板变为可见
+    function notifyPanelVisible(sub) {
+      window.dispatchEvent(new CustomEvent('search-panel-visible', { detail: { sub: sub } }));
+    }
 
     sectionTabs.forEach(function(tab) {
       tab.addEventListener('click', function() {
@@ -1838,10 +2091,24 @@
         scheduleSection.style.display = (section === 'schedule') ? '' : 'none';
         searchSection.style.display = (section === 'search') ? '' : 'none';
 
-        // 切换到搜索模块时，执行一次初始搜索
+        // 切换到搜索模块时，通知当前激活的子面板
         if (section === 'search') {
-          doSearch();
+          var activeSub = searchSubNav.querySelector('.sub-nav-tab.active');
+          var sub = activeSub ? activeSub.getAttribute('data-sub') : 'keyword';
+          notifyPanelVisible(sub);
         }
+      });
+    });
+
+    // 检索子模块切换
+    subNavTabs.forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        var sub = this.getAttribute('data-sub');
+        subNavTabs.forEach(function(t) { t.classList.remove('active'); });
+        this.classList.add('active');
+        subKeyword.style.display = (sub === 'keyword') ? '' : 'none';
+        subCompany.style.display = (sub === 'company') ? '' : 'none';
+        notifyPanelVisible(sub);
       });
     });
   })();
@@ -1862,6 +2129,61 @@
       });
     });
   })();
+
+  /* ======== 公共：跳转到论坛并灰色闪烁 ======== */
+  function jumpToForum(forumId) {
+    // 1. 切换到日程 tab
+    var scheduleTab = document.querySelector('#section-nav .section-nav-tab[data-section="schedule"]');
+    if (scheduleTab) scheduleTab.click();
+
+    // 2. 更新 URL hash（无页面刷新）
+    if (history.replaceState) {
+      history.replaceState(null, '', '#' + forumId);
+    } else {
+      window.location.hash = forumId;
+    }
+
+    // 3. 找到目标论坛卡片
+    var forumBody = document.getElementById(forumId);
+    if (!forumBody) {
+      // 回退：滚动到日程区域
+      var scheduleEl = document.getElementById('schedule');
+      if (scheduleEl) scheduleEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+
+    // 4. 找到该论坛所在的 date-panel，切换到对应的日期 tab
+    var datePanel = forumBody.closest('.date-panel');
+    if (datePanel) {
+      var panelId = datePanel.id; // e.g. "panel-day1"
+      var dateKey = panelId.replace('panel-', ''); // e.g. "day1"
+      var dateTab = document.querySelector('.date-tab[data-date="' + dateKey + '"]');
+      if (dateTab) dateTab.click();
+    }
+
+    // 5. 展开论坛卡片
+    var header = forumBody.previousElementSibling;
+    if (header && header.classList.contains('forum-header')) {
+      header.classList.add('open');
+      forumBody.style.display = '';
+    }
+
+    // 6. 滚动到目标
+    setTimeout(function() {
+      forumBody.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 150);
+
+    // 7. 灰色闪烁动画
+    // 先清除可能残留的动画
+    forumBody.classList.remove('flash-target');
+    void forumBody.offsetWidth; // 强制回流，使动画重新触发
+    forumBody.classList.add('flash-target');
+    // 动画结束后清除
+    forumBody.addEventListener('animationend', function handler() {
+      forumBody.classList.remove('flash-target');
+      forumBody.removeEventListener('animationend', handler);
+    });
+  }
 
   /* ======== 关键词检索：数据抽取 + 搜索 + 筛选 ======== */
   (function() {
@@ -1947,9 +2269,13 @@
         .replace(/\s+/g, ' ')
         .toLowerCase();
 
+      // 获取论坛锚点 ID（从 forum-header 的 data-forum 属性）
+      var forumId = headerEl.getAttribute('data-forum') || '';
+
       searchIndex.push({
         forumName: forumName,
         forumHref: forumHref,
+        forumId: forumId,
         location: location,
         badge: badge,
         periodLabel: periodLabel,
@@ -2126,7 +2452,7 @@
         matched.forEach(function(item) {
           var forumHeaderHtml = '' +
             '<div class="result-forum-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px;">' +
-              '<a class="forum-name-link" href="' + item.forumHref + '" target="_blank" style="font-size:.95rem;font-weight:700;">' + highlightText(item.forumName, terms) + '</a>' +
+              '<span class="forum-name-link" style="font-size:.95rem;font-weight:700;color:var(--accent);">' + highlightText(item.forumName, terms) + '</span>' +
               '<div style="display:flex;gap:8px;align-items:center;flex-shrink:0;">' +
                 (item.location ? '<span style="font-size:.75rem;color:var(--text-light);">' + item.location + '</span>' : '') +
                 '<span style="font-size:.72rem;color:#999;">' + item.periodLabel + '</span>' +
@@ -2138,7 +2464,7 @@
             var topicHtml = highlightText(s.topic, terms);
             var speakerHtml = s.speaker ? '<span class="speaker">' + highlightText(s.speaker, terms) + '</span>' : '';
             resultItems.push('' +
-              '<div class="card" style="margin-bottom:10px;padding:16px 20px;">' +
+              '<div class="card search-result-card" data-forum-id="' + item.forumId + '" data-forum-href="' + item.forumHref + '" style="margin-bottom:10px;padding:16px 20px;">' +
                 forumHeaderHtml +
                 '<table class="schedule-table" style="margin-top:4px;"><tbody>' +
                   '<tr style="background:#fffde7;"><td style="width:55%;">' + topicHtml + '</td><td>' + speakerHtml + '</td></tr>' +
@@ -2159,7 +2485,7 @@
               extraHtml += '<div style="margin-top:8px;padding:10px 14px;background:#fff8e1;border-left:3px solid #f0b400;border-radius:0 6px 6px 0;font-size:.84rem;">' + highlightText(truncate(h, 200), terms) + '</div>';
             });
             resultItems.push('' +
-              '<div class="card" style="margin-bottom:10px;padding:16px 20px;">' +
+              '<div class="card search-result-card" data-forum-id="' + item.forumId + '" data-forum-href="' + item.forumHref + '" style="margin-bottom:10px;padding:16px 20px;">' +
                 forumHeaderHtml +
                 extraHtml +
               '</div>');
@@ -2203,9 +2529,506 @@
       searchInput.focus();
     });
 
+    // 监听子面板切换事件，当关键词面板变为可见时执行搜索
+    window.addEventListener('search-panel-visible', function(e) {
+      if (e.detail && e.detail.sub === 'keyword') {
+        doSearch();
+      }
+    });
+
+    // ---- 搜索结果点击：跳转到子页面并传递闪烁信号 + 搜索关键词 ----
+    searchResults.addEventListener('click', function(e) {
+      var card = e.target.closest('.search-result-card');
+      if (!card) return;
+      var forumHref = card.getAttribute('data-forum-href');
+      if (!forumHref) return;
+      // 获取当前搜索关键词
+      var query = searchInput.value.trim();
+      if (!query) {
+        var activeKw = keywordFilterEl.querySelector('.keyword-btn.active');
+        if (activeKw) query = activeKw.textContent.trim();
+      }
+      // 通过 sessionStorage 传递关键词和闪烁信号给子页面
+      if (query) sessionStorage.setItem('baai-search-query', query.toLowerCase());
+      sessionStorage.setItem('baai-flash', 'true');
+      window.location.href = forumHref;
+    });
+
     // 初始加载时执行一次空搜索（不显示任何结果）
     doSearch();
   })();
+})();
+
+// ====== 公司检索：Logo 轮播 + 论坛关联 ======
+(function() {
+  // ---- 公司/机构数据（logo 优先用 Google Favicon，不可用时回退首字母圆圈） ----
+  var companies = [
+    { id:'baai',       name:'智源研究院',  type:'研究机构', color:'#2857ff', shortName:'BAAI',   logo:'https://raw.githubusercontent.com/lobehub/lobe-icons/refs/heads/master/packages/static-png/dark/baai-color.png' },
+    { id:'pku',        name:'北京大学',    type:'高校',     color:'#8b0000', shortName:'北大',   logo:'https://www.google.com/s2/favicons?domain=pku.edu.cn&sz=128' },
+    { id:'tsinghua',   name:'清华大学',    type:'高校',     color:'#660099', shortName:'清华',   logo:'https://www.google.com/s2/favicons?domain=tsinghua.edu.cn&sz=128' },
+    { id:'meta',       name:'Meta',        type:'科技公司', color:'#0668e1', shortName:'Meta',   logo:'https://raw.githubusercontent.com/lobehub/lobe-icons/refs/heads/master/packages/static-svg/light/meta.svg' },
+    { id:'nvidia',     name:'英伟达',      type:'科技公司', color:'#76b900', shortName:'NVIDIA', logo:'https://raw.githubusercontent.com/lobehub/lobe-icons/refs/heads/master/packages/static-svg/light/nvidia.svg' },
+    { id:'tencent',    name:'腾讯',        type:'科技公司', color:'#0099e5', shortName:'腾讯',   logo:'https://raw.githubusercontent.com/lobehub/lobe-icons/refs/heads/master/packages/static-svg/light/tencent.svg' },
+    { id:'galaxy',     name:'银河通用',    type:'AI企业',   color:'#e65100', shortName:'银河通用',logo:'https://www.google.com/s2/favicons?domain=galbot.com&sz=128' },
+    { id:'qianxun',    name:'千寻智能',    type:'AI企业',   color:'#6a1b9a', shortName:'千寻',   logo:'https://www.google.com/s2/favicons?domain=spirit-ai.com&sz=128' },
+    { id:'starsea',    name:'星海图',      type:'AI企业',   color:'#00838f', shortName:'星海图', logo:'https://www.google.com/s2/favicons?domain=galaxea-ai.com&sz=128' },
+    { id:'inverse',    name:'逆矩阵',      type:'AI企业',   color:'#2e7d32', shortName:'逆矩阵', logo:'' },
+    { id:'xingyuan',   name:'星源智联',    type:'AI企业',   color:'#c62828', shortName:'星源智联',logo:'' },
+    { id:'xingyuanzhi',name:'星源智',      type:'AI企业',   color:'#d32f2f', shortName:'星源智', logo:'' },
+    { id:'brokenbot',  name:'破壳机器人',  type:'AI企业',   color:'#37474f', shortName:'破壳',   logo:'' },
+    { id:'xuanji',     name:'旋玑智能',    type:'AI企业',   color:'#4527a0', shortName:'旋玑',   logo:'' },
+    { id:'anyuan',     name:'安远AI',      type:'AI企业',   color:'#ff6f00', shortName:'安远AI', logo:'https://www.google.com/s2/favicons?domain=concordia-ai.com&sz=128' },
+    { id:'mianbi',     name:'面壁智能',    type:'AI企业',   color:'#00695c', shortName:'面壁',   logo:'https://www.google.com/s2/favicons?domain=modelbest.cn&sz=128' },
+    { id:'lingxin',    name:'灵心巧手',    type:'AI企业',   color:'#bf360c', shortName:'灵心巧手',logo:'https://www.google.com/s2/favicons?domain=linkerbot.cn&sz=128' },
+    { id:'tashihang',  name:'它石智航',    type:'AI企业',   color:'#01579b', shortName:'它石智航',logo:'' },
+    { id:'mayilb',     name:'蚂蚁灵波科技',type:'AI企业',   color:'#1b5e20', shortName:'蚂蚁灵波',logo:'https://www.google.com/s2/favicons?domain=robbyant.com&sz=128' },
+    { id:'zibianliang',name:'自变量机器人',type:'AI企业',   color:'#4e342e', shortName:'自变量', logo:'https://www.google.com/s2/favicons?domain=x2robot.com&sz=128' },
+    { id:'guanglun',   name:'光轮智能',    type:'AI企业',   color:'#827717', shortName:'光轮',   logo:'https://www.google.com/s2/favicons?domain=lightwheel.net&sz=128' },
+    { id:'jijia',      name:'极佳视界',    type:'AI企业',   color:'#006064', shortName:'极佳视界',logo:'https://www.google.com/s2/favicons?domain=gigaai.cc&sz=128' },
+    { id:'zhiyuanjqr', name:'智元机器人',  type:'AI企业',   color:'#311b92', shortName:'智元',   logo:'https://www.google.com/s2/favicons?domain=agibot.com&sz=128' },
+    { id:'ruilai',     name:'瑞莱智慧',    type:'AI企业',   color:'#b71c1c', shortName:'瑞莱',   logo:'https://www.google.com/s2/favicons?domain=real-ai.cn&sz=128' },
+    { id:'qianxin',    name:'奇安信',      type:'安全公司', color:'#e65100', shortName:'奇安信', logo:'https://www.google.com/s2/favicons?domain=qianxin.com&sz=128' },
+    { id:'kunlun',     name:'昆仑万维',    type:'科技公司', color:'#3e2723', shortName:'昆仑万维',logo:'https://www.google.com/s2/favicons?domain=kunlun.com&sz=128' },
+    { id:'modelscope', name:'魔搭社区',    type:'AI平台',   color:'#00acc1', shortName:'魔搭',   logo:'https://raw.githubusercontent.com/lobehub/lobe-icons/refs/heads/master/packages/static-png/dark/modelscope-color.png' },
+    { id:'antgroup',   name:'蚂蚁集团',    type:'科技公司', color:'#1565c0', shortName:'蚂蚁',   logo:'https://www.google.com/s2/favicons?domain=antgroup.com&sz=128' },
+    { id:'chinamobile',name:'中国移动',    type:'通信企业', color:'#388e3c', shortName:'中国移动',logo:'https://www.google.com/s2/favicons?domain=chinamobile.com&sz=128' },
+    { id:'fudan',      name:'复旦大学',    type:'高校',     color:'#1565c0', shortName:'复旦',   logo:'https://www.google.com/s2/favicons?domain=fudan.edu.cn&sz=128' },
+    { id:'zju',        name:'浙江大学',    type:'高校',     color:'#e65100', shortName:'浙大',   logo:'https://www.google.com/s2/favicons?domain=zju.edu.cn&sz=128' },
+    { id:'sjtu',       name:'上海交通大学',type:'高校',     color:'#c62828', shortName:'上交',   logo:'https://www.google.com/s2/favicons?domain=sjtu.edu.cn&sz=128' },
+    { id:'nju',        name:'南京大学',    type:'高校',     color:'#1a237e', shortName:'南大',   logo:'https://www.google.com/s2/favicons?domain=nju.edu.cn&sz=128' },
+    { id:'hku',        name:'香港大学',    type:'高校',     color:'#004d40', shortName:'港大',   logo:'https://www.google.com/s2/favicons?domain=hku.hk&sz=128' },
+    { id:'hkust',      name:'香港科技大学',type:'高校',     color:'#00695c', shortName:'港科大', logo:'https://www.google.com/s2/favicons?domain=hkust.hk&sz=128' },
+    { id:'cuhk',       name:'香港中文大学',type:'高校',     color:'#827717', shortName:'港中文', logo:'https://www.google.com/s2/favicons?domain=cuhk.edu.hk&sz=128' },
+    { id:'westlake',   name:'西湖大学',    type:'高校',     color:'#004d40', shortName:'西湖大学',logo:'https://www.google.com/s2/favicons?domain=westlake.edu.cn&sz=128' },
+    { id:'ntu',        name:'南洋理工大学',type:'高校',     color:'#bf360c', shortName:'NTU',    logo:'https://www.google.com/s2/favicons?domain=ntu.edu.sg&sz=128' },
+    { id:'umontreal',  name:'蒙特利尔大学',type:'高校',     color:'#0277bd', shortName:'UdeM',   logo:'https://www.google.com/s2/favicons?domain=umontreal.ca&sz=128' },
+    { id:'ubc',        name:'英属哥伦比亚大学',type:'高校', color:'#002145', shortName:'UBC',    logo:'https://www.google.com/s2/favicons?domain=ubc.ca&sz=128' },
+    { id:'mila',       name:'Mila',        type:'研究机构', color:'#e91e63', shortName:'Mila',   logo:'https://www.google.com/s2/favicons?domain=mila.quebec&sz=128' },
+    { id:'cas',        name:'中国科学院',  type:'研究机构', color:'#1a237e', shortName:'中科院', logo:'https://www.google.com/s2/favicons?domain=cas.cn&sz=128' },
+    { id:'ruc',        name:'中国人民大学',type:'高校',     color:'#b71c1c', shortName:'人大',   logo:'https://www.google.com/s2/favicons?domain=ruc.edu.cn&sz=128' },
+    { id:'shanghaichuangzhi',name:'上海创智学院',type:'教育机构',color:'#33691e',shortName:'创智',logo:'' },
+    { id:'neocog',     name:'NeoCognition',type:'科技公司', color:'#4a148c', shortName:'Neo',    logo:'' },
+    { id:'xinguang',   name:'心光',        type:'AI企业',   color:'#ad1457', shortName:'心光',   logo:'https://www.google.com/s2/favicons?domain=lifelight.me&sz=128' },
+    { id:'skywork',    name:'Skywork',     type:'科技公司', color:'#0277bd', shortName:'Skywork',logo:'' },
+    { id:'beingbeyond',name:'BeingBeyond', type:'AI企业',   color:'#ff8f00', shortName:'BB',     logo:'' }
+  ];
+
+  // ---- 公司-论坛关联数据（从日程实际提取） ----
+  // 论坛名 → 子页面 URL 映射
+  var forumNameToHref = {
+    '开幕式及全体大会': 'opening-ceremony.html',
+    '大模型产业论坛': 'conference-summary-1022.html',
+    'AI 自进化': 'conference-summary-1023.html',
+    '类脑智能与下一代AI路径': 'forum-brain-inspired.html',
+    '终端智能体与OpenClaw': 'terminal-agent-openclaw.html',
+    'AI + 健康 & 医疗': 'forum-health-ai.html',
+    '智算前沿 · AI 赋能系统': 'forum-ai-computing.html',
+    'Token 经济与 OPC': 'forum-token-opc.html',
+    '智源学者论坛': 'forum-scholars-cross.html',
+    'InnoVibe 共创场': 'forum-innovibe.html',
+    '具身智能与人形机器人': 'forum-embodied-robot.html',
+    'AI + Neuroscience': 'forum-neuroscience.html',
+    'Agent for Science': 'forum-agent-science.html',
+    '世界模型（全天）': 'forum-world-model.html',
+    '🛠 FlagOS 技术开发工作坊': 'forum-flagos.html',
+    '多模态': 'forum-multimodal.html',
+    'AI 智能体安全': 'forum-agent-safety.html',
+    '智算前沿·下一代架构①': 'forum-next-arch-1.html',
+    '具身产业 CEO': 'forum-embodied-ceo.html',
+    '线上对话': 'forum-online-special.html',
+    '强化学习': 'forum-rl.html',
+    '智算前沿·下一代架构②': 'forum-next-arch-2.html',
+    'AI 开闭源产业论坛': 'forum-open-source.html',
+    'AI-Native 教育': 'forum-ai-education.html'
+  };
+  // 辅助函数：根据论坛名生成子页面链接
+  function forumHref(forumName) {
+    var href = forumNameToHref[forumName];
+    return href || '#schedule';
+  }
+
+  var companyForums = {
+    'baai': [
+      { forum:'开幕式及全体大会', role:'开幕主持', speaker:'黄铁军 — 智源研究院理事长', date:'6月8日 上午', href:'#schedule' },
+      { forum:'开幕式及全体大会', role:'智源进展报告', speaker:'王仲远 — 智源研究院院长', date:'6月8日 上午', href:'#schedule' },
+      { forum:'开幕式及全体大会', role:'主持巅峰对话', speaker:'王仲远 — 智源研究院院长', date:'6月8日 上午', href:'#schedule' },
+      { forum:'具身智能与人形机器人', role:'论坛主席 & ORCA世界基座模型', speaker:'王鹏伟 — 智源具身模型研究中心负责人', date:'6月9日 上午', href:'#schedule' },
+      { forum:'具身智能与人形机器人', role:'主持圆桌', speaker:'王鹏伟 — 智源具身模型研究中心负责人', date:'6月9日 上午', href:'#schedule' },
+      { forum:'世界模型（全天）', role:'论坛主席 & 世界模型思考', speaker:'王仲远 — 智源研究院院长', date:'6月9日 下午', href:'#schedule' },
+      { forum:'世界模型（全天）', role:'Physis通用世界基座模型', speaker:'陈博远 — 逆矩阵创始人兼首席研发官，智源世界模型创新中心负责人', date:'6月9日 下午', href:'#schedule' },
+      { forum:'世界模型（全天）', role:'具身世界模型与多模态交互', speaker:'孙振国 — 星源智联合创始人 & 智源研究院具身交互世界模型实验室负责人', date:'6月9日 下午', href:'#schedule' },
+      { forum:'🛠 FlagOS 技术开发工作坊', role:'主办 · FlagOS 开源生态技术专场', speaker:'敖玉龙 — 智源AI框架研发负责人，ACM Gordon Bell奖获得者', date:'6月9日 下午', href:'#schedule' },
+      { forum:'智算前沿·下一代架构①', role:'FlagOS 插件体系实践', speaker:'敖玉龙 — 智源AI框架研发负责人', date:'6月9日 下午', href:'#schedule' },
+      { forum:'AI 智能体安全', role:'联合主办', speaker:'智源研究院 × 安远AI', date:'6月10日 上午', href:'#schedule' },
+      { forum:'具身产业 CEO', role:'主持', speaker:'王业全 — 旋玑智能创始人，智源研究院认知团队负责人', date:'6月10日 上午', href:'#schedule' },
+      { forum:'类脑智能与下一代AI路径', role:'Brainμ 世界模型', speaker:'智源研究院', date:'6月10日 下午', href:'#schedule' },
+      { forum:'开幕式及全体大会', role:'闭幕致辞', speaker:'黄铁军 — 智源研究院理事长', date:'6月10日 下午', href:'#schedule' }
+    ],
+    'pku': [
+      { forum:'具身智能与人形机器人', role:'论坛主席 & 人形机器人ChatGPT时刻', speaker:'王鹤 — 银河通用创始人兼CTO，北京大学研究员', date:'6月9日 上午', href:'#schedule' },
+      { forum:'具身智能与人形机器人', role:'迈向具身基础模型', speaker:'卢宗青 — 北京大学长聘副教授，BeingBeyond创始人', date:'6月9日 上午', href:'#schedule' },
+      { forum:'AI 智能体安全', role:'Panel嘉宾', speaker:'杨耀东 — 北大/智源', date:'6月10日 上午', href:'#schedule' },
+      { forum:'具身产业 CEO', role:'主持', speaker:'王业全 — 旋玑智能创始人，北京大学研究员', date:'6月10日 上午', href:'#schedule' }
+    ],
+    'tsinghua': [
+      { forum:'具身智能与人形机器人', role:'多模态具身基础模型', speaker:'赵行 — 清华大学助理教授，星海图联合创始人', date:'6月9日 上午', href:'#schedule' },
+      { forum:'具身智能与人形机器人', role:'具身智能大模型', speaker:'高阳 — 清华大学交叉信息研究院助理教授，千寻智能联合创始人&首席科学家', date:'6月9日 上午', href:'#schedule' },
+      { forum:'具身产业 CEO', role:'探索具身智能上限', speaker:'许华哲 — 破壳机器人创始人&CEO，清华大学交叉信息研究院助理教授', date:'6月10日 上午', href:'#schedule' },
+      { forum:'强化学习', role:'论坛主席 & RLinf框架', speaker:'于超 — 清华大学深圳国际研究生院助理教授', date:'6月10日 下午', href:'#schedule' }
+    ],
+    'meta': [
+      { forum:'AI 自进化', role:'端侧基础模型优化', speaker:'刘泽春 — Meta', date:'6月8日 下午', href:'#schedule' }
+    ],
+    'nvidia': [
+      { forum:'AI 自进化', role:'可扩展智能体递归自学习', speaker:'张少坤 — 英伟达', date:'6月8日 下午', href:'#schedule' }
+    ],
+    'tencent': [
+      { forum:'世界模型（全天）', role:'混元3D — 从物体生成到世界模型', speaker:'郭春超 — 腾讯混元3D及世界模型负责人', date:'6月9日 下午', href:'#schedule' }
+    ],
+    'galaxy': [
+      { forum:'具身智能与人形机器人', role:'论坛主席 & ORCA世界基座模型主持', speaker:'王鹤 — 银河通用创始人兼CTO', date:'6月9日 上午', href:'#schedule' },
+      { forum:'具身智能与人形机器人', role:'人形机器人的AlphaGo及ChatGPT时刻', speaker:'王鹤 — 银河通用创始人兼CTO', date:'6月9日 上午', href:'#schedule' }
+    ],
+    'qianxun': [
+      { forum:'具身智能与人形机器人', role:'具身智能大模型：通用大脑', speaker:'高阳 — 千寻智能联合创始人&首席科学家', date:'6月9日 上午', href:'#schedule' },
+      { forum:'具身产业 CEO', role:'AGI迈进物理世界', speaker:'韩峰涛 — 千寻智能创始人&CEO', date:'6月10日 上午', href:'#schedule' }
+    ],
+    'starsea': [
+      { forum:'具身智能与人形机器人', role:'多模态具身基础模型', speaker:'赵行 — 星海图联合创始人', date:'6月9日 上午', href:'#schedule' }
+    ],
+    'inverse': [
+      { forum:'世界模型（全天）', role:'Physis：预测下一个物理状态', speaker:'陈博远 — 逆矩阵创始人兼首席研发官', date:'6月9日 下午', href:'#schedule' }
+    ],
+    'xingyuan': [
+      { forum:'世界模型（全天）', role:'具身世界模型与多模态交互', speaker:'孙振国 — 星源智联合创始人', date:'6月9日 下午', href:'#schedule' }
+    ],
+    'xingyuanzhi': [
+      { forum:'具身产业 CEO', role:'打造物理AI的教育系统', speaker:'刘东 — 星源智创始人&CEO', date:'6月10日 上午', href:'#schedule' }
+    ],
+    'brokenbot': [
+      { forum:'具身产业 CEO', role:'探索具身智能上限', speaker:'许华哲 — 破壳机器人创始人&CEO', date:'6月10日 上午', href:'#schedule' }
+    ],
+    'xuanji': [
+      { forum:'具身产业 CEO', role:'主持人', speaker:'王业全 — 旋玑智能创始人', date:'6月10日 上午', href:'#schedule' }
+    ],
+    'anyuan': [
+      { forum:'AI 智能体安全', role:'联合主办', speaker:'智源研究院 × 安远AI', date:'6月10日 上午', href:'#schedule' }
+    ],
+    'mianbi': [
+      { forum:'大模型产业论坛', role:'「智源-面壁联合加速器」发布', speaker:'面壁智能', date:'6月8日 下午', href:'#schedule' },
+      { forum:'AI 开闭源产业论坛', role:'面壁智能开闭源路线与产业实践', speaker:'面壁智能', date:'6月10日 下午', href:'#schedule' }
+    ],
+    'lingxin': [
+      { forum:'具身智能与人形机器人', role:'灵巧手物理自进化路径', speaker:'夏华夏 — 灵心巧手首席科学家', date:'6月9日 上午', href:'#schedule' },
+      { forum:'具身产业 CEO', role:'人形机器人从可用到可规模', speaker:'周永 — 灵心巧手创始人&CEO', date:'6月10日 上午', href:'#schedule' }
+    ],
+    'tashihang': [
+      { forum:'具身智能与人形机器人', role:'走向通用物理智能', speaker:'丁文超 — 它石智航联合创始人兼首席科学家', date:'6月9日 上午', href:'#schedule' }
+    ],
+    'mayilb': [
+      { forum:'世界模型（全天）', role:'具身世界模型思考与实践', speaker:'沈宇军 — 蚂蚁灵波科技首席科学家', date:'6月9日 下午', href:'#schedule' },
+      { forum:'具身产业 CEO', role:'通用家庭机器人现状和未来', speaker:'朱兴 — 蚂蚁灵波科技CEO', date:'6月10日 上午', href:'#schedule' }
+    ],
+    'zibianliang': [
+      { forum:'世界模型（全天）', role:'事件驱动的世界模型预训练', speaker:'王昊 — 自变量机器人联合创始人兼CTO', date:'6月9日 下午', href:'#schedule' }
+    ],
+    'guanglun': [
+      { forum:'具身产业 CEO', role:'数据驱动的具身智能', speaker:'谢晨 — 光轮智能创始人&CEO', date:'6月10日 上午', href:'#schedule' }
+    ],
+    'jijia': [
+      { forum:'世界模型（全天）', role:'世界模型：迈向具身基础模型新时代', speaker:'朱政 — 极佳视界联合创始人、首席科学家', date:'6月9日 下午', href:'#schedule' }
+    ],
+    'zhiyuanjqr': [
+      { forum:'具身智能与人形机器人', role:'真实部署中持续学习的机器人基础模型', speaker:'罗剑岚 — 上海创智学院副教授，智元机器人首席科学家', date:'6月9日 上午', href:'#schedule' }
+    ],
+    'ruilai': [
+      { forum:'AI 智能体安全', role:'面向可信多模态大模型', speaker:'田天 — 瑞莱智慧', date:'6月10日 上午', href:'#schedule' },
+      { forum:'AI 智能体安全', role:'Panel嘉宾', speaker:'田天 — 瑞莱智慧', date:'6月10日 上午', href:'#schedule' }
+    ],
+    'qianxin': [
+      { forum:'AI 智能体安全', role:'Panel嘉宾', speaker:'刘岩 — 奇安信', date:'6月10日 上午', href:'#schedule' }
+    ],
+    'kunlun': [
+      { forum:'多模态', role:'Skyreels V4到Mureka V9', speaker:'昆仑万维', date:'6月9日 上午', href:'#schedule' }
+    ],
+    'modelscope': [
+      { forum:'AI 开闭源产业论坛', role:'魔搭社区：开源开放，共创共赢', speaker:'魔搭社区', date:'6月10日 下午', href:'#schedule' }
+    ],
+    'antgroup': [
+      { forum:'强化学习', role:'AReaL: 下一代Agentic RL框架', speaker:'徐树声 — 蚂蚁集团高级算法专家 & AReaL项目算法负责人', date:'6月10日 下午', href:'#schedule' }
+    ],
+    'chinamobile': [
+      { forum:'AI 开闭源产业论坛', role:'领衔嘉宾 & 安全可信智能服务', speaker:'冯俊兰 — 中国移动首席科学家', date:'6月10日 下午', href:'#schedule' }
+    ],
+    'fudan': [
+      { forum:'AI 智能体安全', role:'智能体系统全栈安全技术', speaker:'杨珉 — 复旦大学', date:'6月10日 上午', href:'#schedule' }
+    ],
+    'zju': [
+      { forum:'AI 智能体安全', role:'AI原生智能体安全体系', speaker:'杜跃进 — 浙江大学', date:'6月10日 上午', href:'#schedule' }
+    ],
+    'sjtu': [
+      { forum:'具身智能与人形机器人', role:'生成式仿真驱动自进化系统', speaker:'穆尧 — 上海交通大学助理教授', date:'6月9日 上午', href:'#schedule' },
+      { forum:'强化学习', role:'个性化主动式可持续演进', speaker:'刘卫文 — 上海交通大学副教授', date:'6月10日 下午', href:'#schedule' }
+    ],
+    'nju': [
+      { forum:'强化学习', role:'论坛主席 & 主持', speaker:'俞扬 — 南京大学教授', date:'6月10日 下午', href:'#schedule' }
+    ],
+    'hku': [
+      { forum:'具身智能与人形机器人', role:'RISE机器人策略自进化框架', speaker:'李弘扬 — 香港大学助理教授', date:'6月9日 上午', href:'#schedule' }
+    ],
+    'hkust': [
+      { forum:'世界模型（全天）', role:'视觉-语言JEPA与世界建模', speaker:'陈德龙 — 香港科技大学博士 & AMI Labs', date:'6月9日 下午', href:'#schedule' },
+      { forum:'世界模型（全天）', role:'通用机器人规模化世界模型', speaker:'高深远 — 香港科技大学博士', date:'6月9日 下午', href:'#schedule' }
+    ],
+    'cuhk': [
+      { forum:'强化学习', role:'大模型强化学习的算力经济学', speaker:'李子牛 — 香港中文大学博士', date:'6月10日 下午', href:'#schedule' }
+    ],
+    'westlake': [
+      { forum:'AI 自进化', role:'自进化统一多模态模型', speaker:'林涛 — 西湖大学', date:'6月8日 下午', href:'#schedule' },
+      { forum:'具身智能与人形机器人', role:'机器人全身运动操作通用方法', speaker:'王东林 — 西湖大学AI系副主任，西湖机器人创始人', date:'6月9日 上午', href:'#schedule' },
+      { forum:'Agent for Science', role:'AI-Driven Research Automation', speaker:'张岳 — 西湖大学工学院副院长', date:'6月10日 上午', href:'#schedule' }
+    ],
+    'ntu': [
+      { forum:'AI 智能体安全', role:'Panel嘉宾', speaker:'安波 — 南洋理工', date:'6月10日 上午', href:'#schedule' }
+    ],
+    'umontreal': [
+      { forum:'Agent for Science', role:'论坛主席 & 引导报告', speaker:'刘邦 — 蒙特利尔大学计算机系副教授', date:'6月10日 上午', href:'#schedule' }
+    ],
+    'ubc': [
+      { forum:'Agent for Science', role:'主题报告', speaker:'李霄霄 — 英属哥伦比亚大学副教授', date:'6月10日 上午', href:'#schedule' }
+    ],
+    'mila': [
+      { forum:'Agent for Science', role:'蛋白质到虚拟细胞基础模型', speaker:'唐建 — Mila', date:'6月10日 上午', href:'#schedule' }
+    ],
+    'cas': [
+      { forum:'强化学习', role:'具身基础模型可扩展RL后训练', speaker:'李浩然 — 中国科学院自动化研究所副研究员', date:'6月10日 下午', href:'#schedule' }
+    ],
+    'ruc': [
+      { forum:'Agent for Science', role:'论坛主席', speaker:'朱余韬 — 中国人民大学高瓴人工智能学院博士后', date:'6月10日 上午', href:'#schedule' }
+    ],
+    'shanghaichuangzhi': [
+      { forum:'具身智能与人形机器人', role:'真实部署中持续学习的机器人基础模型', speaker:'罗剑岚 — 上海创智学院副教授', date:'6月9日 上午', href:'#schedule' }
+    ],
+    'neocog': [
+      { forum:'AI 自进化', role:'自改进智能体的幻觉', speaker:'谷雨 — NeoCognition', date:'6月8日 下午', href:'#schedule' }
+    ],
+    'xinguang': [
+      { forum:'Token 经济与 OPC', role:'多Agent协作组织OPC实践', speaker:'心光团队', date:'6月9日 上午', href:'#schedule' }
+    ],
+    'skywork': [
+      { forum:'世界模型（全天）', role:'Matrix-Game可交互世界模型', speaker:'刘扬 — Skywork 首席科学家', date:'6月9日 下午', href:'#schedule' }
+    ],
+    'beingbeyond': [
+      { forum:'具身智能与人形机器人', role:'迈向具身基础模型', speaker:'卢宗青 — 北京大学长聘副教授，BeingBeyond创始人', date:'6月9日 上午', href:'#schedule' }
+    ]
+  };
+
+  var carouselTrack = document.getElementById('carousel-track');
+  var carouselLeft = document.getElementById('carousel-left');
+  var carouselRight = document.getElementById('carousel-right');
+  var companyDetailEmpty = document.getElementById('company-detail-empty');
+  var companyDetailContent = document.getElementById('company-detail-content');
+  var companyDetailLogo = document.getElementById('company-detail-logo');
+  var companyDetailName = document.getElementById('company-detail-name');
+  var companyDetailType = document.getElementById('company-detail-type');
+  var companyForumsEl = document.getElementById('company-forums');
+  var subCompanyPanel = document.getElementById('sub-panel-company');
+  var currentIndex = 0;
+  var carouselReady = false;  // track populated, but position may not be set
+  var carouselActive = false; // first selection done
+
+  // ---- 立即渲染 logo 项（DOM 已就绪） ----
+  (function buildTrack() {
+    carouselTrack.innerHTML = '';
+    companies.forEach(function(comp, idx) {
+      var item = document.createElement('div');
+      item.className = 'carousel-logo-item';
+      item.setAttribute('data-index', idx);
+      // 默认彩色首字母圆圈；有 logo 时叠加图片，加载成功后切换为白底
+      var logoHTML = '<div class="logo-circle" style="background:' + comp.color + ';">';
+      if (comp.logo) {
+        logoHTML += '' +
+          '<span class="logo-initials">' + comp.shortName + '</span>' +
+          '<img src="' + comp.logo + '" alt="" ' +
+            'onerror="this.remove();" ' +
+            'onload="var c=this.parentElement;c.style.background=\'#fff\';var s=c.querySelector(\'.logo-initials\');if(s)s.remove();" ' +
+            'style="width:100%;height:100%;border-radius:50%;object-fit:contain;position:relative;z-index:1;" ' +
+            'loading="lazy">';
+      } else {
+        logoHTML += comp.shortName;
+      }
+      logoHTML += '</div>';
+      item.innerHTML = logoHTML + '<div class="logo-name">' + comp.name + '</div>';
+      item.addEventListener('click', function() { selectCompany(idx); });
+      carouselTrack.appendChild(item);
+    });
+    carouselReady = true;
+  })();
+
+  // ---- 箭头事件 ----
+  carouselLeft.addEventListener('click', function() {
+    if (!carouselActive) return;
+    if (currentIndex > 0) selectCompany(currentIndex - 1);
+  });
+  carouselRight.addEventListener('click', function() {
+    if (!carouselActive) return;
+    if (currentIndex < companies.length - 1) selectCompany(currentIndex + 1);
+  });
+
+  // ---- 键盘事件 ----
+  document.addEventListener('keydown', function(e) {
+    if (!carouselActive) return;
+    if (subCompanyPanel.style.display === 'none') return;
+    if (e.key === 'ArrowLeft' && currentIndex > 0) selectCompany(currentIndex - 1);
+    if (e.key === 'ArrowRight' && currentIndex < companies.length - 1) selectCompany(currentIndex + 1);
+  });
+
+  // ---- 监听面板可见事件 ----
+  window.addEventListener('search-panel-visible', function(e) {
+    if (!carouselReady) return;
+    if (e.detail && e.detail.sub === 'company') {
+      // 等浏览器完成布局后再计算位置
+      requestAnimationFrame(function() {
+        if (!carouselActive) {
+          // 首次激活：选中第一个公司
+          carouselActive = true;
+          selectCompany(0);
+        } else {
+          // 再次切换回来：重新计算位置
+          updateCarouselPosition(currentIndex);
+        }
+      });
+    }
+  });
+
+  function selectCompany(idx) {
+    currentIndex = idx;
+    var comp = companies[idx];
+    var items = carouselTrack.querySelectorAll('.carousel-logo-item');
+
+    // 更新样式
+    items.forEach(function(item, i) {
+      // 清除所有状态
+      item.classList.remove('selected', 'dimmed', 'far-dimmed');
+      if (i === idx) {
+        item.classList.add('selected');
+      } else if (Math.abs(i - idx) === 1) {
+        item.classList.add('dimmed');
+      } else {
+        item.classList.add('far-dimmed');
+      }
+    });
+
+    // 计算偏移量使选中的始终居中
+    updateCarouselPosition(idx);
+
+    // 更新详情区域
+    updateCompanyDetail(comp);
+
+    // 更新箭头状态
+    carouselLeft.style.opacity = idx === 0 ? '0.3' : '1';
+    carouselLeft.style.pointerEvents = idx === 0 ? 'none' : '';
+    carouselRight.style.opacity = idx === companies.length - 1 ? '0.3' : '1';
+    carouselRight.style.pointerEvents = idx === companies.length - 1 ? 'none' : '';
+  }
+
+  function updateCarouselPosition(idx) {
+    var viewport = document.getElementById('carousel-viewport');
+    var viewportWidth = viewport.offsetWidth;
+    var itemEl = carouselTrack.querySelectorAll('.carousel-logo-item')[0];
+    if (!itemEl) return;
+
+    // 固定间距（与 CSS gap:12px 一致），transform:scale 不影响 offsetWidth
+    var itemWidth = itemEl.offsetWidth;
+    var GAP = 12;
+    var itemTotalWidth = itemWidth + GAP;
+    // 选中项中心对齐 viewport 中心
+    var offset = (viewportWidth / 2) - (itemWidth / 2) - (idx * itemTotalWidth);
+
+    carouselTrack.style.transform = 'translateX(' + offset + 'px)';
+  }
+
+  function updateCompanyDetail(comp) {
+    companyDetailEmpty.style.display = 'none';
+    companyDetailContent.style.display = '';
+
+    // 渲染详情头部 logo（默认彩色首字母；logo 加载成功后切换白底）
+    companyDetailLogo.style.background = comp.color;
+    if (comp.logo) {
+      companyDetailLogo.innerHTML = '' +
+        '<span class="logo-initials">' + comp.shortName + '</span>' +
+        '<img src="' + comp.logo + '" alt="" ' +
+          'onerror="this.remove();" ' +
+          'onload="var c=this.parentElement;c.style.background=\'#fff\';var s=c.querySelector(\'.logo-initials\');if(s)s.remove();" ' +
+          'style="width:100%;height:100%;border-radius:50%;object-fit:contain;position:absolute;inset:0;z-index:1;">';
+    } else {
+      companyDetailLogo.textContent = comp.shortName;
+    }
+    companyDetailName.textContent = comp.name;
+    companyDetailType.textContent = comp.type;
+
+    var forums = companyForums[comp.id] || [];
+    if (forums.length === 0) {
+      companyForumsEl.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:20px;">暂无该机构相关论坛数据，内容持续更新中…</p>';
+    } else {
+      var html = '';
+      forums.forEach(function(f) {
+        var href = forumHref(f.forum);
+        var linkHTML = '<a href="' + href + '" class="cf-jump-link" title="点击跳转到日程查看详情">' + f.forum + ' →</a>';
+        html += '' +
+          '<div class="company-forum-card">' +
+            '<div class="cf-forum-name">' + linkHTML + '</div>' +
+            '<div class="cf-speech"><strong>' + f.role + '</strong></div>' +
+            '<div class="cf-speaker">' + f.speaker + '</div>' +
+            '<div class="cf-date">' + f.date + '</div>' +
+          '</div>';
+      });
+      companyForumsEl.innerHTML = html;
+    }
+  }
+
+  // ---- 论坛详情链接点击：切换到日程板块并滚动到对应论坛 ----
+  companyForumsEl.addEventListener('click', function(e) {
+    var link = e.target.closest('.cf-jump-link');
+    if (!link) return;
+    e.preventDefault();
+    var href = link.getAttribute('href');
+
+    // 切换到日程 tab
+    var scheduleTab = document.querySelector('#section-nav .section-nav-tab[data-section="schedule"]');
+    if (scheduleTab) scheduleTab.click();
+
+    // 等待 display 切换后的布局完成再滚动，避免闪烁
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        var targetId = href ? href.replace('#', '') : '';
+        var target = targetId ? document.getElementById(targetId) : null;
+        if (target) {
+          // 展开目标论坛卡片
+          var header = target.previousElementSibling;
+          if (header && header.classList.contains('forum-header')) {
+            header.classList.add('open');
+            target.style.display = '';
+          }
+          target.scrollIntoView({ behavior: 'instant', block: 'start' });
+        } else {
+          var scheduleEl = document.getElementById('schedule');
+          if (scheduleEl) scheduleEl.scrollIntoView({ behavior: 'instant', block: 'start' });
+        }
+      });
+    });
+  });
+
+  // 窗口 resize 时重新计算位置
+  var resizeTimer;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function() {
+      if (subCompanyPanel.style.display !== 'none' && carouselActive) {
+        updateCarouselPosition(currentIndex);
+      }
+    }, 150);
+  });
 })();
 
 // ====== 邀请信弹窗逻辑 ======
