@@ -694,6 +694,16 @@
     .carousel-logo-item.selected .logo-circle { width: 48px; height: 48px; font-size: 1rem; }
     .carousel-logo-item .logo-name { font-size: .68rem; max-width: 60px; }
     .carousel-arrow { width: 32px; height: 32px; font-size: .8rem; }
+    /* 邀请函移动端适配 */
+    .pdf-viewer-body { max-width: 96vw; max-height: 80vh; }
+    .invitation-scroll { padding: 24px 16px 20px; }
+    .invitation-title-main { font-size: 1.2rem; letter-spacing: 2px; }
+    .invitation-title-sub { font-size: 0.75rem; }
+    .invitation-body-text { font-size: 0.82rem; line-height: 1.8; }
+    .invitation-details { padding: 12px 14px; }
+    .invitation-details .detail-row { font-size: 0.8rem; }
+    .invitation-red-seal { width: 60px; height: 60px; font-size: 0.75rem; }
+    .invitation-signature { font-size: 0.8rem; }
   }
 /* ========== 邀请信弹窗 ========== */
 .envelope-overlay {
@@ -855,7 +865,7 @@
   transform: translateY(0);
 }
 
-/* PDF 查看器 */
+/* 邀请函查看器（替代 PDF） */
 .pdf-viewer-overlay {
   position: fixed;
   inset: 0;
@@ -873,14 +883,14 @@
 }
 .pdf-viewer-header {
   width: 100%;
-  max-width: 950px;
+  max-width: 700px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 14px 24px;
-  background: var(--primary, #1a3a5c);
+  background: linear-gradient(135deg, #8B1A1A 0%, #C41E3A 100%);
   border-radius: 14px 14px 0 0;
-  color: white;
+  color: #FFD700;
   font-weight: 600;
   letter-spacing: 1px;
 }
@@ -888,9 +898,9 @@
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.45);
+  border: 2px solid rgba(255,215,0,0.45);
   background: transparent;
-  color: white;
+  color: #FFD700;
   font-size: 1.3rem;
   cursor: pointer;
   display: flex;
@@ -900,22 +910,154 @@
   line-height: 1;
 }
 .pdf-viewer-close:hover {
-  background: rgba(255,255,255,0.18);
-  border-color: white;
+  background: rgba(255,215,0,0.18);
+  border-color: #FFD700;
 }
 .pdf-viewer-body {
   width: 100%;
-  max-width: 950px;
-  height: 82vh;
-  background: #fff;
+  max-width: 700px;
+  max-height: 85vh;
+  background: #FFF8F0;
   border-radius: 0 0 14px 14px;
-  overflow: hidden;
+  overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  padding: 0;
+  scroll-behavior: smooth;
 }
-.pdf-viewer-body embed {
+
+/* ====== 邀请函内容样式 ====== */
+.invitation-scroll {
+  padding: 40px 36px 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(196,30,58,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse at 50% 100%, rgba(139,26,26,0.04) 0%, transparent 60%),
+    linear-gradient(to bottom, #FFF8F0 0%, #FFF5E8 50%, #FFF8F0 100%);
+}
+
+.invitation-border-top,
+.invitation-border-bottom {
   width: 100%;
-  height: 100%;
-  border: none;
+  height: 4px;
+  background: repeating-linear-gradient(90deg, #C41E3A 0px, #C41E3A 8px, #FFD700 8px, #FFD700 16px);
+  border-radius: 2px;
+  opacity: 0.7;
+}
+
+.invitation-red-seal {
+  width: 80px;
+  height: 80px;
+  border: 3px solid #C41E3A;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #C41E3A;
+  font-weight: 900;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  text-align: center;
+  transform: rotate(-8deg);
+  margin-bottom: 16px;
+  opacity: 0.85;
+  box-shadow: 0 0 0 2px #FFF8F0, 0 0 0 5px #C41E3A;
+}
+
+.invitation-ornament {
+  font-size: 1.4rem;
+  letter-spacing: 8px;
+  color: #C41E3A;
+  margin: 10px 0;
+  opacity: 0.6;
+}
+
+.invitation-title-main {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #8B1A1A;
+  letter-spacing: 3px;
+  text-align: center;
+  margin: 8px 0 2px;
+}
+
+.invitation-title-sub {
+  font-size: 0.95rem;
+  color: #A0522D;
+  letter-spacing: 2px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.invitation-divider {
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(to right, transparent, #C41E3A, transparent);
+  margin: 0 auto 18px;
+  border-radius: 1px;
+}
+
+.invitation-body-text {
+  width: 100%;
+  font-size: 0.92rem;
+  color: #3E2723;
+  line-height: 2;
+  text-align: left;
+  padding: 0 8px;
+}
+
+.invitation-body-text .greeting {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #8B1A1A;
+  margin-bottom: 10px;
+}
+
+.invitation-body-text .highlight {
+  color: #C41E3A;
+  font-weight: 600;
+}
+
+.invitation-details {
+  width: 100%;
+  margin: 16px 0;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, rgba(196,30,58,0.05) 0%, rgba(255,215,0,0.06) 100%);
+  border-radius: 10px;
+  border-left: 3px solid #C41E3A;
+}
+
+.invitation-details .detail-row {
+  display: flex;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+  color: #3E2723;
+  line-height: 1.8;
+}
+
+.invitation-details .detail-label {
+  flex-shrink: 0;
+  font-weight: 600;
+  color: #8B1A1A;
+  min-width: 70px;
+}
+
+.invitation-signature {
+  width: 100%;
+  text-align: right;
+  margin-top: 20px;
+  padding-right: 10px;
+  font-size: 0.9rem;
+  color: #3E2723;
+  line-height: 2;
+}
+
+.invitation-signature .org-name {
+  font-weight: 700;
+  color: #8B1A1A;
+  font-size: 1rem;
+  letter-spacing: 1px;
 }
 
 /* ========== 过渡欢迎画面 ========== */
@@ -1084,14 +1226,52 @@
   </div>
 </div>
 
-<!-- PDF 查看器 -->
+<!-- 邀请函查看器 -->
 <div class="pdf-viewer-overlay" id="pdfViewer">
   <div class="pdf-viewer-header">
-    <span>&#x1F4C4; 2026北京智源大会参会嘉宾邀请函</span>
+    <span>&#x1F48C; 2026北京智源大会 · 参会嘉宾邀请函</span>
     <button class="pdf-viewer-close" id="closePdfBtn" title="关闭">&#x2715;</button>
   </div>
   <div class="pdf-viewer-body">
-    <embed src="./2026北京智源大会参会嘉宾邀请函.pdf" type="application/pdf">
+    <div class="invitation-scroll">
+      <div class="invitation-border-top"></div>
+      <div style="height:24px"></div>
+
+      <div class="invitation-ornament">&#x2735; &#x2726; &#x2735;</div>
+
+      <div class="invitation-title-main">2026 北 京 智 源 大 会</div>
+      <div class="invitation-title-sub">Beijing Academy of Artificial Intelligence Conference 2026</div>
+
+      <div class="invitation-red-seal">邀请<br>函</div>
+
+      <div class="invitation-divider"></div>
+
+      <div class="invitation-body-text">
+        <p class="greeting">尊敬的嘉宾：</p>
+        <p>谨定于<span class="highlight">2026年6月</span>在北京举办<span class="highlight">2026北京智源大会</span>。本次大会由<span class="highlight">北京智源人工智能研究院（BAAI）</span>主办，汇聚全球人工智能领域的顶尖学者、产业领袖与创新力量，共同探讨AI前沿技术与产业发展趋势。</p>
+        <p>大会涵盖大模型、具身智能、AI4Science、脑启发计算、世界模型、多模态学习、智能体安全等多个前沿方向，设有<span class="highlight">开幕式及全体大会</span>及<span class="highlight">30余场专题论坛</span>。</p>
+        <p>诚挚邀请您莅临大会，共襄盛举，共话智能未来。</p>
+      </div>
+
+      <div class="invitation-details">
+        <div class="detail-row"><span class="detail-label">会议名称</span><span>2026北京智源大会</span></div>
+        <div class="detail-row"><span class="detail-label">会议时间</span><span>2026年6月</span></div>
+        <div class="detail-row"><span class="detail-label">会议地点</span><span>中国 · 北京</span></div>
+        <div class="detail-row"><span class="detail-label">主办单位</span><span>北京智源人工智能研究院（BAAI）</span></div>
+        <div class="detail-row"><span class="detail-label">官方网站</span><span>2026.baai.ac.cn</span></div>
+      </div>
+
+      <div class="invitation-signature">
+        <p>北京智源人工智能研究院</p>
+        <p class="org-name">2026北京智源大会组委会</p>
+        <p>2026年6月</p>
+      </div>
+
+      <div style="height:8px"></div>
+      <div class="invitation-ornament">&#x2735; &#x2726; &#x2735;</div>
+      <div style="height:12px"></div>
+      <div class="invitation-border-bottom"></div>
+    </div>
   </div>
 </div>
 
@@ -3234,7 +3414,7 @@
     floatingEnvelope.classList.add('visible');
   }
 
-  // ====== 点击"查看"按钮：信封翻盖动画 → 显示PDF ======
+  // ====== 点击"查看"按钮：信封翻盖动画 → 显示邀请函 ======
   openBtn.addEventListener('click', function() {
     fromFloating = false;
     envelope.classList.add('opened');
@@ -3244,7 +3424,7 @@
     }, 550);
   });
 
-  // ====== 关闭PDF查看器 ======
+  // ====== 关闭邀请函查看器 ======
   // 大信封进入 → 显示欢迎过渡；小信封进入 → 直接关闭
   function closePdf() {
     pdfViewer.classList.remove('active');
@@ -3278,7 +3458,7 @@
     }
   });
 
-  // ====== 小信封悬浮按钮：点击直接查看PDF ======
+  // ====== 小信封悬浮按钮：点击直接查看邀请函 ======
   floatingEnvelope.addEventListener('click', function() {
     fromFloating = true;
     pdfViewer.classList.add('active');
